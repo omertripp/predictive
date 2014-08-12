@@ -345,6 +345,19 @@
 % correct bad hyphenation here
 \hyphenation{op-tical net-works semi-conduc-tor}
 
+\usepackage{listings}
+
+\lstset{
+	numbers=left,
+	numberstyle=\tiny,
+	language={Java},
+	mathescape=true,
+	flexiblecolumns=true,
+	morekeywords={def,Int,call,method,var,assert,share,unshare,acquire,release,fork,join,free,invariant,requires,ensures,acc,rd,old},
+	basicstyle=\sffamily\small,
+	moredelim=[is][\itshape]{@}{@},
+	stepnumber=1,
+	numbersep=2pt} 
 
 \begin{document}
 %

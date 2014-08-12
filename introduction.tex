@@ -1,1 +1,57 @@
 \section{Introduction}\label{Se:introduction}
+
+In a multithreaded application, a data race occurs when two (or more) concurrent threads access a mutual memory location with neither ordering constraints nor guarding synchronization. This form of unstructured access to shared memory is often unintended, indicating a bug in the code. 
+
+A main challenge in detection of data races is that they are elusive, arising only in certain concurrent schedules. Because thread interleavings are decided nondeterministically by the scheduler, it is hard to anticipate and recreate data races. Indeed, in practice data races often manifest rarely, leading e.g. to situations where the bug is missed during testing but surfaces up during production runs (due to its rarity combined with differences in hardware, usage scenario, etc).
+
+\paragraph{Existing Approaches} Various approaches have been proposed to detect data races, which strike different tradeoffs between (i) \emph{soundness}, whereby no false races are reported to the user, and (ii) \emph{completeness}, whereby no true races are missed. Sound techniques are largely based on, or refine, the \emph{happens-before} (\emph{HB}) relation \cite{XXX}. Unsound techniques that opt for more complete detection are based on lockset analysis, as popularized by the Eraser tool \cite{XXX}.
+
+Driven by the requirement for high usability, which is governed by low to zero user tolerance to false warnings \cite{XXX}, we focus on fully sound detection techniques. A recent result in this space is Smagardakis et al.'s \emph{causally-precedes} (\emph{CP}) relation, which soundly relaxes HB edges between critical sections that do not exhibit conflicting accesses. A refinement of the CP model, proposed by Huang et al. \cite{XXX}, is to factor in control-flow information: Inter-thread CP edges, such that statements succeeding the target statement are not control dependent on it, are soundly discarded.
+
+Both of these techniques, as well as preceding HB approaches, ensure soundness via notions of \emph{dependence}. As long as certain data and/or control dependencies are respected, reported data races are guaranteed to be real. While these are useful steps to detect more data races, the reported warnings are restricted to (i) the given execution trace and (ii) reorderings that preserve essential (data and/or control) dependencies.
+
+\paragraph{Motivation} As we illustrate in Figure \ref{Fi:illustrative}, taken from the benchmark suite of Huang et al. \cite{XXX}, these restrictions can potentially block real races from the analysis' view. In 
+the {\tt main} method of class {\tt Example}, a new thread {\tt t} is spawned. Subsequently, and in parallel, variable {\tt y} is both assigned by the main thread and queried by the spawned thread, which checks whether {\tt y}'s value is at least $3$.
+
+\begin{figure}
+\begin{lstlisting}
+public class Example {
+  static int x = -1;
+  static int y = -1;
+
+public static void main(String[] args) {
+  MyThread t = new MyThread();
+  t.start();
+  y = 3;
+  x = 0;
+  y = 5; }
+
+static class MyThread extends Thread {
+  public void run() {
+    if (y >= 3) {
+      // Race: is it possible to print -1? 
+      System.out.println(x);
+    } else {
+      System.out.println(x + "else");	
+    } } } }
+\end{lstlisting}
+\caption{\label{Fi:illustrative}Benchmark from Huang et al.'s suite \cite{XXX} (with slight revisions) that exhibits two potential data races}
+\end{figure}
+
+There are three possibilities: Either (i) the test at line 14 is reached before {\tt y} is first assigned within {\tt main}, and so the initial value of {\tt y} of $-1$ is used and the test evaluates to {\tt false}, or (ii) the test occurs after the first assignment and succeeds for {\tt y $\equiv$ 3}, or (iii) the test takes place after the second assignment, again succeeding bu this time for {\tt y $\equiv$ 5}. In specific, because the test on {\tt y} may either succeed or fail, both branches of the conditional block within the {\tt run} method of inner class {\tt MyThread} may execute. Similarly to the analysis for {\tt y}, we notice that the first {\tt println} statement can either print the initial value of {\tt x} ($-1$) or its value after the assignment inside {\tt main} ($0$). To conclude, there are two potential data races in the code.
+
+The CP model is too restrictive to discover both of these races, even when control-flow information is factored into the analysis. To demonstrate this, let us consider trace $\left[ 6,7,8,14,16,9,10 \right]$. That is, the first context switch occurs after {\tt y} is first assigned, method {\tt run} then executes to completion, and subsequently {\tt main} finishes executing. There is genuine control dependence between the statements at lines 8 and 14, which disables any form of reordering according to CP, the result being that both races are missed. Indeed, if we restrict the analysis to the given trace and dependencies that arise within it, then the races in Figure \ref{Fi:illustrative} remain out of reach.
+
+\paragraph{Our Approach} The main observation underlying our approach is that accounting for dependencies alone is insufficient. The departure point of this paper is in modeling the \emph{values} of shared variables explicitly, rather than stopping at the level of \emph{dependencies} within and between threads. Importantly, this enables us --- in certain cases ---  to step outside the boundaries of the given trace and explore additional program behaviors.
+
+Applied to the example in Figure \ref{Fi:illustrative}, our approach permits us to exploit two important facts:
+\begin{itemize}
+	\item First, the test at line 14 is satisfied both after the first assignment and after the second assignment to {\tt y}. In both cases $y \geq 3$. Making this observation, which refers directly to the values assumed by {\tt y} and their use in control-flow decisions, lets us account for the assignment {\tt x=0}, thereby uncovering the race over {\tt x}.
+	\item Second, and even more significantly, explicit modeling of values allows us to simulate a context switch before {\tt y} is first assigned inside {\tt main}. In this scenario, {\tt y} has the value $-1$, which leads to a negative evaluation of the test at line 14. Note that we are no longer reordering events within the same trace, but have switched to another trace that is still guaranteed to be feasible since we are able to precisely maintain the program's state and behavior along all transitions (including those within the {\tt else} branch, which was not executed in the input trace).
+\end{itemize}
+To summarize, relaxing the ability to reoder events --- to the point of simulating new execution traces beyond the input trace --- is the key to improving detection capabilities. The principal idea undetlying our approach is to model the shared state explicitly, rather than merely recording dependencies that arise within the given trace. 
+As we demonstrate experimentally in Section \ref{Se:evaluation}, this form of refinement has a dramatic effect on detection capabilities compared to previous approaches. ** MORE EXPERIMENTAL DATA NEEDED **
+
+At the technical level, we represent the shared state, and ensure the feasibility of reorderings and execution along new branches, via a novel encoding of relevant events as a constraint system. ** MORE DETAILS NEEDED **
+
+\paragraph{Contributions} The principal contributions of this paper are the following:
