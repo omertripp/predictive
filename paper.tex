@@ -69,7 +69,7 @@
 % \documentclass[conference]{../sty/IEEEtran}
 
 
-
+\usepackage{graphicx}
 
 
 % Some very useful LaTeX packages include:
@@ -363,7 +363,7 @@
 %
 % paper title
 % can use linebreaks \\ within to get better formatting as desired
-\title{Bare Demo of IEEEtran.cls for ICSE'15 and Workshops}
+\title{Recipe: Relaxed Sound Predictive Analysis}
 
 
 % author names and affiliations
@@ -394,19 +394,19 @@
 % for over three affiliations, or if they all won't fit within the width
 % of the page, use this alternative format:
 %
-\author{\IEEEauthorblockN{Michael Shell\IEEEauthorrefmark{1},
-Homer Simpson\IEEEauthorrefmark{2},
-James Kirk\IEEEauthorrefmark{3},
-Montgomery Scott\IEEEauthorrefmark{3} and
-Eldon Tyrell\IEEEauthorrefmark{4}}
-\IEEEauthorblockA{\IEEEauthorrefmark{1}School of Electrical and Computer Engineering\\
-Georgia Institute of Technology,
-Atlanta, Georgia 30332--0250\\ Email: see http://www.michaelshell.org/contact.html}
-\IEEEauthorblockA{\IEEEauthorrefmark{2}Twentieth Century Fox, Springfield, USA\\
-Email: homer@thesimpsons.com}
-\IEEEauthorblockA{\IEEEauthorrefmark{3}Starfleet Academy, San Francisco, California 96678-2391\\
-Telephone: (800) 555--1212, Fax: (888) 555--1212}
-\IEEEauthorblockA{\IEEEauthorrefmark{4}Tyrell Inc., 123 Replicant Street, Los Angeles, California 90210--4321}}
+%\author{\IEEEauthorblockN{Michael Shell\IEEEauthorrefmark{1},
+%Homer Simpson\IEEEauthorrefmark{2},
+%James Kirk\IEEEauthorrefmark{3},
+%Montgomery Scott\IEEEauthorrefmark{3} and
+%Eldon Tyrell\IEEEauthorrefmark{4}}
+%\IEEEauthorblockA{\IEEEauthorrefmark{1}School of Electrical and Computer Engineering\\
+%Georgia Institute of Technology,
+%Atlanta, Georgia 30332--0250\\ Email: see http://www.michaelshell.org/contact.html}
+%\IEEEauthorblockA{\IEEEauthorrefmark{2}Twentieth Century Fox, Springfield, USA\\
+%Email: homer@thesimpsons.com}
+%\IEEEauthorblockA{\IEEEauthorrefmark{3}Starfleet Academy, San Francisco, California 96678-2391\\
+%Telephone: (800) 555--1212, Fax: (888) 555--1212}
+%\IEEEauthorblockA{\IEEEauthorrefmark{4}Tyrell Inc., 123 Replicant Street, Los Angeles, California 90210--4321}}
 
 
 
@@ -577,15 +577,14 @@ The authors would like to thank...
 % <OR> manually copy in the resultant .bbl file
 % set second argument of \begin to the number of references
 % (used to reserve space for the reference number labels box)
-\begin{thebibliography}{1}
+%\begin{thebibliography}{1}
+%\bibitem{IEEEhowto:kopka}
+%H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
+%  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+%\end{thebibliography}
 
-\bibitem{IEEEhowto:kopka}
-H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
-  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
-
-\end{thebibliography}
-
-
+\bibliographystyle{abbrv}
+\bibliography{paper}  % sigproc.bib is the name of the Bibliography in this case
 
 
 % that's all folks

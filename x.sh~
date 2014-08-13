@@ -1,0 +1,5 @@
+pdflatex -interaction nonstopmode flint
+bibtex flint
+pdflatex -interaction nonstopmode flint
+pdflatex -interaction nonstopmode flint
+evince flint.pdf

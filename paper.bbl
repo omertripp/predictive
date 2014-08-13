@@ -1,0 +1,63 @@
+\begin{thebibliography}{1}
+
+\bibitem{dataflow}
+R.~Chugh, J.~W. Voung, R.~Jhala, and S.~Lerner.
+\newblock Dataflow analysis for concurrent programs using datarace detection.
+\newblock In {\em Proceedings of the 2008 ACM SIGPLAN Conference on Programming
+  Language Design and Implementation}, PLDI '08, pages 316--326, New York, NY,
+  USA, 2008. ACM.
+
+\bibitem{leap}
+J.~Huang, P.~Liu, and C.~Zhang.
+\newblock Leap: Lightweight deterministic multi-processor replay of concurrent
+  java programs.
+\newblock In {\em Proceedings of the Eighteenth ACM SIGSOFT International
+  Symposium on Foundations of Software Engineering}, FSE '10, pages 207--216,
+  New York, NY, USA, 2010. ACM.
+
+\bibitem{ucg}
+V.~Kahlon and C.~Wang.
+\newblock Universal causality graphs: A precise happens-before model for
+  detecting bugs in concurrent programs.
+\newblock In {\em Proceedings of the 22Nd International Conference on Computer
+  Aided Verification}, CAV'10, pages 434--449, Berlin, Heidelberg, 2010.
+  Springer-Verlag.
+
+\bibitem{replay2012}
+D.~Lee, P.~M. Chen, J.~Flinn, and S.~Narayanasamy.
+\newblock Chimera: Hybrid program analysis for determinism.
+\newblock In {\em Proceedings of the 33rd ACM SIGPLAN Conference on Programming
+  Language Design and Implementation}, PLDI '12, pages 463--474, New York, NY,
+  USA, 2012. ACM.
+
+\bibitem{learning}
+S.~Lu, S.~Park, E.~Seo, and Y.~Zhou.
+\newblock Learning from mistakes: A comprehensive study on real world
+  concurrency bug characteristics.
+\newblock In {\em Proceedings of the 13th International Conference on
+  Architectural Support for Programming Languages and Operating Systems},
+  ASPLOS XIII, pages 329--339, New York, NY, USA, 2008. ACM.
+
+\bibitem{avio}
+S.~Lu, J.~Tucek, F.~Qin, and Y.~Zhou.
+\newblock Avio: Detecting atomicity violations via access interleaving
+  invariants.
+\newblock In {\em Proceedings of the 12th International Conference on
+  Architectural Support for Programming Languages and Operating Systems},
+  ASPLOS XII, pages 37--48, New York, NY, USA, 2006. ACM.
+
+\bibitem{eraser}
+S.~Savage, M.~Burrows, G.~Nelson, P.~Sobalvarro, and T.~Anderson.
+\newblock Eraser: A dynamic data race detector for multi-threaded programs.
+\newblock In {\em Proceedings of the Sixteenth ACM Symposium on Operating
+  Systems Principles}, SOSP '97, pages 27--37, New York, NY, USA, 1997. ACM.
+
+\bibitem{ordervio}
+Y.~Shi, S.~Park, Z.~Yin, S.~Lu, Y.~Zhou, W.~Chen, and W.~Zheng.
+\newblock Do i use the wrong definition?: Defuse: Definition-use invariants for
+  detecting concurrency and sequential bugs.
+\newblock In {\em Proceedings of the ACM International Conference on Object
+  Oriented Programming Systems Languages and Applications}, OOPSLA '10, pages
+  160--174, New York, NY, USA, 2010. ACM.
+
+\end{thebibliography}
