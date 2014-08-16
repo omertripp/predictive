@@ -1,0 +1,53 @@
+\section{Technical Overview}\label{Se:techoverview}
+
+In this section, we walk the reader through a detailed technical description of our approach based on the example in Figure \ref{fig:running}. 
+%
+As input, we assume (i) a program $P$ as well as (ii) a dynamic execution trace of $P$ in Static Single Assignment (SSA) form, such that every variable is defined exactly once.
+
+We begin with an explanation of the encoding process:
+
+\paragraph{Program Order} The first set of constraints reflects ordering constraints between program statements. We use the symbol $O_i$ to denote the $i$th program statement, which yields the following formula for Figure \ref{fig:running}:
+$$
+	O_1 < O_2 < O_3 \bigwedge O_4 < O_5 \bigwedge O_4 < O_7
+$$
+That is, the first 3 statements are totally ordered, and the {\tt if} statement executes before the body (either $O_5$ or $O_7$).
+
+\paragraph{Variable Definitions} The next set of constraints, denoted ${\tt z}^i=k$, capture variable definitions: Variable {\tt z} is assigned value $k$ at statement $i$. For our running example, we obtain:
+$$
+	{\tt x}^0 = 0 \bigwedge {\tt y}^0 = 0 \bigwedge {\tt y}^1 = 3 \bigwedge 
+			{\tt x}^2 = 1 \bigwedge {\tt y}^3 = 5
+$$
+As an example, ${\tt y}^3 = 5$ denotes that the value assigned to variable {\tt y} 
+at line {\tt 3} is $5$.
+
+\paragraph{Thread Interference} To express inter-thread flow constraints, we utilize expressions of the form $R_{\tt z}^i={\tt z}^j$, which denotes that line $i$ reads variable {\tt z}, and the definition it reads comes from line $j$. The resulting formula for our example is
+$$
+\begin{array}{lcl}
+	& & (R_{\tt y}^4={\tt y}^0 \wedge O_4 < O_1)  \\
+& \bigvee &
+	(R_{\tt y}^4={\tt y}^1 \wedge O_1 < O_4 < O_3) \\
+& \bigvee &
+	(R_{\tt y}^4={\tt y}^3 \wedge O_3 < O_4)
+\end{array}
+$$    
+Notice, importantly, that the formula combines flow constraints with order constraints, which are essential to determinize the value read at a given statement. As an example, 
+$(R_{\tt y}^4={\tt y}^1 \wedge O_1 < O_4 < O_3)$ means that the value of {\tt y} read at 
+line {\tt 4} is that set at line {\tt 1} assuming an execution order whereby the first statement executes followed by the fourth then third statements. 
+
+\paragraph{Path Conditions} To preserve path conditions while potentially permitting dependence-violating reordering (e.g., a context switch after line {\tt 1} in Figure \ref{fig:running}), we model explicitly the condition. For the running example (ignoring the statements in red), this yields:
+$$
+	(R_{\tt y}^4 > 2
+$$
+That is, the value of variable {\tt y} read at line {\tt 4} is greater than $2$. Indeed, this constraint is satisfied by the assignments to {\tt y} both at line {\tt 1} and at line {\tt 3}.
+
+\paragraph{Race Condition} The final constraint, forcing the check whether a particular race is feasible, is to demand that two conflicting statements occur at the same time. For the potential race between lines {\tt 2} and {\tt 5}, we obtain:
+$$
+	O_2 = O_5
+$$ 
+This asserts that both statements occur simultaneously, which --- together with the other constraints --- guarantees the feasibility of the predicted race if a solution is found for the overall constraint system.
+
+\paragraph{Unexplored Branches} Beyond the encoding steps so far, which focus on the given trace, we can often encode constraints along unexplored branches. In our running example, this is essential to discover the race between lines {\tt 2} and {\tt 7}. 
+
+The conflicting accesses in this case, determined based on static analysis of $P$, are expressed as $O_2=O_7$. In addition, we negate the path condition, thereby obtaining $R_{\tt y}^4 \leq 2$ in place of $R_{\tt y}^4 \leq 2$. 
+
+\paragraph{Constraint Solving} Having conjoined the formuals from the different encoding steps into (i) a global representation of all feasibility constraints (path, ordering, assignment and other constraints) and (ii) the requirement for a given race to occur (expressed as simultaneous execution of the conflicting accesses), we discharge the resulting formula to an off-the-shelf constraint solver. If successful, the solver returns a solution for the specified constraints, and in particular, we obtain a feasible trace that gives rise to the race at hand.
