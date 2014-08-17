@@ -1,53 +1,62 @@
 \section{Introduction}\label{Se:introduction}
-A race occurs when two concurrent threads access the same variable and when (i) at least one access is a write, (ii) the threads take no explicit mechanism to prevent the accesses from being simultaneous~\cite{eraser}. More intuitively, a race occurs when two accesses of the same variable (one is write) can happen in parallel.  Race detection is a fundamental analysis for concurrent programs, which underlies  many client applications including the atomicity/order violation detection~\cite{learning,avio,ordervio}, the dataflow analysis~\cite{dataflow} and the record and replay~\cite{leap,replay2012}. 
 
+In a multithreaded application, a data race occurs when two concurrent threads access the same memory location, such that (i) at least one of the accesses is write access, and (ii) no explicit mechanism is enforced to prevent the threads from simultaneous access to the location \cite{eraser}. Race detection is important not only because races often reveal bugs in the implementation, but also as the basis of other techniques and analyses like atomicity checking \cite{learning,avio,ordervio}, data-flow analysis \cite{dataflow} and record/replay \cite{leap,replay2012}.
 
-%fasttrack pldi paper claims happens-before analysis never reports false positives. Check it,
-Over the last decade, researchers have spent tremendous efforts on race detection and have gained relative success. 
-The initial efforts center around the {\em synchronization primitives} including the locks and the scheduling control such as wait/notify and start/join. Lockset analysis, which considers only locks, produces many infeasible races that contradict the schedule control. Happens-before analysis reasons about all the primitives but imposes overly restrictive lock order constraints, i.e., two lock regions with the same lock should follow the execution order as observed. The following work further relaxes the lock constraints: Hybrid analysis allows the two lock regions to be ordered in either way; {\sf Universal Causal Graph (UCG)}~\cite{ucg} allows them to be ordered in either way only when this relaxation does not contradict the schedule control.  
+In this paper, we focus on \emph{sound} race detection, whereby reported races are guaranteed to be real. This is the key requirement for adoption of the tool by developers \cite{XXX}. Ensuring soundness is a difficult challenge, which mandates dynamic forms of analysis. Indeed, extensive research has been carried out on dynamic race detection. The general goal has been to derive constraints from a given execution trace on event reordering, and check for the remaining reorderings whether they disclose data races. The key question then becomes about constraint extraction.
 
-However, these seminal work misses the important {\em value constraints}, leading to false positives. Consider the example in Figure~\ref{fig:running}, 
-where {\tt x} and {\tt y} are shared variables and no synchronizations are employed. The work that considers only synchronization constraints would report a race between line 2 and line 5 on x, which appear in the observed run. However, the race is a false alarm because line 5 can be executed only after line 4 reads the value of {\tt y} from line 3 (after line 2). 
+%Fasttrack PLDI paper claims happens-before analysis never reports false positives. Check.
+\paragraph{Existing Approaches} Initial attempts to address this challenge focused on built-in synchronization primitives. These include locks as well as the wait/notify and start/join scheduling controls. Notable among these efforts is \emph{lockset} analysis, which considers only locks. Because the derived constraints are partial, permitting certain infeasible event reorderings, lockset analysis cannot guarantee soundness. 
+
+A different tradeoff is struck by the \emph{happens-before (HB)} approach. In this style of analysis, all synchronization primitives are accounted for, though reordering constraints are conservative. As an example, HB inhibits reordering of two synchronized blocks governed by the same lock. Recently there have been successful attempts to relax HB constraints. Among these are hybrid analysis, which permits both orderings of lock-synchronized blocks, and the \emph{Universal Causal Graph (UCG)}~\cite{ucg} representation, which also enables both orderings but only if these are consistent with wait/notify- and start/join-induced constraints.
+
+Unfortunately, even full consideration of synchronization constructs is insufficient. Branching decisions must also be respected to ensure the feasibility of a reported race. As an example, we refer to the trace in Figure \ref{fig:running}. (For now, ignore the statements in red.) This trace is free of any explicit synchronization statements, and so a race between the assignment to variable {\tt x} at line {\tt 2} and the use of {\tt x} at line {\tt 5} may appear possible. This race is, however, spurious, since the use of {\tt x} at line {\tt 5} is governed by positive evaluation of the test at line {\tt 4}, which is conditioned on the assignment at line {\tt 3}. Hence, line {\tt 2} necessarily preceds line {\tt 5}.
+
 
 \begin{figure}
 \centering
-\includegraphics[width=0.38\textwidth]{figs/Visio-running.pdf}
-\caption{Running Example}
+\begin{tabular}{ll}
+\multicolumn{2}{c}{{\tt x = 0; y = 0; z = 3;}} \\
+\multicolumn{2}{c}{{\color{red} {\tt z = 2;}}} \\
+\hline
+\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$} \\
+\hline
+{\tt 1: y = 3;} & \\
+{\tt 2: x = 1;} & \\
+{\tt 3: y = 5;} & \\
+& {\tt 4: if (y > z)} \\
+& {\tt 5:~~print(1/x);} \\	
+& {\color{red} {\tt 6: else}} \\
+& {\color{red} {\tt 7:~~print(2/x);}}
+\end{tabular}
+\caption{Example illustrating ordering constraints beyond synchronization primitives}
 \label{fig:running}
 \end{figure}
 
+As an alternative, driven by the requirement for soundness, 
+Smagardakis et al. have recently proposed \emph{predictive analysis}. In this approach, both synchronization constraints and inter-thread dependencies are preserved, where inter-thread dependencies are respected by 
+only allowing reorderings that leave the dependence structure exhibited by the original trace in tact. This ensures that the values of shared memory locations remain the same, which secures the soundness argument. As a soundness-preserving relaxation, Huang et al. \cite{XXX} permit reorderings as long as control dependencies are respected.
 
-%I　really think Yannis' original approach is incorrect as it only preserves the dependence imposed by lock regions, which is insufficient. Check it or Hide it?
-The false positives greatly reduce the usability of the detection tool as programmers need to spend great efforts  in investigating each of them. 
-Recently, the predictive analysis attracts increasing research attention for its soundness guarantee, i.e., no false alarms. Smagardakis et al. pioneered by proposing first of such work. Starting from an original trace, their sound predictive analysis ``predicts'' a new trace by relaxing the execution order 
- while preserving the inter-thread dependence constraints and the synchronization constraints.  The inter-thread dependence constraints require the predicted trace and the original trace to exhibit the same set of dependences between conflicting accesses. Preservation of them leads to the soundness 
- as every value remains the same. Huang et al.~\cite{} further optimizes by preserving only the inter-thread dependences that could affect the branch decisions in the following executions.  
+While being sound and able to find real races, existing predictive analyses are conservative in two respects:
+\begin{enumerate}
+	\item Constraints imposed by branch conditions are abided by preserving the exact values flowing into the condition as in the original trace.
+	\item A second limitation, implied by the first, is that traces that diverge from the original trace in their branching history are strictly out of scope. 
+\end{enumerate}
+ Due to these restrictions, enforced as a conservative means of ensuring soundness, existing predictive analysis suffer from limited coverage.
  
-Although showing promises,  existing sound predictive analyses  are conservative as they satisfy the value constraints imposed by the branch conditions by preserving the inter-thread dependences and reading the same values at the branches. In this work, we propose the relaxed sound predictive analysis, which relaxes the value constraints to find more races without sacrificing the soundness. Our relaxation follows two key insights. First, we satisfy the value constraints computationally, rather than recording and preserving the dependences. The values read at the branches are allowed to change in the prediction as long as the change does not affect the branch decisions.  We realize the value constraints through  the satisfiability checker. Second, even if the change of the read values affects the branch decisions, we can still explore the un-executed branch  if it is ``simple'' enough. The underlying rationale is, when the executed branch contains the shared accesses, the sibling (un-executed) branch is likely to access the same shared variable. Reasoning about the un-executed branch is enabled by flexibility of  our computation-based approach, i.e., we just need to reverse the branch condition and resend it to the checker, while existing approaches cannot support such reasoning due to the lack of the computation power and the conservativeness of perservation-based approaches. 
-
-
-We highlight our approach with the example~\footnote{We omit the synchronization primitives purposely for simplification.} in Figure~\ref{fig:running}. Suppose the branch at line 4 changes to {\tt if(y>=3)}. In the original run, line 4 reads from the value defined at line 3. Therefore, Huang et al.'s approach preserves the same dependence in the predicted run, and therefore misses the race on x between line 2 and line 5. In contrast, our approach reports two more real races on x, (2,5) and (2,7). 
-
-We first demonstrate how we find the race (2,5). As shown in Figure~\ref{fig:demo}, we first encode trace in the SSA form, where each variable is defined exactly once (line number as the superscript). Besides, we introduce a new symbol, e.g., $R^4_{y}$,  to denote each shared read, e.g., the read of $y$ at   
- line 4. We also list the constraints for a valid predicted run. Race constraints specify line 2 and line 5 can run in parallel. Here $O_2$ and $O_5$ are  variables introduced to denote the orders. Program order constraints specify the intra-thread execution order. The rest  constraints model the value constraints: path condition constraints specify the branch decision for the branches preceding the potential racy event line 5; variable definition 
- constraints specify the intra-thread value flow due to each assignment; Inter-thread constraints specify the inter-thread value flow which is conditioned on the scheduling constraints. For example, $R^4_{y}=y^1 \wedge O_1< O_4 <O_3$ specifies that line 4 reads {\tt y} defined at line 1 if and only if line 4   
-  happens after line 1 and before line 3.  Combined together, the constraints are sent to off-the-shelf solver such as z3 or yices, which then returns a solution: line 4 reads $y$ ($y$=3) defined at line 1, which satisfies the branch condition. 
-  
-Finding the race (2,7) requires a slightly different set of constraints. Specifically, the race constraint becomes $O_2=O_7$, and the path condition constraint becomes $R^4_y<3$. The checker also returns a solution for these constraints: line 4 reads $y$ ($y$=0) from the initial value, which steers the execution towards the unexecuted path at the branch line 4.
-
-  
-  
-
-\begin{figure}
-\centering
-\includegraphics[width=0.5\textwidth]{figs/Visio-demo.pdf}
-\caption{Overview}
-\label{fig:demo}
-\end{figure}
+ \paragraph{Our Approach} The departure point of our approach, yielding strictly better coverage, is to consider the explicit values of shared memory locations instead of dependencies between statements. The gain in coverage is twofold:
+ \begin{enumerate}
+ 	\item Reorderings that violate the original dependence structure but preserve the branching history become possible. The values read by a branching statement may change so long as the branch condition evaluates to its original truth value.
+ 	\item In addition, in certain cases we can guarantee soundness while directing execution toward branches that diverge from the original trace. This mandates that the effects of an unexplored branch can be modeled precisely, which holds frequently in practice because the original and new branchees often access the same set of shared memory locations.
+ \end{enumerate}
+ 
+ Returning to the example in Figure \ref{fig:running}, this time also with reference to the statements in red, we demonstrate how value-based reasoning improves coverage. First, unlike predictive analysis, which is unable to detect the race between lines {\tt 2} and {\tt 5} because of the dependence between lines {\tt 3} and {\tt 4}, value-based reasoning reveals that trace 
+ [{\tt 1}, {\tt 4}, {\tt 5}, {\tt 2}, {\tt 3}] is feasible, since the first assignment, {\tt y = 3}, satisfies the condition {\tt y > z}. Hence the race is discovered. A second race, between lines {\tt 2} and {\tt 7}, is detected by negating the condition. This is possible because the effects of the {\tt else} branch can be modeled precisely.
+ Negation leads to an execution starting at line {\tt 4} (where {\tt y $\equiv$ 0}). The race between lines {\tt 2} and {\tt 7} then becomes visible.
+ 
+ Concretely, we achieve value-level (rather than dependence-level) granularity computationally via a unique encoding of the input execution trace as a constraint system. The constraints are then processed by a satisfiability checker. This gives us the flexibility to explore nontrivial constraints, such as 
+ forcing a context switch after the first assignment to {\tt y} or negating the condition in Figure \ref{fig:running}. Importantly, these manipulations are beyond what dependence-based reasoning can achieve, since this view of the trace is too conservative.
+ 
+\paragraph{Contributions} This paper makes the following principal contributions:
 
 
 
-
-
-
-\paragraph{Contributions} The principal contributions of this paper are the following:
