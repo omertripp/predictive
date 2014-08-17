@@ -69,7 +69,7 @@
 % \documentclass[conference]{../sty/IEEEtran}
 
 
-
+\usepackage{graphicx}
 
 
 % Some very useful LaTeX packages include:

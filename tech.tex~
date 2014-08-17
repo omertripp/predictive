@@ -1,0 +1,16 @@
+\section{Technique}~\label{sec:tech}
+
+\subsection{Basics}
+Our analysis starts with a trace, a sequence of events. 
+
+
+
+
+
+
+\subsubsection{Method Calls}
+
+
+\subsection{Time Window}
+
+\subsection{Heap Invariant}

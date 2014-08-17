@@ -1,0 +1,97 @@
+\section{Basics}~\label{sec:basic}
+
+
+\subsection{Trace Terminology}
+Our analysis starts with a trace $\tau$,  a sequence of events, $e_0, e_1, \dots, e_n$.  
+There are three types of events in general.
+\begin{itemize}
+\item the shared access, which includes the read and write of the shared fields, e.g., $o.f$=$x$ and $x$=$o.f$.
+\item the local access, which includes the access of the local variable, e.g., $x=y+z$ or $v.f=x$ (where $v$ is a thread-local object).
+\item the branch event, which evaluates the branch condition to true/false, e.g., $x>3$.
+\item the synchronization event, which includes start/join, wait/notify, lock/unlock events, e.g., $lock(o)$
+\end{itemize}
+
+
+
+Each event $e_i \in \Sigma$ is a tuple, $<t, id, a, v, ins>$, where $t\in \mathcal{T}$ denotes the thread generating the event, $id\in \mathcal{ID}$ denotes the unique integer assigned to the event, $a\mathcal{A}$ denotes the address of the object or field (if any) accessed in the event,  $v\in \mathcal{V}$ denotes the value of the definition (if any) in the event, and $ins\in \mathcal{INS}$ denotes the three-address instruction generating the event.  Specifically, the address of the object $o$ is denoted as $id(o)\in \mathcal{ID}$, which is a string value representing $o$ uniquely, the address of the static field $f$ is  $id(f)$ and the address of the instance object field $o.f$ is  $id(o)\_id(f)$. Besides, as the event is derived by instrumenting the three-address code and monitoring the instrumented execution. Therefore, each event can involve at most three operands. 
+
+
+The trace supports its standard operations as follows.
+\begin{itemize}
+\item projection, e.g., $\tau|t$ returns~\footnote{This is the abbreviation for the complete form $\tau|Thread=t$ } the events from the thread $t$,  $\tau|a$ returns the event involving the address $a$.  
+\item concatenation. $\tau'=\tau e$ represents the new trace by appending the event $e$ to $\tau$.
+\item length $|\tau|$. 
+\item selecting an element. $\tau[0]$ and $\tau[|\tau|-1]$ represents the first and last event in $\tau$.
+\end{itemize}
+
+
+%The modeling of synchronization event is standard and explained in existing work, so we focus on the rest two types of events in this paper.
+
+In addition, we maintain auxiliary information as follows.
+\begin{itemize}
+\item $AT: \mathcal{A} \times \mathcal{T} \rightarrow \gamma$ is a function that returns a trace $\tau \in \gamma$ that contains only the accesses of the address $a \in \mathcal{A}$ by the thread $t\in \mathcal{T}$. Each trace $\tau$ in $\gamma$ is defined over the alphabet of events $\Sigma$, specifically, the trace is an empty trace $\epsilon$ or defined in this way:  $\forall 0\leq i\leq |\tau|,   \tau[i]\in \Sigma, and, \forall i\neq j, \tau[i]\neq \tau[j]$. 
+\item $R: \mathcal{A} \rightarrow \gamma$ is a function that returns the read accesses of the address $a\in \mathcal{A}$.
+\item $W: \mathcal{A} \rightarrow \gamma$ is a function that returns the write accesses of the address $a \in \mathcal{A}$.
+\item $Sync: \mathcal{A} \rightarrow \gamma$ is a function that returns the synchronization events involving the address $a\in \mathcal{A}$. 
+\end{itemize}
+
+
+\subsection{Symbolic Trace}
+To facilitate the symbolic analysis, we need to introduce symbols to represent the operands in each event. Symbols allow us to overcome the limitation of concrete dependences and allow us to explore more dependences symbolically. 
+
+%shared access only, local access only
+
+
+
+
+
+
+
+
+
+
+Like other symbolic analysis~\cite{jeff,chao}, the symbolic trace should be in the SSA form, i.e., each variable is defined exactly once. This is because the constraint solver employed by the analysis does not allow the same variable to hold more than one value.  Besides, we introduce symbols to represent shared reads and shared writes which leave the inter-thread dependence between reads/writes undetermined.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Method Calls}~\label{sec:basic}
+
+
+\section{Time Window}~\label{sec:basic}
+
+\section{Heap Invariant}~\label{sec:basic}
