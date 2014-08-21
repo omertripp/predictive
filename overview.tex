@@ -4,18 +4,37 @@ In this section, we walk the reader through a detailed technical description of 
 %
 As input, we assume (i) a program $P$ as well as (ii) a dynamic execution trace of $P$ in Static Single Assignment (SSA) form, such that every variable is defined exactly once.
 
-We begin with an explanation of the encoding process:
+We begin with an explanation of the encoding process. The resulting formula is provided in Figure \ref{fig:encoding}. We describe the conjuncts comprising the formula one by one.
+
+\begin{figure*}
+	\begin{center}
+$$
+	\begin{array}{rcl}
+	& \left( O_1 < O_2 < O_3 \wedge O_4 < O_5 \wedge O_4 < O_7 \right) & \textbf{(program order)} \\
+\bigwedge & \left( {\tt x}^0 = 0 \wedge {\tt y}^0 = 0 \wedge {\tt y}^1 = 3 \wedge 
+	{\tt x}^2 = 1 \wedge {\tt y}^3 = 5 \right) & \textbf{(variable definitions)} \\
+\bigwedge & \left(		(R_{\tt y}^4={\tt y}^0 \wedge O_4 < O_1) \bigvee	
+(R_{\tt y}^4={\tt y}^1 \wedge O_1 < O_4 < O_3) \bigvee
+(R_{\tt y}^4={\tt y}^3 \wedge O_3 < O_4)
+		\right) & \textbf{(thread interference)} \\
+\bigwedge & R_{\tt y}^4 > 2 & \textbf{(path conditions)} \\
+\bigwedge & O_2 = O_5 & \textbf{(race condition)}
+	\end{array} 
+$$
+\end{center}
+\caption{\label{fig:encoding}\tool\ encoding of the trace in Figure \ref{fig:running} as a constraint system}
+\end{figure*}
 
 \paragraph{Program Order} The first set of constraints reflects ordering constraints between program statements. We use the symbol $O_i$ to denote the $i$th program statement, which yields the following formula for Figure \ref{fig:running}:
 $$
-	O_1 < O_2 < O_3 \bigwedge O_4 < O_5 \bigwedge O_4 < O_7
+	O_1 < O_2 < O_3 \wedge O_4 < O_5 \wedge O_4 < O_7
 $$
 That is, the first 3 statements are totally ordered, and the {\tt if} statement executes before the body (either $O_5$ or $O_7$).
 
 \paragraph{Variable Definitions} The next set of constraints, denoted ${\tt z}^i=k$, capture variable definitions: Variable {\tt z} is assigned value $k$ at statement $i$. For our running example, we obtain:
 $$
-	{\tt x}^0 = 0 \bigwedge {\tt y}^0 = 0 \bigwedge {\tt y}^1 = 3 \bigwedge 
-			{\tt x}^2 = 1 \bigwedge {\tt y}^3 = 5
+	{\tt x}^0 = 0 \wedge {\tt y}^0 = 0 \wedge {\tt y}^1 = 3 \wedge 
+			{\tt x}^2 = 1 \wedge {\tt y}^3 = 5
 $$
 As an example, ${\tt y}^3 = 5$ denotes that the value assigned to variable {\tt y} 
 at line {\tt 3} is $5$.
@@ -36,7 +55,7 @@ line {\tt 4} is that set at line {\tt 1} assuming an execution order whereby the
 
 \paragraph{Path Conditions} To preserve path conditions while potentially permitting dependence-violating reordering (e.g., a context switch after line {\tt 1} in Figure \ref{fig:running}), we model explicitly the condition. For the running example (ignoring the statements in red), this yields:
 $$
-	(R_{\tt y}^4 > 2
+	R_{\tt y}^4 > 2
 $$
 That is, the value of variable {\tt y} read at line {\tt 4} is greater than $2$. Indeed, this constraint is satisfied by the assignments to {\tt y} both at line {\tt 1} and at line {\tt 3}.
 
@@ -50,4 +69,6 @@ This asserts that both statements occur simultaneously, which --- together with 
 
 The conflicting accesses in this case, determined based on static analysis of $P$, are expressed as $O_2=O_7$. In addition, we negate the path condition, thereby obtaining $R_{\tt y}^4 \leq 2$ in place of $R_{\tt y}^4 \leq 2$. 
 
-\paragraph{Constraint Solving} Having conjoined the formuals from the different encoding steps into (i) a global representation of all feasibility constraints (path, ordering, assignment and other constraints) and (ii) the requirement for a given race to occur (expressed as simultaneous execution of the conflicting accesses), we discharge the resulting formula to an off-the-shelf constraint solver. If successful, the solver returns a solution for the specified constraints, and in particular, we obtain a feasible trace that gives rise to the race at hand.
+\paragraph{Constraint Solving} Having conjoined the formuals from the different encoding steps into (i) a global representation of all feasibility constraints (path, ordering, assignment and other constraints) and (ii) the requirement for a given race to occur (expressed as simultaneous execution of the conflicting accesses), we discharge the resulting formula to an off-the-shelf constraint solver, such as Z3 or Yices. If successful, the solver returns a solution for the specified constraints. 
+
+In particular, the solution discloses a feasible trace that gives rise to the race at hand. The trace is identified uniquely via the order enforced in the solution over the variables $O_i$, which represent scheduling order. 
