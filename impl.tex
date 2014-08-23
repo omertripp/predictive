@@ -1,4 +1,0 @@
-\section{Implementation}\label{sec:impl}
-For array access event $arr[i]=x$, we treat them as the field access event $arr.i=x$, where the index $i$ is treated as a field. 
-
-We distinguish the accesses of the shared fields and local fields. To collect the shared fields, we preprocess the trace and map each field to a set of accessing threads. If a field is written by two or more threads, it is shared. If a field is written by one thread and read by other threads, it is shared. Otherwise, it is a local field. 

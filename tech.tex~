@@ -6,14 +6,14 @@ Our analysis starts with a trace $\tau$,  a sequence of events, $e_0, e_1, \dots
 There are three types of events in general.
 \begin{itemize}
 \item the shared access, which includes the read and write of the shared fields, e.g., $o.f$=$x$ and $x$=$o.f$.
-\item the local access, which includes the access of the local variable, e.g., $x=y+z$ or $v.f=x$ (where $v$ is a thread-local object).
+\item the local access, which includes only the access of the local variable, e.g., $x=y+z$ or $v.f=x$ (where $v$ is a thread-local object).
 \item the branch event, which evaluates the branch condition to true/false, e.g., $x>3$.
 \item the synchronization event, which includes start/join, wait/notify, lock/unlock events, e.g., $lock(o)$
 \end{itemize}
 
 
 
-Each event $e_i \in \Sigma$ is a tuple, $<t, id, a, v, ins>$, where $t\in \mathcal{T}$ denotes the thread generating the event, $id\in \mathcal{ID}$ denotes the unique integer assigned to the event, $a\mathcal{A}$ denotes the address of the object or field (if any) accessed in the event,  $v\in \mathcal{V}$ denotes the value of the definition (if any) in the event, and $ins\in \mathcal{INS}$ denotes the three-address instruction generating the event.  Specifically, the address of the object $o$ is denoted as $id(o)\in \mathcal{ID}$, which is a string value representing $o$ uniquely, the address of the static field $f$ is  $id(f)$ and the address of the instance object field $o.f$ is  $id(o)\_id(f)$. Besides, as the event is derived by instrumenting the three-address code and monitoring the instrumented execution. Therefore, each event can involve at most three operands. 
+Each event $e_i \in \Sigma$ is a tuple, $<t, id, a, v, ins>$, where $t\in \mathcal{T}$ denotes the thread generating the event, $id\in \mathcal{ID}$ denotes the unique integer assigned to the event (event id), $a\mathcal{A}$ denotes the address of the object or field (if any) accessed in the event,  $v\in \mathcal{V}$ denotes the value of the definition (if any) in the event, and $ins\in \mathcal{INS}$ denotes the three-address instruction generating the event.  Specifically, the address of the object $o$ is denoted as $id(o)\in \mathcal{ID}$, which is a string value representing $o$ uniquely, the address of the static field $f$ is  $id(f)$ and the address of the instance object field $o.f$ is  $id(o)\_id(f)$. Besides, as the event is derived by instrumenting the three-address code and monitoring the instrumented execution. Therefore, each event can involve at most three operands. 
 
 
 The trace supports its standard operations as follows.
@@ -44,55 +44,223 @@ To facilitate the symbolic analysis, we need to introduce symbols to represent t
 
 
 
+{\bf Local Variables\  }
+Like other symbolic analysis~\cite{jeff,chao}, the symbolic trace should be in the SSA form, i.e., each variable is defined exactly once. This is because the constraint solver employed by the analysis requires each variable to hold only one value. Besides, we need to make sure each use still reads from the same definition thread-locally. 
+
+The  simple procedure shows the construction of the symbolic trace for local variables defined or used. The symbols are constructed by combining the static instruction and the runtime event id. Lines 6-10 handles the local variable definition.  We build a symbolic variable $s$ for it by combining the variable name and the event id. The uniqueness of the event id guarantees that each symbolic variable is defined exactly once. In addition, we replace the variable to the symbolic variable in the instruction and record the replacement in $table$. Lines 3-5 updates the local variable used in each event so that it is replaced with the symbolic variable for the corresponding definition. Here, the corresponding definition and the use share the same variable name, therefore, we can easily find out the symbolic variable through looking up the $table$. 
+
+The SSA form of the trace is different from the SSA form of the instruction as the SSA instruction can only distinguish definitions at different program points but cannot distinguish the definitions at different execution points that share the same program point.
 
 
 
 
 
+\begin{algorithmic}[3]
+\For {$e: \tau$}
+ \State $ins\gets e.ins$ 
+ \For {$ins.use:ins.uses$}
+ \State $ins.use \gets table(ins.use)$
+ \EndFor
+  \If {$ins.def\neq null$}
+    \State $ s\gets ins.def^{e.id}$
+	\State $ table [ins.def \rightarrow s]$
+	\State $ins.def\gets s$
+ \EndIf
+\EndFor
+\end{algorithmic}
 
 
-Like other symbolic analysis~\cite{jeff,chao}, the symbolic trace should be in the SSA form, i.e., each variable is defined exactly once. This is because the constraint solver employed by the analysis does not allow the same variable to hold more than one value.  Besides, we introduce symbols to represent shared reads and shared writes which leave the inter-thread dependence between reads/writes undetermined.
+%TODO update the intro+moti, make sure the same style
+\begin{figure}
+\centering
+\begin{tabular}{ll}
+\multicolumn{2}{c}{{\tt {\bf x} = 0; {\bf y} = 0;}} \\
+\hline
+\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$} \\
+\hline
+{\tt 1: s=0; } & \\
+{\tt 2: for(i=1;i<3;i++)} & \\
+{\tt 3: \ \ \ s+=i;} & \\
+{\tt 4: {\bf y} = s;} & \\
+{\tt 5: {\bf x} = 1;} & \\
+{\tt 6: {\bf y} = 5;} & \\
+& {\tt 7: if ({\bf y} > 2)} \\
+& {\tt 8:~~print({\bf x}+1);} \\	
+& {\color{Gray} {\tt 9: else}} \\
+& {\color{Gray} {\tt 10:~~print({\bf x}+2);}}
+\end{tabular}
+\caption{Running Example (shared variables are in bold font). }
+\label{fig:running2}
+\end{figure}
+
+
+
+{\bf Shared Accesses}   Besides, we introduce symbols to represent shared reads and shared writes which leave the inter-thread dependence between reads/writes undetermined. For each read (or write) of shared variable $x$, we introduce $R^{id}_x$ (or $W^{id}_x$) to denote it, where $id$ is the event id.
+Consider the code in Figure~\ref{fig:running2}, which resembles the example in Figure~\ref{fig:running} except that it includes a for loop at lines 1-2.
+The symbolic trace is produced in Figure~\ref{fig:t4running2}. For simplicity, we only show the symbolic variables, while omitting other information such as thread information.
+
+
+
+
+%TODO distinguish T1 and T2 in the text. 
+\begin{figure}
+\centering
+\begin{tabular}{l|l}
+\hline
+\multicolumn{1}{c}{$Trace$} & \multicolumn{1}{c}{$Symbolic\  Trace$} \\
+\hline
+{\tt 0: {\bf x}=0} &  {\tt 0: $W^0_x$=0}    \\
+{\tt 1: {\bf y}=0} &   {\tt 1: $W^1_y$=0}   \\
+{\tt 2: s=0} &  {\tt 2: $s^2$=0}   \\
+{\tt 3: i=1} &     {\tt 3: $i^3$=1}   \\
+{\tt 4: i<3} &    {\tt 4: $i^3$<3} \\
+{\tt 5: s=s+i} & {\tt 5: $s^5$=$s^2$+$i^3$}   \\
+{\tt 6: i=2} &       {\tt 6: $i^6$=2}  \\
+{\tt 7: i<3} &      {\tt 7: $i^6$<3}  \\
+{\tt 8: s=s+i} &  {\tt 8: $s^8$=$s^5$+$i^6$}  \\
+{\tt 9: i=3} &     {\tt 9: $i^9$=3}  \\
+{\tt 10: i<3} &    {\tt 10: $i^9$<3}  \\
+{\tt 11: {\bf y} = s;} &  {\tt 11: $W^{11}_y$ = $s^8$;}  \\
+{\tt 12: {\bf x} = 1;} &    {\tt 12: $W^{12}_x$ = 1;}   \\
+{\tt 13: {\bf y} = 5;} &    {\tt 13: $W^{13}_y$ = 5;}  \\
+{\tt 14: {\bf y} > 2}  &    {\tt 14: $R^{14}_y$ > 2} \\
+{\tt 15: tmp={\bf x}+1;}  & {\tt 15: tmp=$R^{15}_x$+1;}   \\	
+{\tt 16: print(tmp);} &  {\tt 16: print(tmp);}  \\
+\end{tabular}
+\caption{Trace}
+\label{fig:t4running2}
+\end{figure}
+
+
+
+{\bf Method Calls\ } The key to supporting the method calls is to capture the value flow the actual argument to the formal argument, and the flow from the return statement to the LHS variable of the method call. To explicitly model the value flow, record two additional events for each method call.
+Consider the example in Figure~\ref{fig:methcall},   we record the local access event $y1=y;$ for the argument value flow and record the  local access event $x=i2;$. Recording the additional events is achieved through instrumenting the call site and the callee method statically.  
+
+The above simple strategy however hides the complexity of the virtual method calls. At a call site of a virtual method, the static instrumentation cannot know precisely which method would be called. Therefore, we do not know what formal argument the actual argument flows to. Consider the example in Figure~\ref{fig:methcall}, suppose another implementation of the virtual method exists (in the comments).  We do not know how to instrument the code statically, $y1=y$ or $y2=y$. 
+
+
+To avoid the problem, we have to combine the runtime knowledge. 
+Our strategy is as follows: rather than directly record direct value flow from actual argument to formal argument, we introduce an artificial variable during the static instrumentation. Then we  insert the instrumentation $record(ARG0=y;)$ at call site, and insert  $record(y1=ARG0)$ at the entry of the method $func$ declared in the first class, and insert $record(y2=ARG0);$ at the entry of the method $func$ declared in the second class. At runtime, depending on which $func$ method is invoked, we record either the event sequence $ARG0=y; y1=ARG0$ or the sequence $ARG0=y; y2=ARG0$, which precisely captures the value flow. We model the return value flow similarly. 
+
+Note that although different methods use the same names for the artificial variable,  they are translated to different variables after we get the SSA form of symbolic trace. 
+
+ 
+
+\begin{figure}
+\centering
+\begin{tabular}{ll}
+{\tt  x=o.func(y) } &  \\ 
+ {\tt  func(y1)\{ // class O1} &  \\
+ {\tt  \ \      i=y1; } & \\
+ {\tt  \ \      i2=2*i; } &  \\
+ {\tt  \  \      return i2;} & \\ 
+ {\tt           \}} & \\ 
+ 
+  {\tt //  func(y2)\{ // class O2} &  \\
+ {\tt  // \ \      j=y2; } & \\
+ {\tt  // \ \      j2=3*j; } &  \\
+ {\tt  // \  \      return j;} & \\ 
+ {\tt  //         \}} & \\ 
+\end{tabular}
+\caption{Method Calls}
+\label{fig:methcall}
+\end{figure}
 
 
 
 
 
+\subsection{Constraints}~\label{sec:constraints}
+The constraints $\Phi$ is the conjunction of the following categories of constraints: program order constraints $\Phi_{IT}$, variable definition constraints $\Phi_{VD}$, the thread interference constraints $\Phi_{TI}$, the path condition constraints $\Phi_{PC}$ and the race condition constraints $\Phi_{RC}$. In the following, we discuss each of them in  order.
+
+{\bf Intra-thread order constraints\ } During the predictive analysis, each thread produces the same event sequence in the original run and the predicted run (this constraint will be further relaxed in Section).  
+
+The constraints are encoded as follows. Here, $O(e)$ returns the order variable for the event $e$. In our settings, the order variable is denoted with the event id, e.g., the order variable for the event with id $15$ is denoted as $O_{15}$
+$\forall t, \forall 0<i<|\tau'|-1, where \tau'=\tau|t, O(\tau'[i])<O(\tau'[i+1])$.  
+Intuitively, the formula specifies that there is an order between any two consecutive events from the same thread. 
+
+For the example in Figure~\ref{fig:t4running2}, inside the execution of thread $T1$, we have $O_1<O_2 < \dots < O_{13}$. 
+Inside the execution of thread $T2$, we have $O{14}<O{15}<O{16}$.
+
+
+{\bf Variable definition constraints\ } The variable definition constraint captures the value flow due to each statement from the right hand side to the left hand side. It is directly derived from each statement in the symbolic form. 
+
+{\bf Thread interference constraints \ }  Thread interference constraints model the value flows between the writes and reads of the same shared variable. 
+ Previous predictive analysis requires the predicted run to share many scheduling decisions with the original run so that the reads read from the same writes or the same written value. Our approach achieves the relaxation, without the need for preserving such scheduling decisions. In our settings, each shared read can read from any write of the same variable from a different thread, or from the preceding write from the same thread. 
+ 
+ For example,  consider Figure~\ref{fig:t4running2},  the read $R^{14}_y$ may read from the writes $W^1_y$, $W^{11}_y$ or $W^{13}_y$.
+Each read-write correlation further requires certain scheduling constraints. For example, to read from the write $W^1_y$, the read should happen after $W^1_y$, and no other writes of the same variable interleave between them. The constraint can be captured as $R^{14}_y=W^1_y \wedge O_1<O_{14} \wedge (O_{14}<O_{11} \vee O_{11} < O_1) \wedge (O_{14}<O_{13} \vee O_{13}<O_{1})$.  
+
+In general,  given an event $e_R$ that contains the read $R$, and the set $S$ of candidate matching write events, we have the following formula. Here, $W_e$ denotes the shared write access included in the event $e$. 
+
+
+%TODO explain W_e.
+$\Phi_{TI}= \bigvee_{e\in S} R=W_e \wedge O(e)<O(e_R)\wedge \bigwedge_{e'\in S\e} (O(e')<O(e) \vee O(e_R)<O(e'))$.
+
+%TODO candidate matching operations
+
+Previously we use the candiate matching operations $S$. $S$ includes both all the writes of the same variable from other threads and the preceding write of the same variable from the current thread. 
+Thereofre, given the event $e_R$, $S= \{e| e \in W(e_R.a) \wedge ((e.t\neq e_R.t) \vee (e.t=e_R.t \wedge ( \nexists e' \in W(e_R.a) s.t., e'.t=e_R.t \wedge e.id < e'.id < e_R.id)) )\}$.
+
+
+
+
+{\bf Path condition constraints \ } The path condition constraints specify that the predicted run should follow the same paths to produce the same set of events.  It is directly derived from the branch conditions in the symbolic trace.
+
+{\bf Race condition constraints \ } The race condition specifies that the racy pair may happen at the same time, i.e., they own the same order. 
+
+
+
+\section{Heap Invariant}~\label{sec:heapinv} 
+We demonstrate in Section~\ref{sec:constraints} that the address plays an important role in correlating the shared reads and shared writes. Intuitively speaking, a remote write matches a read if they access the same address. In the predicted run, we reuse the addresses from the origin run as a guidance for searching for the matching writes of a read. Therefore, we need to guarantee a write matches with a read in the predicted run if and only if the write matches the reads in the origin run. 
 
 
 
 
 
+ 
+
+ 
+
+\section{Time Window and Initial Value constraints}~\label{sec:timewindow}
+The trace is typically long and the constraint solver cannot scale to the whole trace. Instead, we adopt the notion of time window. 
+We divide the trace into $N$ traces of the same length, where $N$ is configurable parameter (1000 in our experiment). To support the time window, we need to store the values of the shared variables and local variables at the end of a window and encode such values as the inputs of the next window. 
+
+We maintain two maps,  $sstore$ and $lstore$, for the shared variables and local variables respectively. Suppose the trace for the last window is $\tau$. The following code illustrates how we maintain the $sstore$, i.e., storing the value written by the last write with each address. Beside, the variable $e.ins.left$ represents the left hand variable inside the instruction $e.ins$.
+
+\begin{algorithmic}[3]
+\For {$a \in \mathcal{A}$}
+ \State $\tau_a=W(a)$
+ \State $sstore.put(a,\tau_a[|\tau_a|-1].v)$ 
+\EndFor
+\end{algorithmic}
+
+%TODO define left:
+\begin{algorithmic}[3]
+\For {$e \in \tau$}
+  \If {$e.isLocalAcc()$}
+    \State $ lstore.put(e.ins.left, e.v)$
+  \Else
+     \If{$e.isRead()$}      
+        \State $ lstore.put(e.ins.left, e.v)$
+     \EndIf
+  \EndIf 
+\EndFor
+\end{algorithmic}
 
 
+When constructing the constraints for the next window, we specify the following constraints to encode the input values.
+
+The following formula enhances the thread interfernce constraint to include the case that the read reads from the initial values. 
+
+$\Phi_{TI}=\Phi_{TI} \wedge  R=sstore.get(e_R.a) \wedge \bigvee_{e\in S} O(e_R)<O(e)$.
+
+The following formula encodes the input values of local variables. 
+
+$\Phi_{IN}=\bigvee_{l\in lstore.keys()} l=lstore.get(l)$.
 
 
+ 
+ 
 
 
-
-
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\subsection{Method Calls}~\label{sec:basic}
-
-
-\section{Time Window}~\label{sec:basic}
-
-\section{Heap Invariant}~\label{sec:basic}

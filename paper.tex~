@@ -2,7 +2,9 @@
 
 \usepackage{graphicx}
 \usepackage{color}
+\usepackage{algpseudocode}
 
+\newcommand{\tool}{{\sc Recipe}}
 
 \ifCLASSINFOpdf
   % \usepackage[pdftex]{graphicx}
@@ -44,7 +46,7 @@
 %
 % paper title
 % can use linebreaks \\ within to get better formatting as desired
-\title{Recipe: Relaxed Sound Predictive Analysis}
+\title{\tool: Relaxed Sound Predictive Analysis}
 
 
 % author names and affiliations
@@ -132,6 +134,7 @@ The abstract goes here.
 
 \input{introduction}
 \input{overview}
+\input{tech}
 
 
 % An example of a floating figure using the graphicx package.

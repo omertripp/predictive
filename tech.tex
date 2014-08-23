@@ -1,27 +1,33 @@
-\section{Basics}~\label{sec:basic}
+%\section{Basics}~\label{sec:basic}
 
 
-\subsection{Trace Terminology}
+\section{Trace Terminology}
 Our analysis starts with a trace $\tau$,  a sequence of events, $e_0, e_1, \dots, e_n$.  
-There are three types of events in general.
+There are  types of events in general.
 \begin{itemize}
 \item the shared access, which includes the read and write of the shared fields, e.g., $o.f$=$x$ and $x$=$o.f$.
 \item the local access, which includes only the access of the local variable, e.g., $x=y+z$ or $v.f=x$ (where $v$ is a thread-local object).
 \item the branch event, which evaluates the branch condition to true/false, e.g., $x>3$.
-\item the synchronization event, which includes start/join, wait/notify, lock/unlock events, e.g., $lock(o)$
+\item the method call event, which includes the method call, e.g., $o.method()$.
+\item the synchronization event, which includes start/join, wait/notify, lock/unlock events, e.g., $lock(o)$.
 \end{itemize}
 
+%TODO synchronization constraints.
+
+Each event $e_i \in \Sigma$ is a tuple, $<t, id, a, v, type, ins, \_def, \_uses, \_ins>$, where $t\in \mathcal{T}$ denotes the thread generating the event, $id\in \mathcal{ID}$ denotes the unique integer assigned to the event (event id). We say $e_1 < e_2$ iff $e_1.id<e_2.id$. $a\in \mathcal{A}$ denotes the address of the object or field (if any) accessed in the event,  $v\in \mathcal{V}$ denotes the value of the definition (if any) in the event, $type$ denotes the type of the event.
+
+Specifically, the address of the object $o$ is denoted as $id(o)\in \mathcal{ID}$, which is a string value representing $o$ uniquely, the address of the static field $f$ is  $id(f)$ and the address of the instance object field $o.f$ is  $id(o).id(f)$. 
 
 
-Each event $e_i \in \Sigma$ is a tuple, $<t, id, a, v, ins>$, where $t\in \mathcal{T}$ denotes the thread generating the event, $id\in \mathcal{ID}$ denotes the unique integer assigned to the event (event id), $a\mathcal{A}$ denotes the address of the object or field (if any) accessed in the event,  $v\in \mathcal{V}$ denotes the value of the definition (if any) in the event, and $ins\in \mathcal{INS}$ denotes the three-address instruction generating the event.  Specifically, the address of the object $o$ is denoted as $id(o)\in \mathcal{ID}$, which is a string value representing $o$ uniquely, the address of the static field $f$ is  $id(f)$ and the address of the instance object field $o.f$ is  $id(o)\_id(f)$. Besides, as the event is derived by instrumenting the three-address code and monitoring the instrumented execution. Therefore, each event can involve at most three operands. 
+$ins\in \mathcal{INS}$ denotes the static three-address instruction corresponding to the event.  $\_def \in \mathcal{S}$ is the symbolic representation of the variable definition  in the event (We will explain the symbolic representation in Section~\ref{sec:symtrace}). $\_uses$ are the symbolic representations of the variable uses. $\_ins$ is the symbolic form of the instruction after changing the variables into symbolic variables.
 
 
 The trace supports its standard operations as follows.
 \begin{itemize}
-\item projection, e.g., $\tau|t$ returns~\footnote{This is the abbreviation for the complete form $\tau|Thread=t$ } the events from the thread $t$,  $\tau|a$ returns the event involving the address $a$.  
+\item projection, e.g., $\tau|Thread=t$ returns the events from the thread $t$,  $\tau|Address=a$ returns the event involving the address $a$, $\tau|Type=branch$ returns all branch events.  
 \item concatenation. $\tau'=\tau e$ represents the new trace by appending the event $e$ to $\tau$.
 \item length $|\tau|$. 
-\item selecting an element. $\tau[0]$ and $\tau[|\tau|-1]$ represents the first and last event in $\tau$.
+\item selection. $\tau[i]$ and $\tau[j]$ denotes the $i$th and $j$th event in $\tau$. $\tau[i\dots j]$ denotes the event sequence from the $i$th event to the $j$th event. $\tau.before(e)$ and $\tau.after(e)$ are the helper function for selecting the event sequences before or after $e$. $\tau.between(e_1, e_2)$  selects the event sequence between $e_1$ and $e_2$ (inclusively). 
 \end{itemize}
 
 
@@ -29,15 +35,15 @@ The trace supports its standard operations as follows.
 
 In addition, we maintain auxiliary information as follows.
 \begin{itemize}
-\item $AT: \mathcal{A} \times \mathcal{T} \rightarrow \gamma$ is a function that returns a trace $\tau \in \gamma$ that contains only the accesses of the address $a \in \mathcal{A}$ by the thread $t\in \mathcal{T}$. Each trace $\tau$ in $\gamma$ is defined over the alphabet of events $\Sigma$, specifically, the trace is an empty trace $\epsilon$ or defined in this way:  $\forall 0\leq i\leq |\tau|,   \tau[i]\in \Sigma, and, \forall i\neq j, \tau[i]\neq \tau[j]$. 
-\item $R: \mathcal{A} \rightarrow \gamma$ is a function that returns the read accesses of the address $a\in \mathcal{A}$.
-\item $W: \mathcal{A} \rightarrow \gamma$ is a function that returns the write accesses of the address $a \in \mathcal{A}$.
-\item $Sync: \mathcal{A} \rightarrow \gamma$ is a function that returns the synchronization events involving the address $a\in \mathcal{A}$. 
+%\item $AT: \mathcal{A} \times \mathcal{T} \rightarrow \Gamma$ is a function that returns a trace $\tau \in \gamma$ that contains only the accesses of the address $a \in \mathcal{A}$ by the thread $t\in \mathcal{T}$. 
+\item $R: \mathcal{A} \rightarrow \Gamma$ is a function that returns the read accesses of the address $a\in \mathcal{A}$. Each trace $\tau$ in $\Gamma$ is defined over the alphabet of events $\Sigma$, specifically, the trace is an empty trace $\epsilon$ or defined in this way:  $\forall 0\leq i\leq |\tau|,   \tau[i]\in \Sigma, and, \forall i\neq j, \tau[i]\neq \tau[j]$. 
+\item $W: \mathcal{A} \rightarrow \Gamma$ is a function that returns the write accesses of the address $a \in \mathcal{A}$.
+\item $Sync: \mathcal{A} \rightarrow \Gamma$ is a function that returns the synchronization events involving the address $a\in \mathcal{A}$. 
 \end{itemize}
 
 
-\subsection{Symbolic Trace}
-To facilitate the symbolic analysis, we need to introduce symbols to represent the operands in each event. Symbols allow us to overcome the limitation of concrete dependences and allow us to explore more dependences symbolically. 
+\section{Symbolic Trace}~\label{sec:symtrace}
+To facilitate the symbolic analysis, we need to introduce symbols to represent the the variables in each event. Symbols allow us to overcome the limitation of concrete dependences and allow us to explore more dependences symbolically. We refer to this process as the symbolicization.
 
 %shared access only, local access only
 
@@ -45,26 +51,30 @@ To facilitate the symbolic analysis, we need to introduce symbols to represent t
 
 
 {\bf Local Variables\  }
-Like other symbolic analysis~\cite{jeff,chao}, the symbolic trace should be in the SSA form, i.e., each variable is defined exactly once. This is because the constraint solver employed by the analysis requires each variable to hold only one value. Besides, we need to make sure each use still reads from the same definition thread-locally. 
+Like other symbolic analysis~\cite{jeff,chao}, the symbolic trace should be in the SSA form, i.e., each variable is defined exactly once. This is because the constraint solver employed by the analysis requires each variable to hold only one value. Besides, we need to preserve the local data dependences, i.e., to guarantee each use still reads from the same definition thread-locally. 
 
-The  simple procedure shows the construction of the symbolic trace for local variables defined or used. The symbols are constructed by combining the static instruction and the runtime event id. Lines 6-10 handles the local variable definition.  We build a symbolic variable $s$ for it by combining the variable name and the event id. The uniqueness of the event id guarantees that each symbolic variable is defined exactly once. In addition, we replace the variable to the symbolic variable in the instruction and record the replacement in $table$. Lines 3-5 updates the local variable used in each event so that it is replaced with the symbolic variable for the corresponding definition. Here, the corresponding definition and the use share the same variable name, therefore, we can easily find out the symbolic variable through looking up the $table$. 
+The  simple procedure shows the construction of the symbolic trace for local variables defined or used. The symbols are constructed by combining the 
+name of the variable in the static instruction $e.ins$ and the runtime event id $e.id$. Lines 6-10 handles the local variable definition.  The symbolic representation $e.\_def$ for a variable definition is the combination of the variable name and the event id, where  the unique event id guarantees the uniqueness of the symbolic representation.  In addition, we record the mapping in $table$.  
+Lines 3-5 build the symbolic representations for the variables used in the instruction, which are computed through looking up $table$ with the variable name as the key. For a local stack variable, its uses and definition involve the same variable name. However, for a local heap variable, i.e.,  a field, its uses and definition may not involve the same variable name. For example, $o.f=5$ and $y=r.f$ ($o=f$) involve the same field but involve different names. 
+To simplify the representation, we introduce a stack variable $l_{address(o.f)}$ to replace the heap variable. The replacement is conducted before the construction of the symbolic trace.
 
-The SSA form of the trace is different from the SSA form of the instruction as the SSA instruction can only distinguish definitions at different program points but cannot distinguish the definitions at different execution points that share the same program point.
+An important assumption for the replacement is that the address of the heap variable will remain the same in the predicted run. We will guarantee the validity of the assumption, as explained in Section. 
+
+%The SSA form of the trace is different from the SSA form of the instruction as the SSA instruction can only distinguish definitions at different program points but cannot distinguish the definitions at different execution points that share the same program point.
 
 
 
 
 
 \begin{algorithmic}[3]
+\State $ins=e.ins$
 \For {$e: \tau$}
- \State $ins\gets e.ins$ 
- \For {$ins.use:ins.uses$}
- \State $ins.use \gets table(ins.use)$
+  \For {$i: 0\dots ins.uses.length-1$}
+ \State $e.\_uses[i] \gets table.get(ins.uses[i])$
  \EndFor
-  \If {$ins.def\neq null$}
-    \State $ s\gets ins.def^{e.id}$
-	\State $ table [ins.def \rightarrow s]$
-	\State $ins.def\gets s$
+  \If {$e.\_def\neq null$}
+    \State $ e.\_def \gets ins.def^{e.id}$
+	\State $ table.put(ins.def,  e.\_def)$
  \EndIf
 \EndFor
 \end{algorithmic}
@@ -95,11 +105,12 @@ The SSA form of the trace is different from the SSA form of the instruction as t
 
 
 
-{\bf Shared Accesses}   Besides, we introduce symbols to represent shared reads and shared writes which leave the inter-thread dependence between reads/writes undetermined. For each read (or write) of shared variable $x$, we introduce $R^{id}_x$ (or $W^{id}_x$) to denote it, where $id$ is the event id.
+{\bf Shared Variables}   Besides, we introduce symbols to represent shared variables read or written.  For each shared variable $x$ read (or written), we introduce $R^{id}_x$ (or $W^{id}_x$) to denote it, where $id$ is the event id. We denote the read and the write with different symbols, which allow us to reason about different dependence relations among them flexibly. 
+
+
 Consider the code in Figure~\ref{fig:running2}, which resembles the example in Figure~\ref{fig:running} except that it includes a for loop at lines 1-2.
-The symbolic trace is produced in Figure~\ref{fig:t4running2}. For simplicity, we only show the symbolic variables, while omitting other information such as thread information.
-
-
+Figure~\ref{fig:t4running2} shows the instruction $e.ins$ of each event $e$ and its symbolic instruction $e.\_ins$, which is essentially replaces the variables in $e.ins$ to the symbolic variables. 
+ 
 
 
 %TODO distinguish T1 and T2 in the text. 
@@ -133,16 +144,22 @@ The symbolic trace is produced in Figure~\ref{fig:t4running2}. For simplicity, w
 
 
 
-{\bf Method Calls\ } The key to supporting the method calls is to capture the value flow the actual argument to the formal argument, and the flow from the return statement to the LHS variable of the method call. To explicitly model the value flow, record two additional events for each method call.
-Consider the example in Figure~\ref{fig:methcall},   we record the local access event $y1=y;$ for the argument value flow and record the  local access event $x=i2;$. Recording the additional events is achieved through instrumenting the call site and the callee method statically.  
+{\bf Method Calls\ } To support the method calls, we need to capture the value flow from the actual argument to the formal argument, and the flow from the return variable to the variable definition at the call site. We capture the value flow by recording additional events for each method call.
+Consider the example in Figure~\ref{fig:methcall},   we need to record events to capture the implicit assignment $y1=y$ and $x=i2$ due to the method call. 
 
-The above simple strategy however hides the complexity of the virtual method calls. At a call site of a virtual method, the static instrumentation cannot know precisely which method would be called. Therefore, we do not know what formal argument the actual argument flows to. Consider the example in Figure~\ref{fig:methcall}, suppose another implementation of the virtual method exists (in the comments).  We do not know how to instrument the code statically, $y1=y$ or $y2=y$. 
+Our strategy is as follows. To capture the argument flow $y1=y$, we record two events, one capturing $ARG0=y$ and the other capturing $y1=ARG0$, where $ARG0$ is an artificial variable denoting the first argument of any method. This simple strategy helps handle the virtual method calls. 
+At the call site, we do not know which target method would be called, the first event records  information about the actual argument. Then, a target method is invoked, the second event records information about the formal argument of the resolved target method. Combined together, the two events record the argument value flow.  The recorded events also undergo the above symbolicization process for gaining the SSA form.
 
 
-To avoid the problem, we have to combine the runtime knowledge. 
-Our strategy is as follows: rather than directly record direct value flow from actual argument to formal argument, we introduce an artificial variable during the static instrumentation. Then we  insert the instrumentation $record(ARG0=y;)$ at call site, and insert  $record(y1=ARG0)$ at the entry of the method $func$ declared in the first class, and insert $record(y2=ARG0);$ at the entry of the method $func$ declared in the second class. At runtime, depending on which $func$ method is invoked, we record either the event sequence $ARG0=y; y1=ARG0$ or the sequence $ARG0=y; y2=ARG0$, which precisely captures the value flow. We model the return value flow similarly. 
 
-Note that although different methods use the same names for the artificial variable,  they are translated to different variables after we get the SSA form of symbolic trace. 
+
+%The above simple strategy however hides the complexity of the virtual method calls. At a call site of a virtual method, the static instrumentation cannot know precisely which method would be called. Therefore, we do not know what formal argument the actual argument flows to. Consider the example in Figure~\ref{fig:methcall}, suppose another implementation of the virtual method exists (in the comments).  We do not know how to instrument the code statically, $y1=y$ or $y2=y$. 
+%
+%
+%To avoid the problem, we have to combine the runtime knowledge. 
+%Our strategy is as follows: rather than directly record direct value flow from actual argument to formal argument, we introduce an artificial variable during the static instrumentation. Then we  insert the instrumentation $record(ARG0=y;)$ at call site, and insert  $record(y1=ARG0)$ at the entry of the method $func$ declared in the first class, and insert $record(y2=ARG0);$ at the entry of the method $func$ declared in the second class. At runtime, depending on which $func$ method is invoked, we record either the event sequence $ARG0=y; y1=ARG0$ or the sequence $ARG0=y; y2=ARG0$, which precisely captures the value flow. We model the return value flow similarly. 
+%
+%Note that although different methods use the same names for the artificial variable,  they are translated to different variables after we get the SSA form of symbolic trace. 
 
  
 
@@ -155,12 +172,14 @@ Note that although different methods use the same names for the artificial varia
  {\tt  \ \      i2=2*i; } &  \\
  {\tt  \  \      return i2;} & \\ 
  {\tt           \}} & \\ 
- 
   {\tt //  func(y2)\{ // class O2} &  \\
- {\tt  // \ \      j=y2; } & \\
- {\tt  // \ \      j2=3*j; } &  \\
- {\tt  // \  \      return j;} & \\ 
- {\tt  //         \}} & \\ 
+   {\tt //    ...     } & \\ 
+  
+  
+% {\tt  // \ \      j=y2; } & \\
+% {\tt  // \ \      j2=3*j; } &  \\
+% {\tt  // \  \      return j;} & \\ 
+% {\tt  //         \}} & \\ 
 \end{tabular}
 \caption{Method Calls}
 \label{fig:methcall}
@@ -170,8 +189,197 @@ Note that although different methods use the same names for the artificial varia
 
 
 
-\subsection{Constraints}
-The constraints 
+
+Until now, we get the trace with the symbolic variables. The following section uses these symbolic representations to compute races. 
+Hereafter, we always refer to the symbolic form, such as symbolic variable or symbolic instruction, unless otherwise specified. 
+%Unless otherwise specified, we refer to the symbolic variables 
+
+
+\section{Constraints}~\label{sec:constraints}
+First we collect the candidate racy pairs and apply the constraint solver to verify each of them. 
+In general, the candidate racy pairs are collected from the trace as  pairs of shared accesses (one is a write) of the same variable from different threads. 
+
+
+$$
+\{(e_1, e_2| e_1.a=e_2.a \vee e_1.t\neq e_2.t \vee (e_1\in W(e_1.a) \wedge e_2\in W(e_2.a) ))\}
+$$
+
+
+For each race pair ($e_1$, $e_2$), we construct the constraints $\Phi$ that encode the feasibility requirement and apply the solver to verify the feasibility. The constraints $\Phi$ are the conjunction of the following categories of constraints: local order constraints $\Phi_{Local}$, variable definition constraints $\Phi_{VDef}$, the thread interference constraints $\Phi_{Interference}$, the path condition constraints $\Phi_{Path}$ and the race condition constraints $\Phi_{Race}$, and the synchronization constraints $\Phi_{Sync}$. In the following, we discuss each of them in  order.
+We omit the synchronization constraints as they are identical to ~\cite{jeff}.
+
+
+{\bf Race condition constraints \ } The race condition specifies that the racy pair may happen at the same time, i.e., they own the same order. 
+Given two events in the racy pair, ($e_1$, $e_2$), suppose $O(e)$ denotes the order variable associated with the event, we have,
+
+$$
+\Phi_{Race}= (O(e_1)=O(e_2))
+$$
+
+
+
+
+{\bf Path condition constraints \ } The path condition constraints specify that the predicted run should follow the same paths to produce the same set of events (Section~\ref{sec:unexplored} will relax these constraints to explore more paths).  It is directly derived from the branch conditions taking the symbolic variables, as illustrated at line 10 in Figure~\ref{fig:t4running2}.
+Given a racy pair, ($e_1$, $e_2$), suppose $e_1$ is after $e_2$ in the trace, i.e., $e_2< e_1$. 
+
+$$
+\Phi_{Path}=\bigwedge_{e\in (\tau.before(e_1)|Type=branch)} e.\_ins 
+$$
+
+The branches do not need to include those after both racy events as we only need to guarantee the feasibility of the  execution leading to the racy events.
+The branches include not only those from the two threads executing $e_1$ and $e_2$ but also those from other threads, as other threads the feasibility may require the interference from other threads.
+ 
+
+
+
+
+{\bf Variable definition constraints\ } The variable definition constraint captures the value flow due to each statement from the right hand side to the left hand side. It is directly derived from the symbolic form of the instruction in the each event, as illustrated at line 5 in Figure~\ref{fig:t4running2}.
+Suppose $e_1$ is after $e_2$ in the trace,
+
+ $$
+\Phi_{VDef}=\bigwedge_{e\in (\tau.before(e_1)|(Type=shardAccess\vee Type=localAccess))} e.\_ins 
+$$
+
+Similar to the branches, we include also the accesses from other threads that precede $e_1$.
+
+
+
+{\bf Intra-thread order constraints\ } During the predictive analysis, each thread produces the same event sequence in the original run and the predicted run (Section~\ref{sec:unexplored} will relax these constraints to explore more event sequences).  
+The constraints are encoded as follows. 
+
+$$
+\forall t,  0<i<|\tau'|-1, where\  \tau'=\tau|t, O(\tau'[i])<O(\tau'[i+1])
+$$
+
+  
+Intuitively, the formula specifies that there is an order between any two consecutive events from the same thread. 
+
+ In our settings, the order variable is denoted with the event id, e.g., the order variable for the event with id $15$ is denoted as $O_{15}$
+For the example in Figure~\ref{fig:t4running2}, inside the execution of thread $T1$, we have $O_1<O_2 < \dots < O_{13}$. 
+Inside the execution of thread $T2$, we have $O_{14}<O_{15}<O_{16}$.
+
+
+\subsection{Relaxation for the schedules breaking dependences}
+In addition to the above constraints, we also need to reason about the dependences between the shared reads and shared writes. 
+ Previous predictive analysis requires the predicted run to share many scheduling decisions with the original run so that each shared read reads from the same write (or the same written value) in two runs. Our approach achieves the relaxation, without the need for preserving such scheduling decisions. In our settings, each shared read can read from any write of the same variable from a different thread, or from the preceding write from the same thread, as long as the resultant execution is feasible.
+ 
+
+{\bf Thread interference constraints \ }  Thread interference constraints model the value flows between the writes and reads of the same shared variable. 
+Consider Figure~\ref{fig:t4running2},  the read $R^{14}_y$ may read from the writes $W^1_y$, $W^{11}_y$ or $W^{13}_y$.
+Each read-write correlation further requires certain scheduling constraints. For example, to read from the write $W^1_y$, the read should happen after $W^1_y$, and no other writes of the same variable interleave between them. The constraint can be captured as $R^{14}_y=W^1_y \wedge O_1<O_{14} \wedge (O_{14}<O_{11} \vee O_{11} < O_1) \wedge (O_{14}<O_{13} \vee O_{13}<O_{1})$.  
+
+In general,  given an event $e_R$ that contains the read $R$, and the set $S$ of candidate matching write events, we have the following formula. Here, $W_e$ denotes the shared write access included in the event $e$. 
+
+
+% explain W_e.
+$$
+\Phi_{Interference}= \bigvee_{e\in S} (R=W_e) \wedge O(e)<O(e_R)
+\wedge \bigwedge_{e'\in S\setminus e} (O(e')<O(e) \vee O(e_R)<O(e'))
+$$
+
+% candidate matching operations
+
+The candidate matching operations $S$ include both all the writes of the same variable/address from other threads and the preceding write of the same variable from the current thread. 
+%Therefore, given the event $e_R$, 
+%$$S= \{e| e \in W(e_R.a) \wedge ((e.t\neq e_R.t) \vee (e.t=e_R.t \wedge ( \nexists e' \in W(e_R.a) s.t., e'.t=e_R.t \wedge e.id < e'.id < e_R.id)) )\}
+%$$.
+
+%We demonstrate in Section~\ref{sec:constraints} that the address plays an important role in correlating the shared reads and shared writes. Intuitively speaking, a remote write matches a read  if and only if they access the same address. In the predicted run, we use the address from the original run to judge the matching relations between writes and reads, which is however not always valid. 
+
+{\bf Heap invariant\ } In the above, we find the matching operations for the predicted run based on the address collected in the original run.
+However, the matching may be invalid because the address of a field may change if the base reference variable reads a different value, which is allowed in our relaxed analysis. 
+
+Consider the following example, in the original run following the line number order, thread $T_2$ reads $o_2$ at line 4 and uses the field $o_2.f$ at line 5. 
+Therefore, following the address value, the write at line 3 is a candidate match for the read at line 5. However, in the predicted run, the match may be invalid if the relaxation allows line 4 to read from a different write at line 1.
+
+
+\begin{figure}
+\centering
+\begin{tabular}{ll}
+\hline
+\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$} \\
+\hline
+{\tt 1: {\bf $o_2$} = $new ClassA()$;} & \\
+{\tt 1: {\bf A} = $o_1$;} & \\
+{\tt 2: {\bf A} = $o_2$;} & \\
+{\tt 3: {\bf $o_2$.f} = 5;} & \\
+& {\tt 4: {\bf r} ={\bf A}; } \\
+& {\tt 5: x={\bf r}.f;} \\	
+\end{tabular}
+\caption{Heap Invariant}
+\label{fig:heapinv}
+\end{figure}
+
+
+We need to guarantee that the address collected for each event in the original run remains the same in the predicted run. 
+Therefore, we add the heap invariant constraint $\Phi_{Heap}$.
+Given an event $e$ that defines the object reference that is used as the base for a field reference or a method call (before the racy pair), we have,
+
+
+$$
+\Phi_{Heap}=(e.\_def=e.v)
+$$
+$base(e_{inv})=baseDefEvent(e_{inv}).v$, requires the symbol representing the base object to read the original value. 
+
+
+
+%\begin{theorem}
+%Given a shared read event $e_r$ and a shared write event $e_w$, if they involve the same address $a$ in the original run, 
+%they should involve the same address $a$ in the predicted run; if they involve different addresses in the original run, they should involve different addresses in the predicted run. 
+%\end{theorem}
+
+%Besides, we need to guarantee the base of the method invocation to be identical between the predicted run and the original run. Otherwise, the method call may be dispatched to a different target method. The constraint, 
+In this way, we guarantees three properties: (1) the matching events in the original run are also the matching events in the predicted run, i.e., our above strategy for finding candidate matching events is valid. (2) the shared accesses forming a racy pair in the original run also form a racy pair in the predicted run as the base object references do not change from original run to predicted run.   (3) the dispatching of method calls remains the same in both runs as the base object reference remains the same. 
+
+
+Suppose $e_1$ is after $e_2$ in the trace, the following algorithm judges whether an event $e$ defines such a base reference.  The branch at line 4 returns false because we encounter a redefinition before the use as the base reference.  
+
+\begin{algorithmic}[3]
+\State $o = e.ins.def$
+\State $\tau'=\tau.before(e_1)|e.t$
+\For {$e_i \in \tau'.after(e)$}
+\If {$e_i.ins.def=o$}
+\State $return false$
+\Else
+{
+    \If {$e_i.ins \ references\  o$}
+    \State $ return \ true$
+    \EndIf
+}
+\EndIf
+\EndFor
+\State $return \ false$
+\end{algorithmic}
+
+
+
+
+
+
+
+%We add heap invariant constraints to guarantee the theorem, $base(e_r)=base(e_w)$. Here $base(e_r)$ (or $base(e_w)$) is the symbol representing the base reference of the field accessed in $e_r$. The following algorithm finds such a symbol through backward analysis over the trace. 
+%We can get the base from the address of a field at line 2. Remember that the address of a field is a concatenation of the base and the field. 
+%Through the backward analysis, we can find the definition of the base and return the symbol for the definition. 
+%TODO do not use value for finding base, unnecessary
+
+
+%Note that we do not require the address  $a'$ in the predicted run to be identical to the address $a$ in the original run.  Differently, existing approaches require them to be the same. Therefore, our approach relaxes the heap constraints too.
+
+%\begin{algorithmic}[3]
+%\State $a=e_r.a$
+%\State $base=getBase(a)$
+%\For {$i: \tau.indexOf(e_r)\dots 0$}
+%  \If {$\tau[i].v=base$}
+%    \State $ return \tau[i].ins.left$
+% \EndIf
+%\EndFor
+%\end{algorithmic}
+
+
+
+
+%In addition to the matching of the read and the write, we need to also guarantee the racy pair still involves the same address in the predicted run. 
+%Consider the same example in Figure~\ref{fig:heapinv}, suppose line 3 and line 5 form a race pair. Our analysis does not preserve the addresses, therefore, may lead to different addresses at line 3 and line 5. To guarantee that they still form a race, we need to add the heap constraint similar to the above.  
 
 
 
@@ -184,6 +392,74 @@ The constraints
 
 
 
-\section{Time Window}~\label{sec:basic}
 
-\section{Heap Invariant}~\label{sec:basic}
+ 
+
+ 
+
+
+
+
+ 
+\subsection{Relaxation for the un-explored branches}~\label{sec:unexplored}
+To reason about the un-explored branches, we conduct the symbolic execution to collect the symbolic trace for the unexplored branches. 
+At the high level, the symbolic execution starts from any branch event $e$ in the original trace $\tau$, and symbolically executes the un-executed branch. 
+The un-explored branch may contains branches itself, therefore, we conduct the depth-first search (DFS) to collect the symbolic traces $\Gamma_e$ for all paths inside the branch.  We truncate the original trace at the branch event,  append it with the negation of the branch event and the symbolic trace derived during the DFS.  The new trace is $\tau.before(e) neg(e) \tau_e$, where $\tau_e$ is any symbolic trace from $\Gamma_e$. We apply the constraint solver to the new trace to find potential races.
+
+Loop issues and object creation issues are known limitations of symbolic execution. For simplicity, we assume the un-explored branch is simple enough, i.e., it does not contain the loops and every object reference is fully resolved at the branch point. In case that the assumption does not hold, we avoid exploring such a branch, sacrificing the coverage in general. 
+
+Besides, as mentioned above, we need to know the address which guides the matching of reads and writes. As we assume the unexplored branch has no object creation, all addresses are fully resolved.
+
+
+
+
+\section{Implementation}\label{sec:impl}
+
+
+\subsection{Time Window and Initial Value constraints}~\label{sec:timewindow}
+The trace is typically long and the constraint solver cannot scale to the whole trace. Instead, we adopt the notion of time window. 
+We divide the trace into $N$ traces of the same length, where $N$ is configurable parameter (1000 in our experiment). To support the time window, we need to store the values of the shared variables and local variables at the end of a window and encode such values as the inputs of the next window. 
+
+We maintain two maps,  $sstore$ and $lstore$, for the shared variables and local variables respectively. Suppose the trace for the last window is $\tau$. The following code illustrates how we maintain the $sstore$, i.e., storing the value written by the last write with each address. Beside, the variable $e.ins.left$ represents the left hand variable inside the instruction $e.ins$.
+
+\begin{algorithmic}[3]
+\For {$a \in \mathcal{A}$}
+ \State $\tau_a=W(a)$
+ \State $sstore.put(a,\tau_a[|\tau_a|-1].v)$ 
+\EndFor
+\end{algorithmic}
+
+%TODO define left:
+\begin{algorithmic}[3]
+\For {$e \in \tau$}
+  \If {$e.isLocalAcc()$}
+    \State $ lstore.put(e.\_def, e.v)$
+  \Else
+     \If{$e.isRead()$}      
+        \State $ lstore.put(e.\_def, e.v)$
+     \EndIf
+  \EndIf 
+\EndFor
+\end{algorithmic}
+
+
+When constructing the constraints for the next window, we specify the following constraints to encode the input values.
+
+The following formula enhances the thread interfernce constraint to include the case that the read reads from the initial values. 
+
+$$\Phi_{TI}=\Phi_{TI} \wedge  R=sstore.get(e_R.a) \wedge \bigvee_{e\in S} O(e_R)<O(e)$$.
+
+The following formula encodes the input values of local variables. 
+
+$$\Phi_{IN}=\bigvee_{l\in lstore.keys()} l=lstore.get(l)$$.
+ 
+
+{\bf Object Creation\ } Given the event in the form of $x=new Object()$, we encode the created object as a unique integer and treats the instruction as a normal integer assignment. The unique integer is the address of the object, calculated by $System.identityHashcode(x)$.
+
+
+{\bf Array access\ } For array access event $arr[i]=x$, we treat them as the field access event $arr.i=x$, where the index $i$ is treated as a field. 
+
+{\bf Shared Analysis\ } We distinguish the accesses of the shared fields and local fields. To collect the shared fields, we preprocess the trace and map each field to a set of accessing threads. If a field is written by two or more threads, it is shared. If a field is written by one thread and read by other threads, it is shared. Otherwise, it is a local field. 
+
+{\bf Optimization\ }. Before the symbolic analysis, we conduct the backward slicing by treating the racy pair as the seeds. Only those selected in the slices are preserved while the rest events are removed. 
+
