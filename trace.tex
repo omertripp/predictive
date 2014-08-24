@@ -1,0 +1,48 @@
+\section{Trace Encoding}
+
+In this section, we describe how a concrete execution trace is encoded as a symbolic trace, which enables \tool\ to 
+derive reordering constraints.
+
+\subsection{Preliminaries}
+
+Throughout this paper, we assume a standard operational semantics, which defines (i) a mapping ${\sf thr}$ between
+execution threads, each having a unique identifier $i \in \mathbb{N}$, and their respective code, as well as (ii) per-thread stack and shared heap memory. The code executed by a given thread follows the syntax in Table \ref{Ta:syntax}. In the starting state, each thread points to a parameter-free method.
+
+As is standard, we assume an interleaved semantics of concurrency. A transition is of the form
+$\sigma \stackrel{i / {\tt s}}{\longrightarrow} \sigma'$, denoting that thread $i$ took an evaluation step
+in prestate $\sigma$, wherein atomic
+statement {\tt s} was executed, which resulted in poststate $\sigma'$. We refer to a sequence of transitions from
+the starting state to either an exceptional state (e.g., due to null dereference) or a state where all the threads have 
+reduced their respective code to $\epsilon$ as a \emph{trace}.
+
+\begin{table}
+	\begin{center}
+	\begin{tabular}{rl}
+						\multicolumn{1}{l}{{\tt p} $::=$} & \\
+					    $\overline{\texttt{r m($\overline{{\tt x}}$) \{ s \}}}$ & {\bf (method)} \\
+						\multicolumn{1}{l}{{\tt s} $::=$} & \\
+						{\tt x = y}\ $|$\ {\tt x = $c$} $|$\ & {\bf (assignment)} \\
+						{\tt x = new()} $|$\ & {\bf (allocation)} \\
+						{\tt x = f($\overline{{\tt y}}$)} $|$\ & {\bf (invocation)} \\
+						{\tt z = x \{ $+$,$-$,$\times$,$/$ \} y}\ $|$\ & {\bf (aexp)} \\
+						{\tt b = x \{ $<$,$\leq$,$\equiv$,$\geq$,$>$ \} y}\ $|$\ & {\bf (comparison)} \\
+						{\tt b = bx $\wedge$ by}\ $|$\ {\tt b = bx $\vee$ by} $|$\ & {\bf (bexp)} \\
+						{\tt y = x.f} $|$\ {\tt x.f = y}\ $|$\ & {\bf (heap)} \\
+						{\tt if (b) \{ s \} $|$\ {\tt while (b) \{  s \}} $|$\ {\tt s ; s }} $|$\ & {\bf (control)} \\
+						{\tt lock(x)}\ $|$\ {\tt unlock(x)} & {\bf (sync)}
+	\end{tabular}
+	\end{center}
+	\caption{\label{Ta:syntax}Language syntax}
+\end{table}
+
+We make use of the following helper functions:
+\begin{itemize}
+	\item ${\sf proj}\ t\ i$ projects trace $t$ onto all transitions involving thread $i$.
+	\item $t[k]$ obtains the $k$th transition within trace $t$.
+	\item ${\sf pre}\ t\ \tau$ is the prefix of trace $t$ preceding transition $\tau$. For the suffix beyond $\tau$, we 
+	use ${\sf post}\ t\ \tau$. Finally, ${\sf bet}\ t\ \tau_1\ \tau_2$ returns the transitions delimited by $\tau_1$ and $\tau_2$.
+\end{itemize}
+
+\subsection{Basic Encoding}
+
+\subsection{Advanced Encoding}
