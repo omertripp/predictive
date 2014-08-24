@@ -1,5 +1,9 @@
 \section{Trace Encoding}
 
+% % 
+% TODO: Explain the format of the raw trace in impl.tex.
+% %
+
 In this section, we describe how a concrete execution trace is encoded as a symbolic trace, which enables \tool\ to 
 derive reordering constraints.
 
@@ -44,6 +48,8 @@ We make use of the following helper functions:
 \begin{itemize}
 	\item ${\sf proj}\ t\ i$ projects trace $t$ onto all transitions involving thread $i$.
 	\item $t[k]$ obtains the $k$th transition within trace $t$.
+	\item ${\sf index}\ t\ \tau$ retrieves the index, or offset, of transition $\tau$ within trace $t$. When simply writing
+	 ${\sf index}\ \tau$ (while omitting the trace parameter) we refer to the index of $\tau$ within the original trace. 
 	\item ${\sf pre}\ t\ \tau$ is the prefix of trace $t$ preceding transition $\tau$. For the suffix beyond $\tau$, we 
 	use ${\sf post}\ t\ \tau$. Finally, ${\sf bet}\ t\ \tau_1\ \tau_2$ returns the transitions delimited by $\tau_1$ and $\tau_2$.
 \end{itemize}
@@ -81,10 +87,10 @@ In this way, the trace is flattened. Method invocations are substituted with qua
 
 \paragraph{Shared Heap Accesses} The final aspect of our encoding process is representation of shared heap accesses. As illustrated in Section \ref{Se:techoverview}, this is done via designated symbols:
 \begin{itemize}
-	\item $W^{k}_{\tt v}$ denotes write access to variable ${\tt v}$ at offset $k$ (where $k$ is a qualified offset to account  for the interprocedural setting).
-	\item Analogously, $R^{k}_{\tt v}$ denotes that ${\tt v}$ is read at offset $k$.
+	\item $W^{k}_{\tt v}$ denotes write access to variable ${\tt v}$ at trace index $k$ (where ${\tt v}$ is assumed to be a qualified identifier to account for the interprocedural setting).
+	\item Analogously, $R^{k}_{\tt v}$ denotes that ${\tt v}$ is read at index $k$.
 \end{itemize}
 
-The main motivation to encode shared heap accesses using special symbols is to simplify downstream processing, and in particular, the definition of candidate races. We could encode the question of shared versus local as additional constraints on variable accesses by different threads, but that would be more complicated and less efficient.
+The main motivation to encode shared heap accesses using special symbols is to simplify downstream processing, and in particular, the definition of candidate races. We could encode the question of shared versus local accesses as additional constraints (requiring that a variable be accessed by more than one thread), but that would be more complicated and less efficient.
 
 
