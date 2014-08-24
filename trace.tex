@@ -6,7 +6,11 @@ derive reordering constraints.
 \subsection{Preliminaries}
 
 Throughout this paper, we assume a standard operational semantics, which defines (i) a mapping ${\sf thr}$ between
-execution threads, each having a unique identifier $i \in \mathbb{N}$, and their respective code, as well as (ii) per-thread stack and shared heap memory. The code executed by a given thread follows the syntax in Table \ref{Ta:syntax}. In the starting state, each thread points to a parameter-free method.
+execution threads, each having a unique identifier $i \in \mathbb{N}$, and their respective code, as well as (ii) per-thread stack and shared heap memory. 
+
+The code executed by a given thread follows the syntax in Table \ref{Ta:syntax}. The text of a program is a sequence of zero or more method declarations, as given in the definition of symbol {\tt p}. Methods accept zero or more arguments $\overline{{\tt x}}$, have a body ${\tt s}$, and may have a return value (which we leave implicit). For simplicity, we avoid from static typing as well as virtual methods. The body of a method consists of the core grammar for symbol {\tt s}. We avoid from specifying syntax checking rules, as the grammar is fully standard.
+
+For simplicity, we assume that in the starting state each thread points to a parameter-free method. In this way, we can simply assume an empty starting state (i.e., an empty heap), and eliminate complexities such as user-provided inputs and initialization of arguments with default values. These extensions are of course possible, and in practice we handle these cases, but reflecting them in the formalism would result in needless complications.
 
 As is standard, we assume an interleaved semantics of concurrency. A \emph{transition}, or \emph{event}, is of the form
 $\sigma \stackrel{i / {\tt s}}{\longrightarrow} \sigma'$, denoting that thread $i$ took an evaluation step
@@ -19,11 +23,12 @@ reduced their respective code to $\epsilon$ as a \emph{trace}.
 	\begin{center}
 	\begin{tabular}{rl}
 						\multicolumn{1}{l}{{\tt p} $::=$} & \\
-					    $\overline{\texttt{r m($\overline{{\tt x}}$) \{ s \}}}$ & {\bf (method)} \\
+					    $\overline{\texttt{m($\overline{{\tt x}}$) \{ s \}}}$ & {\bf (method)} \\
 						\multicolumn{1}{l}{{\tt s} $::=$} & \\
 						{\tt x = y}\ $|$\ {\tt x = $c$} $|$\ & {\bf (assignment)} \\
 						{\tt x = new()} $|$\ & {\bf (allocation)} \\
 						{\tt x = f($\overline{{\tt y}}$)} $|$\ & {\bf (invocation)} \\
+						{\tt return x} $|$\ & {\bf (return)} \\
 						{\tt z = x \{ $+$,$-$,$\times$,$/$ \} y}\ $|$\ & {\bf (aexp)} \\
 						{\tt b = x \{ $<$,$\leq$,$\equiv$,$\geq$,$>$ \} y}\ $|$\ & {\bf (comparison)} \\
 						{\tt b = bx $\wedge$ by}\ $|$\ {\tt b = bx $\vee$ by} $|$\ & {\bf (bexp)} \\
@@ -43,12 +48,12 @@ We make use of the following helper functions:
 	use ${\sf post}\ t\ \tau$. Finally, ${\sf bet}\ t\ \tau_1\ \tau_2$ returns the transitions delimited by $\tau_1$ and $\tau_2$.
 \end{itemize}
 
-\subsection{Basic Encoding}
+\subsection{Basic Encoding: Local Accesses}
 
 We describe how \tool\ encodes a trace into symbolic form in two steps. We first start with ``local'' intraprocedural events --- i.e., 
 transitions that manipulate memory accessed by at most a single thread during an invocation-free run --- and then extend our encoding scheme to the entire set of possible events.
 
-The fundamental encoding transformation is to induce Static Single Assignment (SSA) form on the raw trace, such that
+\paragraph{SSA Form} The fundamental encoding transformation is to induce Static Single Assignment (SSA) form on the raw trace, such that
 a variable is defined exactly once. In this way, def/use chains become explicit, and encoding of trace events as constraints is simplified. As an illustration, trace
 \begin{quote}
 	{\tt 1: x=1; 2: x<3; 3: x=3;} \\
@@ -63,9 +68,23 @@ becomes
 \end{quote}
 (For readability, we version variables according to the line number of their definition.)
 
-Beyond the default SSA rewriting algorithm, we apply a specialized transformation to handle local heap accesses.\footnote{
-	Note that while in general determining whether a given heap access is local is an undecidable problem, in the context
-	of a concrete execution trace this determination is straightforward.
-} In the baseline SSA form, def/use chains over heap accesses are ignored. To ensure feasibility, we must account for such accesses. Hence, we replace accesses to field {\tt f} of local object $o$ with a fresh local variable {\tt l$_{o{\tt .f}}$}, where $o{\tt .f}$ denotes the memory location itself and not its value. This is done prior to the standard SSA transformation, and under the assumption that in the predicted run, the base object $o$ remains the same.
+\paragraph{Local Heap Accesses} Beyond the default SSA rewriting algorithm, we apply a specialized transformation to handle local heap accesses. While in general determining whether a given heap access is local is an undecidable problem, in the context
+of a concrete execution trace this determination is straightforward. We can thus improve upon the baseline SSA form, where def/use chains over heap accesses are ignored. Indeed, to ensure feasibility, we must account for such accesses. Hence, we replace accesses to field {\tt f} of local object $o$ with a fresh local variable {\tt l$_{o{\tt .f}}$}, where $o{\tt .f}$ denotes the memory location itself and not its value. This is done prior to the standard SSA transformation, and under the assumption that in the predicted run, the base object $o$ remains the same.
 
-\subsection{Advanced Encoding}
+\subsection{Full Encoding: Method Calls and Shared Accesses}
+
+To complete the encoding algorithm, we next explain how shared heap accesses and method calls are dealt with. Similarly to the case of local heap accesses, we take advantage of the fact that the full execution trace is available for analysis to detect shared accesses (the dual of local accesses) as well as call-site resolutions (which is more relevant in practice, where we support virtual method calls).
+
+\paragraph{Method Invocations} To account for method invocations, we induce additional context on variable accesses. Instead of recording only the version of a variable, we also represent as part of the variable's identifier its enclosing method and its invocation counter. Thus, symbol ${\tt m}^2 \colon {\tt v}^3$ is interpreted as the definition of variable ${\tt v}$ at offset 3 within method ${\tt m}$ during its second invocation. 
+
+In this way, the trace is flattened. Method invocations are substituted with qualified variable names, and the rest of the encoding steps, described above, remain unchanged. Because the trace is finite and fully resolved, challenges such as looping, recursion and mutual recursion are all obviated.
+
+\paragraph{Shared Heap Accesses} The final aspect of our encoding process is representation of shared heap accesses. As illustrated in Section \ref{Se:techoverview}, this is done via designated symbols:
+\begin{itemize}
+	\item $W^{k}_{\tt v}$ denotes write access to variable ${\tt v}$ at offset $k$ (where $k$ is a qualified offset to account  for the interprocedural setting).
+	\item Analogously, $R^{k}_{\tt v}$ denotes that ${\tt v}$ is read at offset $k$.
+\end{itemize}
+
+The main motivation to encode shared heap accesses using special symbols is to simplify downstream processing, and in particular, the definition of candidate races. We could encode the question of shared versus local as additional constraints on variable accesses by different threads, but that would be more complicated and less efficient.
+
+
