@@ -51,16 +51,21 @@ transitions that manipulate memory accessed by at most a single thread during an
 The fundamental encoding transformation is to induce Static Single Assignment (SSA) form on the raw trace, such that
 a variable is defined exactly once. In this way, def/use chains become explicit, and encoding of trace events as constraints is simplified. As an illustration, trace
 \begin{quote}
-	{\tt x=1; x<3; x=3; y=1; z=x+y}
+	{\tt 1: x=1; 2: x<3; 3: x=3;} \\
+	{\tt 4: y=1;} \\
+	{\tt 5: z=x+y}
 \end{quote}
 becomes
 \begin{quote}
-	{\tt x$^0$=1; x$^0$<3; x$^1$=3; y$^0$=1; z$^0$=x$^1$+y$^0$}
+	{\tt 1: x$^1$=1; 2: x$^1$<3; 3: x$^3$=3;} \\
+	{\tt 4: y$^4$=1;} \\
+	{\tt 5: z$^5$=x$^3$+y$^4$}
 \end{quote}
+(For readability, we version variables according to the line number of their definition.)
 
 Beyond the default SSA rewriting algorithm, we apply a specialized transformation to handle local heap accesses.\footnote{
 	Note that while in general determining whether a given heap access is local is an undecidable problem, in the context
 	of a concrete execution trace this determination is straightforward.
-} We replace accesses to field {\tt f} of local object {\tt x} with a fresh local variable {\tt l$_{\tt x.f}$}. This is done prior to the standard SSA transformation, and under the assumption that the heap object pointed-to by {\tt x} will remain the same in the predicted trace.
+} In the baseline SSA form, def/use chains over heap accesses are ignored. To ensure feasibility, we must account for such accesses. Hence, we replace accesses to field {\tt f} of local object $o$ with a fresh local variable {\tt l$_{o{\tt .f}}$}, where $o{\tt .f}$ denotes the memory location itself and not its value. This is done prior to the standard SSA transformation, and under the assumption that in the predicted run, the base object $o$ remains the same.
 
 \subsection{Advanced Encoding}
