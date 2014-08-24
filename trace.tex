@@ -8,7 +8,7 @@ derive reordering constraints.
 Throughout this paper, we assume a standard operational semantics, which defines (i) a mapping ${\sf thr}$ between
 execution threads, each having a unique identifier $i \in \mathbb{N}$, and their respective code, as well as (ii) per-thread stack and shared heap memory. The code executed by a given thread follows the syntax in Table \ref{Ta:syntax}. In the starting state, each thread points to a parameter-free method.
 
-As is standard, we assume an interleaved semantics of concurrency. A transition is of the form
+As is standard, we assume an interleaved semantics of concurrency. A \emph{transition}, or \emph{event}, is of the form
 $\sigma \stackrel{i / {\tt s}}{\longrightarrow} \sigma'$, denoting that thread $i$ took an evaluation step
 in prestate $\sigma$, wherein atomic
 statement {\tt s} was executed, which resulted in poststate $\sigma'$. We refer to a sequence of transitions from
@@ -44,5 +44,23 @@ We make use of the following helper functions:
 \end{itemize}
 
 \subsection{Basic Encoding}
+
+We describe how \tool\ encodes a trace into symbolic form in two steps. We first start with ``local'' intraprocedural events --- i.e., 
+transitions that manipulate memory accessed by at most a single thread during an invocation-free run --- and then extend our encoding scheme to the entire set of possible events.
+
+The fundamental encoding transformation is to induce Static Single Assignment (SSA) form on the raw trace, such that
+a variable is defined exactly once. In this way, def/use chains become explicit, and encoding of trace events as constraints is simplified. As an illustration, trace
+\begin{quote}
+	{\tt x=1; x<3; x=3; y=1; z=x+y}
+\end{quote}
+becomes
+\begin{quote}
+	{\tt x$^0$=1; x$^0$<3; x$^1$=3; y$^0$=1; z$^0$=x$^1$+y$^0$}
+\end{quote}
+
+Beyond the default SSA rewriting algorithm, we apply a specialized transformation to handle local heap accesses.\footnote{
+	Note that while in general determining whether a given heap access is local is an undecidable problem, in the context
+	of a concrete execution trace this determination is straightforward.
+} We replace accesses to field {\tt f} of local object {\tt x} with a fresh local variable {\tt l$_{\tt x.f}$}. This is done prior to the standard SSA transformation, and under the assumption that the heap object pointed-to by {\tt x} will remain the same in the predicted trace.
 
 \subsection{Advanced Encoding}
