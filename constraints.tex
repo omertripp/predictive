@@ -1,0 +1,53 @@
+\section{Constraint Derivation and Resolution}
+
+We now describe in detail the constraint encoding and solving steps.
+
+\subsection{Same Trace}
+
+We begin with the basic setting, which enforces strict reordering of the events along the input trace without diverging into new execution paths. We relax this requirement later, such that different branches can be followed as long as feasibility is retained.
+
+\paragraph{Intra-thread Order}
+
+The first set of constraints reflects control flow within the individual threads, which must remain unchanged under the reordering transformation. Given input trace $t$, this is expressed as the following formula:
+$$
+\begin{array}{rl}
+	\forall \tau,\tau' \in t. & {\sf thread}\ \tau \equiv {\sf thread}\ \tau'. \\
+										& {\sf index}\ \tau < {\sf index}\ \tau' \Rightarrow O_{\tau} < O_{\tau'}
+\end{array}
+$$ 
+The logical variables $O_x$ express ordering constraints. The requirement, as stated above, is that these variables
+reflect the same order as the projection of ${\sf index}$ onto individual threads.
+
+\paragraph{Race Condition}
+
+Given pair $\tau$ and $\tau'$ of events that both access a common memory location $\ell$, we demand that
+$$
+\begin{array}{rl}
+					& {\sf thread}\ \tau \neq {\sf thread}\ \tau' \\
+\bigwedge 	& ({\sf writes}\ \tau\ \ell \vee \tau'\ {\tt s}'\ \ell) \\
+\bigwedge   & O_{\tau} = O_{\tau'}
+\end{array}
+$$
+That is, (i) events $\tau$ and $\tau'$ are executed by different threads, (ii) at least one of the events performs write access to $\ell$, and (iii) the events occur at the simultanesouly. This is a direct logical encoding of the definition of a race condition.
+
+\paragraph{Path Constraints}
+
+The requirement with respect to branching is that the prefix of the original trace $t$ up to the pair $\tau$ and $\tau'$ of candidate racing events remains identical in the predicted trace $t'$. More accurately, under the assumption that ${\sf index}\ \tau < {\sf index}\ \tau'$, 
+we require that 
+$$
+	\bigwedge_{\tau'' \in t \cap {\bf bexp}.\
+		\tau'' \in {\sf pre}\ \tau'} \lsyn {\sf stmt}\ \tau'' \rsyn\ t \equiv \lsyn {\sf stmt}\ \tau'' \rsyn\ t'
+$$ 
+where ${\sf stmt}$ is a helper function that obtains the code statement incident in a given transition. That is, all branching transitions up to $\tau'$ (which occurs after $\tau$) preserve their boolean interpretation under $t'$. This ensures that there are no divergences from the path containing the racing events, though beyond that path any feasible continuation is permitted. Importantly, contrary to \cite{JEFF-PLDI14}, we do not pose the requirement that the values flowing into branching statements remain the same, but suffice with the relaxed requirement that the evaluation of branching expressions is invariant under the input and predicted traces.
+
+\paragraph{Variable Definitions}
+
+The final requirement for the basic setting is that left-hand variables are defined according to the same right-hand variables as before. That is, version $i$ of variable ${\tt u}$ is defined as version $j$ of variable ${\tt v}$ in input trace $t$, then the same remains true in predicted  trace $t'$. This is enforced as the formula
+$$
+	\bigwedge_{\tau'' \in t \cap {\bf asgn}.\
+		\tau'' \in {\sf pre}\ \tau'} {\sf stmt}\ \tau'' \in t' 
+$$
+where we again assume that ${\sf index}\ \tau < {\sf index}\ \tau'$. That is, the same statement occurring in $t$ is also present in $t'$ (though the transitions may differ). Since the statements of $t'$ are a permutation of the statements of $t$, we are assured that use/def flow is constrained appropriately.
+
+\subsection{Unexplored Paths}
+
