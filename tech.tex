@@ -1,198 +1,198 @@
-%\section{Basics}~\label{sec:basic}
-
-
-\section{Trace Terminology}
-Our analysis starts with a trace $\tau$,  a sequence of events, $e_0, e_1, \dots, e_n$.  
-There are  types of events in general.
-\begin{itemize}
-\item the shared access, which includes the read and write of the shared fields, e.g., $o.f$=$x$ and $x$=$o.f$.
-\item the local access, which includes only the access of the local variable, e.g., $x=y+z$ or $v.f=x$ (where $v$ is a thread-local object).
-\item the branch event, which evaluates the branch condition to true/false, e.g., $x>3$.
-\item the method call event, which includes the method call, e.g., $o.method()$.
-\item the synchronization event, which includes start/join, wait/notify, lock/unlock events, e.g., $lock(o)$.
-\end{itemize}
-
-%TODO synchronization constraints.
-
-Each event $e_i \in \Sigma$ is a tuple, $<t, id, a, v, type, ins, \_def, \_uses, \_ins>$, where $t\in \mathcal{T}$ denotes the thread generating the event, $id\in \mathcal{ID}$ denotes the unique integer assigned to the event (event id). We say $e_1 < e_2$ iff $e_1.id<e_2.id$. $a\in \mathcal{A}$ denotes the address of the object or field (if any) accessed in the event,  $v\in \mathcal{V}$ denotes the value of the definition (if any) in the event, $type$ denotes the type of the event.
-
-Specifically, the address of the object $o$ is denoted as $id(o)\in \mathcal{ID}$, which is a string value representing $o$ uniquely, the address of the static field $f$ is  $id(f)$ and the address of the instance object field $o.f$ is  $id(o).id(f)$. 
-
-
-$ins\in \mathcal{INS}$ denotes the static three-address instruction corresponding to the event.  $\_def \in \mathcal{S}$ is the symbolic representation of the variable definition  in the event (We will explain the symbolic representation in Section~\ref{sec:symtrace}). $\_uses$ are the symbolic representations of the variable uses. $\_ins$ is the symbolic form of the instruction after changing the variables into symbolic variables.
-
-
-The trace supports its standard operations as follows.
-\begin{itemize}
-\item projection, e.g., $\tau|Thread=t$ returns the events from the thread $t$,  $\tau|Address=a$ returns the event involving the address $a$, $\tau|Type=branch$ returns all branch events.  
-\item concatenation. $\tau'=\tau e$ represents the new trace by appending the event $e$ to $\tau$.
-\item length $|\tau|$. 
-\item selection. $\tau[i]$ and $\tau[j]$ denotes the $i$th and $j$th event in $\tau$. $\tau[i\dots j]$ denotes the event sequence from the $i$th event to the $j$th event. $\tau.before(e)$ and $\tau.after(e)$ are the helper function for selecting the event sequences before or after $e$. $\tau.between(e_1, e_2)$  selects the event sequence between $e_1$ and $e_2$ (inclusively). 
-\end{itemize}
-
-
-%The modeling of synchronization event is standard and explained in existing work, so we focus on the rest two types of events in this paper.
-
-In addition, we maintain auxiliary information as follows.
-\begin{itemize}
-%\item $AT: \mathcal{A} \times \mathcal{T} \rightarrow \Gamma$ is a function that returns a trace $\tau \in \gamma$ that contains only the accesses of the address $a \in \mathcal{A}$ by the thread $t\in \mathcal{T}$. 
-\item $R: \mathcal{A} \rightarrow \Gamma$ is a function that returns the read accesses of the address $a\in \mathcal{A}$. Each trace $\tau$ in $\Gamma$ is defined over the alphabet of events $\Sigma$, specifically, the trace is an empty trace $\epsilon$ or defined in this way:  $\forall 0\leq i\leq |\tau|,   \tau[i]\in \Sigma, and, \forall i\neq j, \tau[i]\neq \tau[j]$. 
-\item $W: \mathcal{A} \rightarrow \Gamma$ is a function that returns the write accesses of the address $a \in \mathcal{A}$.
-\item $Sync: \mathcal{A} \rightarrow \Gamma$ is a function that returns the synchronization events involving the address $a\in \mathcal{A}$. 
-\end{itemize}
-
-
-\section{Symbolic Trace}~\label{sec:symtrace}
-To facilitate the symbolic analysis, we need to introduce symbols to represent the the variables in each event. Symbols allow us to overcome the limitation of concrete dependences and allow us to explore more dependences symbolically. We refer to this process as the symbolicization.
-
-%shared access only, local access only
-
-
-
-
-{\bf Local Variables\  }
-Like other symbolic analysis~\cite{jeff,chao}, the symbolic trace should be in the SSA form, i.e., each variable is defined exactly once. This is because the constraint solver employed by the analysis requires each variable to hold only one value. Besides, we need to preserve the local data dependences, i.e., to guarantee each use still reads from the same definition thread-locally. 
-
-The  simple procedure shows the construction of the symbolic trace for local variables defined or used. The symbols are constructed by combining the 
-name of the variable in the static instruction $e.ins$ and the runtime event id $e.id$. Lines 6-10 handles the local variable definition.  The symbolic representation $e.\_def$ for a variable definition is the combination of the variable name and the event id, where  the unique event id guarantees the uniqueness of the symbolic representation.  In addition, we record the mapping in $table$.  
-Lines 3-5 build the symbolic representations for the variables used in the instruction, which are computed through looking up $table$ with the variable name as the key. For a local stack variable, its uses and definition involve the same variable name. However, for a local heap variable, i.e.,  a field, its uses and definition may not involve the same variable name. For example, $o.f=5$ and $y=r.f$ ($o=f$) involve the same field but involve different names. 
-To simplify the representation, we introduce a stack variable $l_{address(o.f)}$ to replace the heap variable. The replacement is conducted before the construction of the symbolic trace.
-
-An important assumption for the replacement is that the address of the heap variable will remain the same in the predicted run. We will guarantee the validity of the assumption, as explained in Section. 
-
-%The SSA form of the trace is different from the SSA form of the instruction as the SSA instruction can only distinguish definitions at different program points but cannot distinguish the definitions at different execution points that share the same program point.
-
-
-
-
-
-\begin{algorithmic}[3]
-\State $ins=e.ins$
-\For {$e: \tau$}
-  \For {$i: 0\dots ins.uses.length-1$}
- \State $e.\_uses[i] \gets table.get(ins.uses[i])$
- \EndFor
-  \If {$e.\_def\neq null$}
-    \State $ e.\_def \gets ins.def^{e.id}$
-	\State $ table.put(ins.def,  e.\_def)$
- \EndIf
-\EndFor
-\end{algorithmic}
-
-
-%TODO update the intro+moti, make sure the same style
-\begin{figure}
-\centering
-\begin{tabular}{ll}
-\multicolumn{2}{c}{{\tt {\bf x} = 0; {\bf y} = 0;}} \\
-\hline
-\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$} \\
-\hline
-{\tt 1: s=0; } & \\
-{\tt 2: for(i=1;i<3;i++)} & \\
-{\tt 3: \ \ \ s+=i;} & \\
-{\tt 4: {\bf y} = s;} & \\
-{\tt 5: {\bf x} = 1;} & \\
-{\tt 6: {\bf y} = 5;} & \\
-& {\tt 7: if ({\bf y} > 2)} \\
-& {\tt 8:~~print({\bf x}+1);} \\	
-& {\color{Gray} {\tt 9: else}} \\
-& {\color{Gray} {\tt 10:~~print({\bf x}+2);}}
-\end{tabular}
-\caption{Running Example (shared variables are in bold font). }
-\label{fig:running2}
-\end{figure}
-
-
-
-{\bf Shared Variables}   Besides, we introduce symbols to represent shared variables read or written.  For each shared variable $x$ read (or written), we introduce $R^{id}_x$ (or $W^{id}_x$) to denote it, where $id$ is the event id. We denote the read and the write with different symbols, which allow us to reason about different dependence relations among them flexibly. 
-
-
-Consider the code in Figure~\ref{fig:running2}, which resembles the example in Figure~\ref{fig:running} except that it includes a for loop at lines 1-2.
-Figure~\ref{fig:t4running2} shows the instruction $e.ins$ of each event $e$ and its symbolic instruction $e.\_ins$, which is essentially replaces the variables in $e.ins$ to the symbolic variables. 
- 
-
-
-%TODO distinguish T1 and T2 in the text. 
-\begin{figure}
-\centering
-\begin{tabular}{l|l}
-\hline
-\multicolumn{1}{c}{$Trace$} & \multicolumn{1}{c}{$Symbolic\  Trace$} \\
-\hline
-{\tt 0: {\bf x}=0} &  {\tt 0: $W^0_x$=0}    \\
-{\tt 1: {\bf y}=0} &   {\tt 1: $W^1_y$=0}   \\
-{\tt 2: s=0} &  {\tt 2: $s^2$=0}   \\
-{\tt 3: i=1} &     {\tt 3: $i^3$=1}   \\
-{\tt 4: i<3} &    {\tt 4: $i^3$<3} \\
-{\tt 5: s=s+i} & {\tt 5: $s^5$=$s^2$+$i^3$}   \\
-{\tt 6: i=2} &       {\tt 6: $i^6$=2}  \\
-{\tt 7: i<3} &      {\tt 7: $i^6$<3}  \\
-{\tt 8: s=s+i} &  {\tt 8: $s^8$=$s^5$+$i^6$}  \\
-{\tt 9: i=3} &     {\tt 9: $i^9$=3}  \\
-{\tt 10: i<3} &    {\tt 10: $i^9$<3}  \\
-{\tt 11: {\bf y} = s;} &  {\tt 11: $W^{11}_y$ = $s^8$;}  \\
-{\tt 12: {\bf x} = 1;} &    {\tt 12: $W^{12}_x$ = 1;}   \\
-{\tt 13: {\bf y} = 5;} &    {\tt 13: $W^{13}_y$ = 5;}  \\
-{\tt 14: {\bf y} > 2}  &    {\tt 14: $R^{14}_y$ > 2} \\
-{\tt 15: tmp={\bf x}+1;}  & {\tt 15: tmp=$R^{15}_x$+1;}   \\	
-{\tt 16: print(tmp);} &  {\tt 16: print(tmp);}  \\
-\end{tabular}
-\caption{Trace}
-\label{fig:t4running2}
-\end{figure}
-
-
-
-{\bf Method Calls\ } To support the method calls, we need to capture the value flow from the actual argument to the formal argument, and the flow from the return variable to the variable definition at the call site. We capture the value flow by recording additional events for each method call.
-Consider the example in Figure~\ref{fig:methcall},   we need to record events to capture the implicit assignment $y1=y$ and $x=i2$ due to the method call. 
-
-Our strategy is as follows. To capture the argument flow $y1=y$, we record two events, one capturing $ARG0=y$ and the other capturing $y1=ARG0$, where $ARG0$ is an artificial variable denoting the first argument of any method. This simple strategy helps handle the virtual method calls. 
-At the call site, we do not know which target method would be called, the first event records  information about the actual argument. Then, a target method is invoked, the second event records information about the formal argument of the resolved target method. Combined together, the two events record the argument value flow.  The recorded events also undergo the above symbolicization process for gaining the SSA form.
-
-
-
-
-%The above simple strategy however hides the complexity of the virtual method calls. At a call site of a virtual method, the static instrumentation cannot know precisely which method would be called. Therefore, we do not know what formal argument the actual argument flows to. Consider the example in Figure~\ref{fig:methcall}, suppose another implementation of the virtual method exists (in the comments).  We do not know how to instrument the code statically, $y1=y$ or $y2=y$. 
+%%\section{Basics}~\label{sec:basic}
 %
 %
-%To avoid the problem, we have to combine the runtime knowledge. 
-%Our strategy is as follows: rather than directly record direct value flow from actual argument to formal argument, we introduce an artificial variable during the static instrumentation. Then we  insert the instrumentation $record(ARG0=y;)$ at call site, and insert  $record(y1=ARG0)$ at the entry of the method $func$ declared in the first class, and insert $record(y2=ARG0);$ at the entry of the method $func$ declared in the second class. At runtime, depending on which $func$ method is invoked, we record either the event sequence $ARG0=y; y1=ARG0$ or the sequence $ARG0=y; y2=ARG0$, which precisely captures the value flow. We model the return value flow similarly. 
+%\section{Trace Terminology}
+%Our analysis starts with a trace $\tau$,  a sequence of events, $e_0, e_1, \dots, e_n$.  
+%There are  types of events in general.
+%\begin{itemize}
+%\item the shared access, which includes the read and write of the shared fields, e.g., $o.f$=$x$ and $x$=$o.f$.
+%\item the local access, which includes only the access of the local variable, e.g., $x=y+z$ or $v.f=x$ (where $v$ is a thread-local object).
+%\item the branch event, which evaluates the branch condition to true/false, e.g., $x>3$.
+%\item the method call event, which includes the method call, e.g., $o.method()$.
+%\item the synchronization event, which includes start/join, wait/notify, lock/unlock events, e.g., $lock(o)$.
+%\end{itemize}
 %
-%Note that although different methods use the same names for the artificial variable,  they are translated to different variables after we get the SSA form of symbolic trace. 
-
- 
-
-\begin{figure}
-\centering
-\begin{tabular}{ll}
-{\tt  x=o.func(y) } &  \\ 
- {\tt  func(y1)\{ // class O1} &  \\
- {\tt  \ \      i=y1; } & \\
- {\tt  \ \      i2=2*i; } &  \\
- {\tt  \  \      return i2;} & \\ 
- {\tt           \}} & \\ 
-  {\tt //  func(y2)\{ // class O2} &  \\
-   {\tt //    ...     } & \\ 
-  
-  
-% {\tt  // \ \      j=y2; } & \\
-% {\tt  // \ \      j2=3*j; } &  \\
-% {\tt  // \  \      return j;} & \\ 
-% {\tt  //         \}} & \\ 
-\end{tabular}
-\caption{Method Calls}
-\label{fig:methcall}
-\end{figure}
-
-
-
-
-
-
-Until now, we get the trace with the symbolic variables. The following section uses these symbolic representations to compute races. 
-Hereafter, we always refer to the symbolic form, such as symbolic variable or symbolic instruction, unless otherwise specified. 
-%Unless otherwise specified, we refer to the symbolic variables 
+%%TODO synchronization constraints.
+%
+%Each event $e_i \in \Sigma$ is a tuple, $<t, id, a, v, type, ins, \_def, \_uses, \_ins>$, where $t\in \mathcal{T}$ denotes the thread generating the event, $id\in \mathcal{ID}$ denotes the unique integer assigned to the event (event id). We say $e_1 < e_2$ iff $e_1.id<e_2.id$. $a\in \mathcal{A}$ denotes the address of the object or field (if any) accessed in the event,  $v\in \mathcal{V}$ denotes the value of the definition (if any) in the event, $type$ denotes the type of the event.
+%
+%Specifically, the address of the object $o$ is denoted as $id(o)\in \mathcal{ID}$, which is a string value representing $o$ uniquely, the address of the static field $f$ is  $id(f)$ and the address of the instance object field $o.f$ is  $id(o).id(f)$. 
+%
+%
+%$ins\in \mathcal{INS}$ denotes the static three-address instruction corresponding to the event.  $\_def \in \mathcal{S}$ is the symbolic representation of the variable definition  in the event (We will explain the symbolic representation in Section~\ref{sec:symtrace}). $\_uses$ are the symbolic representations of the variable uses. $\_ins$ is the symbolic form of the instruction after changing the variables into symbolic variables.
+%
+%
+%The trace supports its standard operations as follows.
+%\begin{itemize}
+%\item projection, e.g., $\tau|Thread=t$ returns the events from the thread $t$,  $\tau|Address=a$ returns the event involving the address $a$, $\tau|Type=branch$ returns all branch events.  
+%\item concatenation. $\tau'=\tau e$ represents the new trace by appending the event $e$ to $\tau$.
+%\item length $|\tau|$. 
+%\item selection. $\tau[i]$ and $\tau[j]$ denotes the $i$th and $j$th event in $\tau$. $\tau[i\dots j]$ denotes the event sequence from the $i$th event to the $j$th event. $\tau.before(e)$ and $\tau.after(e)$ are the helper function for selecting the event sequences before or after $e$. $\tau.between(e_1, e_2)$  selects the event sequence between $e_1$ and $e_2$ (inclusively). 
+%\end{itemize}
+%
+%
+%%The modeling of synchronization event is standard and explained in existing work, so we focus on the rest two types of events in this paper.
+%
+%In addition, we maintain auxiliary information as follows.
+%\begin{itemize}
+%%\item $AT: \mathcal{A} \times \mathcal{T} \rightarrow \Gamma$ is a function that returns a trace $\tau \in \gamma$ that contains only the accesses of the address $a \in \mathcal{A}$ by the thread $t\in \mathcal{T}$. 
+%\item $R: \mathcal{A} \rightarrow \Gamma$ is a function that returns the read accesses of the address $a\in \mathcal{A}$. Each trace $\tau$ in $\Gamma$ is defined over the alphabet of events $\Sigma$, specifically, the trace is an empty trace $\epsilon$ or defined in this way:  $\forall 0\leq i\leq |\tau|,   \tau[i]\in \Sigma, and, \forall i\neq j, \tau[i]\neq \tau[j]$. 
+%\item $W: \mathcal{A} \rightarrow \Gamma$ is a function that returns the write accesses of the address $a \in \mathcal{A}$.
+%\item $Sync: \mathcal{A} \rightarrow \Gamma$ is a function that returns the synchronization events involving the address $a\in \mathcal{A}$. 
+%\end{itemize}
+%
+%
+%\section{Symbolic Trace}~\label{sec:symtrace}
+%To facilitate the symbolic analysis, we need to introduce symbols to represent the the variables in each event. Symbols allow us to overcome the limitation of concrete dependences and allow us to explore more dependences symbolically. We refer to this process as the symbolicization.
+%
+%%shared access only, local access only
+%
+%
+%
+%
+%{\bf Local Variables\  }
+%Like other symbolic analysis~\cite{jeff,chao}, the symbolic trace should be in the SSA form, i.e., each variable is defined exactly once. This is because the constraint solver employed by the analysis requires each variable to hold only one value. Besides, we need to preserve the local data dependences, i.e., to guarantee each use still reads from the same definition thread-locally. 
+%
+%The  simple procedure shows the construction of the symbolic trace for local variables defined or used. The symbols are constructed by combining the 
+%name of the variable in the static instruction $e.ins$ and the runtime event id $e.id$. Lines 6-10 handles the local variable definition.  The symbolic representation $e.\_def$ for a variable definition is the combination of the variable name and the event id, where  the unique event id guarantees the uniqueness of the symbolic representation.  In addition, we record the mapping in $table$.  
+%Lines 3-5 build the symbolic representations for the variables used in the instruction, which are computed through looking up $table$ with the variable name as the key. For a local stack variable, its uses and definition involve the same variable name. However, for a local heap variable, i.e.,  a field, its uses and definition may not involve the same variable name. For example, $o.f=5$ and $y=r.f$ ($o=f$) involve the same field but involve different names. 
+%To simplify the representation, we introduce a stack variable $l_{address(o.f)}$ to replace the heap variable. The replacement is conducted before the construction of the symbolic trace.
+%
+%An important assumption for the replacement is that the address of the heap variable will remain the same in the predicted run. We will guarantee the validity of the assumption, as explained in Section. 
+%
+%%The SSA form of the trace is different from the SSA form of the instruction as the SSA instruction can only distinguish definitions at different program points but cannot distinguish the definitions at different execution points that share the same program point.
+%
+%
+%
+%
+%
+%\begin{algorithmic}[3]
+%\State $ins=e.ins$
+%\For {$e: \tau$}
+%  \For {$i: 0\dots ins.uses.length-1$}
+% \State $e.\_uses[i] \gets table.get(ins.uses[i])$
+% \EndFor
+%  \If {$e.\_def\neq null$}
+%    \State $ e.\_def \gets ins.def^{e.id}$
+%	\State $ table.put(ins.def,  e.\_def)$
+% \EndIf
+%\EndFor
+%\end{algorithmic}
+%
+%
+%%TODO update the intro+moti, make sure the same style
+%\begin{figure}
+%\centering
+%\begin{tabular}{ll}
+%\multicolumn{2}{c}{{\tt {\bf x} = 0; {\bf y} = 0;}} \\
+%\hline
+%\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$} \\
+%\hline
+%{\tt 1: s=0; } & \\
+%{\tt 2: for(i=1;i<3;i++)} & \\
+%{\tt 3: \ \ \ s+=i;} & \\
+%{\tt 4: {\bf y} = s;} & \\
+%{\tt 5: {\bf x} = 1;} & \\
+%{\tt 6: {\bf y} = 5;} & \\
+%& {\tt 7: if ({\bf y} > 2)} \\
+%& {\tt 8:~~print({\bf x}+1);} \\	
+%& {\color{Gray} {\tt 9: else}} \\
+%& {\color{Gray} {\tt 10:~~print({\bf x}+2);}}
+%\end{tabular}
+%\caption{Running Example (shared variables are in bold font). }
+%\label{fig:running2}
+%\end{figure}
+%
+%
+%
+%{\bf Shared Variables}   Besides, we introduce symbols to represent shared variables read or written.  For each shared variable $x$ read (or written), we introduce $R^{id}_x$ (or $W^{id}_x$) to denote it, where $id$ is the event id. We denote the read and the write with different symbols, which allow us to reason about different dependence relations among them flexibly. 
+%
+%
+%Consider the code in Figure~\ref{fig:running2}, which resembles the example in Figure~\ref{fig:running} except that it includes a for loop at lines 1-2.
+%Figure~\ref{fig:t4running2} shows the instruction $e.ins$ of each event $e$ and its symbolic instruction $e.\_ins$, which is essentially replaces the variables in $e.ins$ to the symbolic variables. 
+% 
+%
+%
+%%TODO distinguish T1 and T2 in the text. 
+%\begin{figure}
+%\centering
+%\begin{tabular}{l|l}
+%\hline
+%\multicolumn{1}{c}{$Trace$} & \multicolumn{1}{c}{$Symbolic\  Trace$} \\
+%\hline
+%{\tt 0: {\bf x}=0} &  {\tt 0: $W^0_x$=0}    \\
+%{\tt 1: {\bf y}=0} &   {\tt 1: $W^1_y$=0}   \\
+%{\tt 2: s=0} &  {\tt 2: $s^2$=0}   \\
+%{\tt 3: i=1} &     {\tt 3: $i^3$=1}   \\
+%{\tt 4: i<3} &    {\tt 4: $i^3$<3} \\
+%{\tt 5: s=s+i} & {\tt 5: $s^5$=$s^2$+$i^3$}   \\
+%{\tt 6: i=2} &       {\tt 6: $i^6$=2}  \\
+%{\tt 7: i<3} &      {\tt 7: $i^6$<3}  \\
+%{\tt 8: s=s+i} &  {\tt 8: $s^8$=$s^5$+$i^6$}  \\
+%{\tt 9: i=3} &     {\tt 9: $i^9$=3}  \\
+%{\tt 10: i<3} &    {\tt 10: $i^9$<3}  \\
+%{\tt 11: {\bf y} = s;} &  {\tt 11: $W^{11}_y$ = $s^8$;}  \\
+%{\tt 12: {\bf x} = 1;} &    {\tt 12: $W^{12}_x$ = 1;}   \\
+%{\tt 13: {\bf y} = 5;} &    {\tt 13: $W^{13}_y$ = 5;}  \\
+%{\tt 14: {\bf y} > 2}  &    {\tt 14: $R^{14}_y$ > 2} \\
+%{\tt 15: tmp={\bf x}+1;}  & {\tt 15: tmp=$R^{15}_x$+1;}   \\	
+%{\tt 16: print(tmp);} &  {\tt 16: print(tmp);}  \\
+%\end{tabular}
+%\caption{Trace}
+%\label{fig:t4running2}
+%\end{figure}
+%
+%
+%
+%{\bf Method Calls\ } To support the method calls, we need to capture the value flow from the actual argument to the formal argument, and the flow from the return variable to the variable definition at the call site. We capture the value flow by recording additional events for each method call.
+%Consider the example in Figure~\ref{fig:methcall},   we need to record events to capture the implicit assignment $y1=y$ and $x=i2$ due to the method call. 
+%
+%Our strategy is as follows. To capture the argument flow $y1=y$, we record two events, one capturing $ARG0=y$ and the other capturing $y1=ARG0$, where $ARG0$ is an artificial variable denoting the first argument of any method. This simple strategy helps handle the virtual method calls. 
+%At the call site, we do not know which target method would be called, the first event records  information about the actual argument. Then, a target method is invoked, the second event records information about the formal argument of the resolved target method. Combined together, the two events record the argument value flow.  The recorded events also undergo the above symbolicization process for gaining the SSA form.
+%
+%
+%
+%
+%%The above simple strategy however hides the complexity of the virtual method calls. At a call site of a virtual method, the static instrumentation cannot know precisely which method would be called. Therefore, we do not know what formal argument the actual argument flows to. Consider the example in Figure~\ref{fig:methcall}, suppose another implementation of the virtual method exists (in the comments).  We do not know how to instrument the code statically, $y1=y$ or $y2=y$. 
+%%
+%%
+%%To avoid the problem, we have to combine the runtime knowledge. 
+%%Our strategy is as follows: rather than directly record direct value flow from actual argument to formal argument, we introduce an artificial variable during the static instrumentation. Then we  insert the instrumentation $record(ARG0=y;)$ at call site, and insert  $record(y1=ARG0)$ at the entry of the method $func$ declared in the first class, and insert $record(y2=ARG0);$ at the entry of the method $func$ declared in the second class. At runtime, depending on which $func$ method is invoked, we record either the event sequence $ARG0=y; y1=ARG0$ or the sequence $ARG0=y; y2=ARG0$, which precisely captures the value flow. We model the return value flow similarly. 
+%%
+%%Note that although different methods use the same names for the artificial variable,  they are translated to different variables after we get the SSA form of symbolic trace. 
+%
+% 
+%
+%\begin{figure}
+%\centering
+%\begin{tabular}{ll}
+%{\tt  x=o.func(y) } &  \\ 
+% {\tt  func(y1)\{ // class O1} &  \\
+% {\tt  \ \      i=y1; } & \\
+% {\tt  \ \      i2=2*i; } &  \\
+% {\tt  \  \      return i2;} & \\ 
+% {\tt           \}} & \\ 
+%  {\tt //  func(y2)\{ // class O2} &  \\
+%   {\tt //    ...     } & \\ 
+%  
+%  
+%% {\tt  // \ \      j=y2; } & \\
+%% {\tt  // \ \      j2=3*j; } &  \\
+%% {\tt  // \  \      return j;} & \\ 
+%% {\tt  //         \}} & \\ 
+%\end{tabular}
+%\caption{Method Calls}
+%\label{fig:methcall}
+%\end{figure}
+%
+%
+%
+%
+%
+%
+%Until now, we get the trace with the symbolic variables. The following section uses these symbolic representations to compute races. 
+%Hereafter, we always refer to the symbolic form, such as symbolic variable or symbolic instruction, unless otherwise specified. 
+%%Unless otherwise specified, we refer to the symbolic variables 
 
 
 \section{Constraints}~\label{sec:constraints}

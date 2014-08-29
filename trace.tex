@@ -27,17 +27,17 @@ reduced their respective code to $\epsilon$ as a \emph{trace}.
 	\begin{center}
 	\begin{tabular}{rl}
 						\multicolumn{1}{l}{{\tt p} $::=$} & \\
-					    $\overline{\texttt{m($\overline{{\tt x}}$) \{ s \}}}$ & {\bf (method)} \\
+					    $\overline{\texttt{m($\overline{{\tt x}}$) \{ s \}}}$ & {\bf (mdcl)} \\
 						\multicolumn{1}{l}{{\tt s} $::=$} & \\
-						{\tt x = y}\ $|$\ {\tt x = $c$} $|$\ & {\bf (assignment)} \\
-						{\tt x = new()} $|$\ & {\bf (allocation)} \\
-						{\tt x = f($\overline{{\tt y}}$)} $|$\ & {\bf (invocation)} \\
+						{\tt x = y}\ $|$\ {\tt x = $c$} $|$\ & {\bf (asgn)} \\
+						{\tt x = new()} $|$\ & {\bf (alloc)} \\
+						{\tt x = f($\overline{{\tt y}}$)} $|$\ & {\bf (call)} \\
 						{\tt return x} $|$\ & {\bf (return)} \\
 						{\tt z = x \{ $+$,$-$,$\times$,$/$ \} y}\ $|$\ & {\bf (aexp)} \\
-						{\tt b = x \{ $<$,$\leq$,$\equiv$,$\geq$,$>$ \} y}\ $|$\ & {\bf (comparison)} \\
+						{\tt b = x \{ $<$,$\leq$,$\equiv$,$\geq$,$>$ \} y}\ $|$\ & \\
 						{\tt b = bx $\wedge$ by}\ $|$\ {\tt b = bx $\vee$ by} $|$\ & {\bf (bexp)} \\
 						{\tt y = x.f} $|$\ {\tt x.f = y}\ $|$\ & {\bf (heap)} \\
-						{\tt if (b) \{ s \} $|$\ {\tt while (b) \{  s \}} $|$\ {\tt s ; s }} $|$\ & {\bf (control)} \\
+						{\tt if (b) \{ s \} $|$\ {\tt while (b) \{  s \}} $|$\ {\tt s ; s }} $|$\ & {\bf (ctrl)} \\
 						{\tt lock(x)}\ $|$\ {\tt unlock(x)} & {\bf (sync)}
 	\end{tabular}
 	\end{center}
@@ -81,7 +81,7 @@ of a concrete execution trace this determination is straightforward. We can thus
 
 To complete the encoding algorithm, we next explain how shared heap accesses and method calls are dealt with. Similarly to the case of local heap accesses, we take advantage of the fact that the full execution trace is available for analysis to detect shared accesses (the dual of local accesses) as well as call-site resolutions (which is more relevant in practice, where we support virtual method calls).
 
-\paragraph{Method Invocations} To account for method invocations, we induce additional context on variable accesses. Instead of recording only the version of a variable, we also represent as part of the variable's identifier its enclosing method and its invocation counter. Thus, symbol ${\tt m}^2 \colon {\tt v}^3$ is interpreted as the definition of variable ${\tt v}$ at offset 3 within method ${\tt m}$ during its second invocation. 
+\paragraph{Method Invocations} To account for method invocations, we induce additional context on variable accesses. Instead of recording only the version of a variable, we also represent as part of the variable's identifier its enclosing method and its invocation counter. Thus, symbol ${\tt m}^2 \colon {\tt v}^7$ is interpreted as the definition of local variable ${\tt v}$ within the second invocation of method ${\tt m}$ that occurs at trace index 7.
 
 In this way, the trace is flattened. Method invocations are substituted with qualified variable names, and the rest of the encoding steps, described above, remain unchanged. Because the trace is finite and fully resolved, challenges such as looping, recursion and mutual recursion are all obviated.
 
