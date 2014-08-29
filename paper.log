@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  23 AUG 2014 06:23
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  29 AUG 2014 02:32
 entering extended mode
  %&-line parsing enabled.
 **paper
@@ -129,7 +129,10 @@ Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
 File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
 Package color Info: Driver file: pdftex.def on input line 130.
-)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/dvipsnam.def
+File: dvipsnam.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+))
 (/usr/share/texmf-texlive/tex/latex/algorithmicx/algpseudocode.sty
 Package: algpseudocode 
 
@@ -258,7 +261,19 @@ LaTeX Warning: Citation `XXX' on page 1 undefined on input line 37.
 
 
 ]) (./overview.tex)
-(./tech.tex [2]
+(./trace.tex [2]
+LaTeX Font Info:    Try loading font information for OMS+pcr on input line 30.
+ (/usr/share/texmf-texlive/tex/latex/psnfss/omspcr.fd
+File: omspcr.fd 
+)
+LaTeX Font Info:    Font shape `OMS/pcr/m/n' in size <8> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 30.
+
+Overfull \hbox (2.61143pt too wide) in paragraph at lines 28--43
+ [] 
+ []
+
+[3]) (./tech.tex
 Underfull \hbox (badness 10000) in paragraph at lines 17--18
 []\OT1/ptm/m/n/10 Each event $\OML/cmm/m/it/10 e[] \OMS/cmsy/m/n/10 2 \OT1/cmr/
 m/n/10 ^^F$ \OT1/ptm/m/n/10 is a tu-ple, $\OML/cmm/m/it/10 <
@@ -271,44 +286,15 @@ Underfull \hbox (badness 1590) in paragraph at lines 17--18
  []
 
 
-LaTeX Warning: Citation `jeff' on page 3 undefined on input line 54.
+LaTeX Warning: Citation `jeff' on page 4 undefined on input line 54.
 
 
-LaTeX Warning: Citation `chao' on page 3 undefined on input line 54.
+LaTeX Warning: Citation `chao' on page 4 undefined on input line 54.
 
-[3]
-
-! LaTeX Error: Undefined color `Gray'.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.99 & {\color{Gray}
-                     {\tt 9: else}} \\
-You're in trouble here.  Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-
-! LaTeX Error: Undefined color `Gray'.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.100 & {\color{Gray}
-                      {\tt 10:~~print({\bf x}+2);}}
-You're in trouble here.  Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-LaTeX Font Info:    Try loading font information for OMS+pcr on input line 170.
-
-(/usr/share/texmf-texlive/tex/latex/psnfss/omspcr.fd
-File: omspcr.fd 
-)
+[4]
 LaTeX Font Info:    Font shape `OMS/pcr/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 170.
-
+ [5]
 Overfull \hbox (25.56729pt too wide) detected at line 205
 \OMS/cmsy/m/n/10 f\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 e[]; e[]\OMS/cmsy/m/n/10 j\
 OML/cmm/m/it/10 e[]:a \OT1/cmr/m/n/10 = \OML/cmm/m/it/10 e[]:a \OMS/cmsy/m/n/10
@@ -320,9 +306,9 @@ OMS/cmsy/m/n/10 ^ \OML/cmm/m/it/10 e[] \OMS/cmsy/m/n/10 2 \OML/cmm/m/it/10 W\OT
  []
 
 
-LaTeX Warning: Citation `jeff' on page 4 undefined on input line 209.
+LaTeX Warning: Citation `jeff' on page 6 undefined on input line 209.
 
-[4]
+
 Overfull \hbox (27.68153pt too wide) detected at line 241
 \OT1/cmr/m/n/10 ^^H[] = [] \OML/cmm/m/it/10 e:[]ins
  []
@@ -339,7 +325,22 @@ it/10 O\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 e[]\OT1/cmr/m/n/10 ) \OML/cmm/m/it/10
 /it/10 < O\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 e[]\OT1/cmr/m/n/10 ))
  []
 
-[5]) (./paper.bbl [6])
+[6] [7]) (./eval.tex
+LaTeX Font Info:    Try loading font information for OT1+phv on input line 3.
+ (/usr/share/texmf-texlive/tex/latex/psnfss/ot1phv.fd
+File: ot1phv.fd 2001/06/04 scalable font definitions for OT1/phv.
+)
+
+LaTeX Warning: Citation `shanlu' on page 8 undefined on input line 5.
+
+
+
+pdfTeX warning: pdflatex (file ./cases/Visio-bbuffer.pdf): PDF inclusion: found
+ PDF version <1.5>, but at most version <1.4> allowed
+<cases/Visio-bbuffer.pdf, id=45, 337.69041pt x 192.4279pt>
+File: cases/Visio-bbuffer.pdf Graphic file (type pdf)
+
+<use cases/Visio-bbuffer.pdf> [8]) (./paper.bbl)
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -351,38 +352,41 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[7
-
-] (./paper.aux)
+[9 <./cases/Visio-bbuffer.pdf>] (./paper.aux)
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 3777 strings out of 493848
- 55430 string characters out of 1152823
- 145474 words of memory out of 3000000
- 7022 multiletter control sequences out of 15000+50000
- 40338 words of font info for 80 fonts, out of 3000000 for 9000
+ 4092 strings out of 493848
+ 60102 string characters out of 1152823
+ 151893 words of memory out of 3000000
+ 7307 multiletter control sequences out of 15000+50000
+ 53084 words of font info for 109 fonts, out of 3000000 for 9000
  717 hyphenation exceptions out of 8191
- 27i,10n,40p,829b,274s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 27i,15n,40p,944b,307s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
 ve/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-texlive/fonts/ty
 pe1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/fonts/type1/public/
 amsfonts/cm/cmmi7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/
-cmr10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr5.pfb></u
-sr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texm
-f-texlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/f
-onts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texmf-texlive/fonts/type1/p
-ublic/amsfonts/cm/cmsy7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfon
-ts/cm/cmtt10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmtt8
-.pfb></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/t
-exmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/t
-ype1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr
-8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (7 pages, 217393 bytes).
+cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></
+usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/tex
+mf-texlive/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-texlive/fo
+nts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/pub
+lic/amsfonts/cm/cmss10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfont
+s/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy5.
+pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/sh
+are/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-te
+xlive/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texmf-texlive/fonts
+/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texmf-texlive/fonts/type1/publi
+c/amsfonts/symbols/msbm10.pfb></usr/share/texmf-texlive/fonts/type1/urw/courier
+/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helvetic/uhvr8a.pfb></usr
+/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive
+/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/ti
+mes/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
+Output written on paper.pdf (9 pages, 306311 bytes).
 PDF statistics:
- 91 PDF objects out of 1000 (max. 8388607)
+ 168 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 6 words of extra memory for PDF output out of 10000 (max. 10000000)
 

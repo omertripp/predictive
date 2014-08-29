@@ -5,9 +5,10 @@ Database file #1: paper.bib
 Warning--I didn't find a database entry for "XXX"
 Warning--I didn't find a database entry for "jeff"
 Warning--I didn't find a database entry for "chao"
+Warning--I didn't find a database entry for "shanlu"
 You've used 8 entries,
             2118 wiz_defined-function locations,
-            557 strings with 5941 characters,
+            558 strings with 5947 characters,
 and the built_in function-call counts, 4215 in all, are:
 = -- 456
 > -- 189
@@ -46,4 +47,4 @@ warning$ -- 0
 while$ -- 40
 width$ -- 9
 write$ -- 114
-(There were 3 warnings)
+(There were 4 warnings)

@@ -1,8 +1,9 @@
 \documentclass[conference]{IEEEtran}
 
 \usepackage{graphicx}
-\usepackage{color}
+\usepackage[usenames,dvipsnames]{color}
 \usepackage{algpseudocode}
+\usepackage{ amssymb}
 
 \newcommand{\tool}{{\sc Recipe}}
 
@@ -134,6 +135,7 @@ The abstract goes here.
 
 \input{introduction}
 \input{overview}
+\input{trace}
 \input{tech}
 
 
