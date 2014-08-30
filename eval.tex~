@@ -1,8 +1,8 @@
 \section{Evaluation}~\label{sec:eval}
 
 {\bf Evaluation Method} We conduct our experiment with a set of large applications, e.g.,  those from the {\sf Dacapo} benchmark suite. 
-The benchmarks are shown in Table. We compare our approach with the state-of-the-art technique proposed by Huang et al. As the capability of finding races depends on the monitored run, for fair comparison, we 
- apply both techniques to the same monitored run. Specifically, we use two threads in the monitored run as two threads are sufficient to manifest most of races~\cite{shanlu}. 
+The benchmarks are shown in Table. 
+%Specifically, we use two threads in the monitored run as two threads are sufficient to manifest most of races~\cite{shanlu}. 
 
 The {\sf Dacapo} relies on the reflection functionality to execute, which imposes challenges to static analysis and transformation. We apply the tool {\sf Tamiflex}~\cite{} to overcome the problems, which resolves the reflection using the classes observed in the dynamic run. The window size is 10000.
 
@@ -11,7 +11,19 @@ Our experiments and measurements
 were all conducted on an x86 64 Thinkpad W530 worksta- 
 tion with eight 2.30GHz Intel Core i7-3610QM processors, 
 16GB of RAM and 6M caches. The workstation runs version 12.04 of the Ubuntu Linux distribution, and has the Sun 
-64-Bit 1.6.0_26 Java virtual machine (JVM) installed~\footnote{Note that Sun JDK 1.7 does not support the transformation of dacapo applications with {\sf tamiflex}.}. 
+64-Bit 1.6.0\_26 Java virtual machine (JVM) installed~\footnote{Note that Sun JDK 1.7 does not support the transformation of dacapo applications with {\sf tamiflex}.}. 
+
+
+
+\subsection{Effectiveness}
+In this section, we evaluate the effectiveness of our approach by comparing the number of races detected by it with the number of races found by other approaches. 
+In particular, we compare our approach with the maximal predictive analysis technique proposed by Huang et al., which improves over existing analysis approaches by preserving only the schedulings that affect the control flow. 
+
+ 
+ 
+
+ As the capability of finding races depends on the monitored run, for fair comparison, we 
+ apply both techniques to the same monitored run. 
 
 
 
@@ -22,17 +34,39 @@ Our approach suffers from scalability issues for two reasons. First, as we recor
   
 
 
-\begin{table}[htbp]
-\caption{haha}
-\begin{tabular}{|l|l|}
-\hline
-ad & fda \\ \hline
-\multicolumn{1}{|r|}{1} & \multicolumn{1}{r|}{2} \\ \hline
-\end{tabular}
-\label{tb:ref}
-\end{table}
+
+\subsection{Case studies}
+We manually inspect the reported races in small applications to gain better understanding about our approach. 
+
+{\bf Relaxing the Inter-thread dependence\ } Figure~\ref{fig:relax1} demonstrates the relaxation of inter-thread dependence enabled by our approach. 
+The code is from the benchmark {\sf bbuffer}, where the line number is marked. Huang et al.~\cite{} detects the race between line 291 and line 400, but fails to detect the race between line 294 and line 400. The reason is as follows. In the observation run, the execution follows the order,  lines 400, 291 and 294. For the event at line 294, its preceding branch at line 291 reads from line 400. Therefore, Huang et al.~\cite{}
+ requires the predicted run to preserve the dependence between line 291 and line 400 so that line 291 reads exactly the same value and the branch takes the same branch decision. The dependence enforces the order constraint, $400 \rightarrow 291$, which further enforces the order $400\rightarrow 291 \rightarrow 294$.    Our approach does not require the existence of such dependence. Specifically, we allow line 291 to happen before line 400 in the predicted run as long as the value read by it leads to the same branch decision, which is true in this case.  As a result, there is no order constraint between line 294 and line 400, and the two forms a race. We re-replay such race  easily using the eclipse IDE breakpoints. 
 
 
+ 
+
+\begin{figure}[htp]
+\centering
+\includegraphics[scale=0.7]{cases/Visio-bbuffer.pdf}
+\caption{Relaxation of Inter-thread dependence}\label{fig:relax1}
+\end{figure}
+
+{\bf Relaxing the Paths\ } Figure~\ref{fig:relax2} demonstrates how our approach relaxes the schedulings to account for the unexecuted paths. 
+Each thread invokes the method {\sf Sorting}, which recursively starts two children threads if there are two more available entries in the thread pool (lines 8-11), or  starts one child thread if there is only one available entry (lines 4-5).  The availability is computed through the static method {\sf available} with the constant {\tt total}, which is equal to 5. The shared variable {\tt alive} denotes the used entries.
+
+ 
+Initially there is one sorting thread. After it starts Thread 1 and Thread 2, there are three threads alive and only two more entries are available.
+Suppose in the observation run, Thread 2 consumes both thread entries and starts the children Thread 3 and Thread 4 (not shown), updating {\tt alive} to 5, then Thread 1 cannot execute the branch at lines 4-5. Huang et al.~\cite{} require the predicted run to preserve the dependence denoted by the dotted line since the dependence affects the branch condition at line 2. As a result, the predicted run follows the same branch decision and cannot reason about the code at lines 4-5. Our analysis does not have such limitation. Instead, it allows the predicted run to reason about the un-explored code. Specifically, it does not need to preserve the dependence from line 11 to line 1 and it allows line 1 (Thread 1) to read from line 9 (Thread 2). As a result, the branch condition guarding the unexplored branch is evaluated to be true, enabling the unexplored path in the constraint solver. Finally, the solver identifies the race between line 5 (Thread 1) and line 1 (Thread 3). Note that the two lines are synchronized on different locks~\footnote{We abbreviate the {\tt synchronized} keyword as {\tt sync}.
+}. 
+
+ 
+
+
+\begin{figure}[htp]
+\centering
+\includegraphics[scale=0.7]{cases/Visio-msort.pdf}
+\caption{Relaxation of Paths}\label{fig:relax2}
+\end{figure}
 
 
 \section{Validity Threat}
