@@ -106,7 +106,7 @@ Beyond relaxing flow dependencies, \tool\ is also capable of exploring code bran
 	\item apply depth-first search (DFS) to uncover all execution suffixes under the unexplored branch (which may itself contain branching statements); and
 	\item for each suffix $t^s$,
 	\begin{enumerate}
-		\item truncate the original trace at $e_b$ {\tt s} yielding $t_s$; and
+		\item truncate the original trace at $e_b$ yielding prefix $t_s$; and
 		\item concatenate $t_s$ with the negation of $e_b$ followed by $t^s$.
 	\end{enumerate}
 \end{enumerate}
