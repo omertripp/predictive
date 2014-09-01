@@ -36,7 +36,8 @@ reduced their respective code to $\epsilon$ as a \emph{trace}.
 						{\tt z = x \{ $+$,$-$,$\times$,$/$ \} y}\ $|$\ & {\bf (aexp)} \\
 						{\tt b = x \{ $<$,$\leq$,$\equiv$,$\geq$,$>$ \} y}\ $|$\ & \\
 						{\tt b = bx $\wedge$ by}\ $|$\ {\tt b = bx $\vee$ by} $|$\ & {\bf (bexp)} \\
-						{\tt y = x.f} $|$\ {\tt x.f = y}\ $|$\ & {\bf (heap)} \\
+						{\tt y = x.f} $|$\ & {\bf (heapr)} \\ 
+						{\tt x.f = y}\ $|$\ {\tt x.f = $c$}\ $|$\ & {\bf (heapw)} \\
 						{\tt if (b) \{ s \} $|$\ {\tt while (b) \{  s \}} $|$\ {\tt s ; s }} $|$\ & {\bf (ctrl)} \\
 						{\tt lock(x)}\ $|$\ {\tt unlock(x)} & {\bf (sync)}
 	\end{tabular}
