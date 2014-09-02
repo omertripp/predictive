@@ -4,6 +4,56 @@ In this section, we walk the reader through a detailed technical description of 
 %
 As input, we assume (i) a program $P$ as well as (ii) a dynamic execution trace of $P$ in Static Single Assignment (SSA) form, such that every variable is defined exactly once.
 
+\subsection{Preliminaries}
+
+Throughout this paper, we assume a standard operational semantics, which defines (i) a mapping ${\sf thr}$ between
+execution threads, each having a unique identifier $i \in \mathbb{N}$, and their respective code, as well as (ii) per-thread stack and shared heap memory. 
+
+The code executed by a given thread follows the syntax in Table \ref{Ta:syntax}. The text of a program is a sequence of zero or more method declarations, as given in the definition of symbol {\tt p}. Methods accept zero or more arguments $\overline{{\tt x}}$, have a body ${\tt s}$, and may have a return value (which we leave implicit). For simplicity, we avoid from static typing as well as virtual methods. The body of a method consists of the core grammar for symbol {\tt s}. We avoid from specifying syntax checking rules, as the grammar is fully standard.
+
+For simplicity, we assume that in the starting state each thread points to a parameter-free method. In this way, we can simply assume an empty starting state (i.e., an empty heap), and eliminate complexities such as user-provided inputs and initialization of arguments with default values. These extensions are of course possible, and in practice we handle these cases, but reflecting them in the formalism would result in needless complications.
+
+As is standard, we assume an interleaved semantics of concurrency. A \emph{transition}, or \emph{event}, is of the form
+$\sigma \stackrel{i / {\tt s}}{\longrightarrow} \sigma'$, denoting that thread $i$ took an evaluation step
+in prestate $\sigma$, wherein atomic
+statement {\tt s} was executed, which resulted in poststate $\sigma'$. We refer to a sequence of transitions from
+the starting state to either an exceptional state (e.g., due to null dereference) or a state where all the threads have 
+reduced their respective code to $\epsilon$ as a \emph{trace}.
+
+\begin{table}
+	\begin{center}
+		\begin{tabular}{rl}
+			\multicolumn{1}{l}{{\tt p} $::=$} & \\
+			$\overline{\texttt{m($\overline{{\tt x}}$) \{ s \}}}$ & {\bf (mdcl)} \\
+			\multicolumn{1}{l}{{\tt s} $::=$} & \\
+			{\tt x = y}\ $|$\ {\tt x = $c$} $|$\ & {\bf (asgn)} \\
+			{\tt x = new()} $|$\ & {\bf (alloc)} \\
+			{\tt x = f($\overline{{\tt y}}$)} $|$\ & {\bf (call)} \\
+			{\tt return x} $|$\ & {\bf (return)} \\
+			{\tt z = x \{ $+$,$-$,$\times$,$/$ \} y}\ $|$\ & {\bf (aexp)} \\
+			{\tt b = x \{ $<$,$\leq$,$\equiv$,$\geq$,$>$ \} y}\ $|$\ & \\
+			{\tt b = bx $\wedge$ by}\ $|$\ {\tt b = bx $\vee$ by} $|$\ & {\bf (bexp)} \\
+			{\tt y = x.f} $|$\ & {\bf (heapr)} \\ 
+			{\tt x.f = y}\ $|$\ {\tt x.f = $c$}\ $|$\ & {\bf (heapw)} \\
+			{\tt if (b) \{ s \} $|$\ {\tt while (b) \{  s \}} $|$\ {\tt s ; s }} $|$\ & {\bf (ctrl)} \\
+			{\tt lock(x)}\ $|$\ {\tt unlock(x)} & {\bf (sync)}
+		\end{tabular}
+	\end{center}
+	\caption{\label{Ta:syntax}Language syntax}
+\end{table}
+
+We make use of the following helper functions:
+\begin{itemize}
+	\item ${\sf proj}\ t\ i$ projects trace $t$ onto all transitions involving thread $i$.
+	\item $t[k]$ obtains the $k$th transition within trace $t$.
+	\item ${\sf index}\ t\ \tau$ retrieves the index, or offset, of transition $\tau$ within trace $t$. When simply writing
+	${\sf index}\ \tau$ (while omitting the trace parameter) we refer to the index of $\tau$ within the original trace. 
+	\item ${\sf pre}\ t\ \tau$ is the prefix of trace $t$ preceding transition $\tau$. For the suffix beyond $\tau$, we 
+	use ${\sf post}\ t\ \tau$. Finally, ${\sf bet}\ t\ \tau_1\ \tau_2$ returns the transitions delimited by $\tau_1$ and $\tau_2$.
+\end{itemize}
+
+\subsection{Constraint System}
+
 We begin with an explanation of the encoding process. The resulting formula is provided in Figure \ref{fig:encoding}. We describe the conjuncts comprising the formula one by one.
 
 \begin{figure*}

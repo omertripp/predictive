@@ -1,104 +1,6 @@
-\section{Constraint Derivation and Resolution}
+\section{Exploration of Unexecuted Branches}
 
-We now describe in detail the constraint encoding and solving steps.
-
-\subsection{Same Trace}
-
-We begin with the basic setting, which enforces conservative reordering of the events along the input trace without diverging into new dependence structures or execution paths. We relax this requirement later, such that different data-flow paths and branches can be followed as long as feasibility is retained.
-
-\paragraph{Intra-thread Order}
-
-The first set of constraints reflects control flow within the individual threads, which must remain unchanged under the reordering transformation. Given input trace $t$, this is expressed as the following formula:
-$$
-\begin{array}{rl}
-	\forall \tau,\tau' \in t. & {\sf thread}\ \tau \equiv {\sf thread}\ \tau'. \\
-										& {\sf index}\ \tau < {\sf index}\ \tau' \Rightarrow O_{\tau} < O_{\tau'}
-\end{array}
-$$ 
-The logical variables $O_x$ express ordering constraints. The requirement, as stated above, is that these variables
-reflect the same order as the projection of ${\sf index}$ onto individual threads.
-
-\paragraph{Race Condition}
-
-Given pair $\tau$ and $\tau'$ of events that both access a common memory location $\ell$, we demand that
-$$
-\begin{array}{rl}
-					& {\sf thread}\ \tau \neq {\sf thread}\ \tau' \\
-\bigwedge 	& (\ell \in {\sf writeset}\ \tau \vee \ell \in {\sf writeset}\ \tau') \\
-\bigwedge   & O_{\tau} = O_{\tau'}
-\end{array}
-$$
-That is, (i) events $\tau$ and $\tau'$ are executed by different threads, (ii) at least one of the events performs write access to $\ell$ (as judged by the ${\sf writeset}$ membership check), and (iii) the events occur simultanesouly. This is a direct logical encoding of the definition of a race condition.
-
-\paragraph{Path Constraints}
-
-The requirement with respect to branching is that the prefix of the original trace $t$ up to the pair $\tau$ and $\tau'$ of candidate racing events remains identical in the predicted trace $t'$. More accurately, under the assumption that ${\sf index}\ \tau < {\sf index}\ \tau'$, 
-we require that 
-$$
-	\bigwedge_{\tau'' \in t \cap {\bf bexp}.\
-		\tau'' \in {\sf pre}\ \tau'} \lsyn {\sf stmt}\ \tau'' \rsyn\ t \equiv \lsyn {\sf stmt}\ \tau'' \rsyn\ t'
-$$ 
-where ${\sf stmt}$ is a helper function that obtains the code statement incident in a given transition. That is, all branching transitions up to $\tau'$ (which occurs after $\tau$) preserve their boolean interpretation under $t'$. This ensures that there are no divergences from the path containing the racing events, though beyond that path any feasible continuation is permitted. Importantly, contrary to \cite{JEFF-PLDI14}, we do not pose the requirement that the values flowing into branching statements remain the same, but suffice with the relaxed requirement that the evaluation of branching expressions is invariant under the input and predicted traces.
-
-\paragraph{Variable Definitions}
-
-A final requirement for the basic setting is that left-hand variables are defined according to the same right-hand variables as before. That is, version $i$ of variable ${\tt u}$ is defined as version $j$ of variable ${\tt v}$ in input trace $t$, then the same remains true in predicted  trace $t'$. This is enforced as the formula
-$$
-	\bigwedge_{\tau'' \in t \cap {\bf asgn}.\
-		\tau'' \in {\sf pre}\ \tau'} {\sf stmt}\ \tau'' \in t' 
-$$
-where we again assume that ${\sf index}\ \tau < {\sf index}\ \tau'$. That is, the same statement occurring in $t$ is also present in $t'$ (though the transitions may differ). Since the statements of $t'$ are a permutation of the statements of $t$, we are assured that use/def flow is constrained appropriately.
-
-\subsection{Relaxations}
-
-We now move to the novel feature of \tool, which is its ability to explore execution schedules that depart from the data flow exhibited in the original trace. More precisely, \tool\ is able to relax flow dependencies in the original trace, whereby a thread reads a shared memory location written by another thread, while enforcing feasibility. This is strictly beyond the coverage potential of existing predictive analyses, which restrict trace transformations to ones where any read access to a shared memory location must correspond to the same write access as in the original trace.
-
-\paragraph{Relaxation of Flow Dependencies}
-
-To ensure feasibility under relaxation of flow dependencies, we need to secure the link between the execution schedule and the write/read flow. As an illustration from the example in Figure \ref{fig:running}, $R_{\tt y}^4={\tt y}^1 \wedge O_1 < O_4 < O_3$ specifies that in a schedule where thread $T_1$ executes line {\tt 1}, then $T_2$ executes line {\tt 4}, and then the schedule switches again to $T_1$ to execute line {\tt 3}, the read access to ${\tt y}$ at line {\tt 4} obtains the value assigned to ${\tt y}$ at line {\tt 1}: $R_{\tt y}^4={\tt y}^1$.
-
-The full and general constraint formula, given read $R_{\ell}$ of location $\ell$ as part of event $e$ with set ${\cal W}$ of matching write events (i.e., events including write access to $\ell$), takes the following form:
-$$
-\begin{array}{rll}
-\bigvee_{e_w \in {\cal W}} &  & (R_{\ell} = {\ell}^{{\sf index}\ e_w}) \\
-&		\bigwedge 	&  O(e_w) < O(e) \\
-&		\bigwedge_{e' \in {\cal W} \setminus \{ e_w \}} & (O(e') < O(e_w) \vee O(e) < O(e'))
-\end{array}
-$$
-This disjunctive formula iterates over all matching write events, and demands for each that (i) it occurs prior to the read event ($O(e_w) < O(e)$) and (ii) all other write events either occur before ($O(e') < O(e_w)$) it or after the read event
-($O(e) < O(e')$).
-
-An important concern that arises due to relaxation of flow dependencies is that heap accesses may change their meaning. As an illustration, we refer to Figure \ref{fig:heapAccess}. While the read at line {\tt 7} appears to match the write at line {\tt 5}, this is conditioned on the read at line {\tt 6} being linked to the assignment at line {\tt 4}. If the predicted run violates this link, then feasibility is no longer guaranteed. In particular, if reordering results in {\tt z} being assigned the first rather than second allocated object, then the write at line {\tt 5} no longer matches the read at line {\tt 7}.
- 
-\begin{figure}
-	\centering
-	\begin{tabular}{ll}
-		\hline
-		\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$} \\
-		\hline
-		{\tt 1: x1 = new();} & \\
-		{\tt 2: x2 = new();} & \\
-		{\tt 3: y = x1;} & \\
-		{\tt 4: y = x2;} & \\
-		{\tt 5: x2.f = 5;} & \\	
-		& {\tt 6: z = y;} \\
-		& {\tt 7: w = z.f;} \\
-	\end{tabular}
-	\caption{\label{fig:heapAccess}Example illustrating the need to account for heap accesses during trace transformation}
-\end{figure}
-
-To address this challenge, we enhance the constraint system with the requirement that heap objects that are dereferenced before the candidate racing events retain their original address in the predicted trace.
-This achieves three guarantees: First, matching events in the original trace are guaranteed to also match in the predicted trace. Second, candidate races in the original trace remain viable in the predicted trace. Finally, in a practical setting involving virtual method calls (which goes beyond our core grammar in Table \ref{Ta:syntax}), call-site resolutions are the same across the original and predicted traces. Notice that in this setting, we consider as relevant not only the targets of field dereferences but also the targets of virtual method invocations.
-
-Formally, given pair $\tau$ and $\tau'$ of candidate racing events such that ${\sf index}\ \tau < {\sf index}\ \tau'$, 
-we require that
-$$
-\bigwedge_{\tau'' \equiv {\tt y=x.f} \in t \cap {\bf heapr}.\
-	\tau'' \in {\sf pre}\ \tau'} {\sf env}\ \sigma(t,\tau'')\ {\tt x} = {\sf env}\ \sigma(t',\tau'')\ {\tt x}
-$$
-where ${\sf env}$ is the state mapping from local variables to their value and $\sigma(t,\tau'')$ 
-(resp. $\sigma(t',\tau'')$) is the state arising at trace $t$ (resp. $t'$) immediately before event $\tau''$.
-This constraint fixes that all heap dereferences up to the later of the candidate racing events retain their original base object as in the predicted trace $t'$. 
+We now switch to the second feature of \tool, which is its ability to reason about unexplored branches.
 
 \paragraph{Relaxation of Branching Decisions}
 
@@ -116,6 +18,6 @@ Constraint solving is applied to each of the resulting traces analogously to the
 
 We emphasize that exploration of new execution paths is subject to all the known limitations of symbolic execution, including in particular loop structures and object allocation. \tool\ currently fails if (i) the unexplored branch containts loops or (ii) there are object references that cannot be fully resolved at the branching point. In case of failure, \tool\ moves on to other branches. We demonstrate in Section \ref{sec:eval} that despite these limitations, the increase in coverage thanks to exploration of new paths is significant.
 
-\subsection{Proof of Correctness}
+\paragraph{Proof of Correctness}
 
 \input{proof}
