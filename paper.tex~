@@ -4,6 +4,17 @@
 \usepackage[usenames,dvipsnames]{color}
 \usepackage{algpseudocode}
 \usepackage{ amssymb}
+\usepackage{url}
+
+\usepackage{amsthm, amsmath, amssymb}
+%\usepackage{amsthm}
+% conflict with the following commands
+%\newdef{definition}{Definition}
+\newtheorem{definition}{Definition}
+\newtheorem{axiom}{Axiom}
+\newtheorem{mytheorem}{Theorem}
+\newtheorem{myproperty}{Property}
+\newtheorem{myrule}{Rule}
 
 \newcommand{\tool}{{\sc Recipe}}
 \newcommand{\lsyn}{\lbrack\!\lbrack}
@@ -140,7 +151,8 @@ The abstract goes here.
 \input{overview}
 \input{trace}
 \input{constraints}
-\input{tech}
+\input{proofsec}
+%\input{tech}
 \input{eval}
 
 % An example of a floating figure using the graphicx package.
@@ -282,4 +294,3 @@ The authors would like to thank...
 \end{document}
 
 
->>>>>>> 47c0ed781e58f50875c6003165317720ad84879f

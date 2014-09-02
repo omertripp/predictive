@@ -3,47 +3,50 @@ The top-level auxiliary file: paper.aux
 The style file: abbrv.bst
 Database file #1: paper.bib
 Warning--I didn't find a database entry for "XXX"
+Warning--I didn't find a database entry for "YYY"
+Warning--I didn't find a database entry for "ZZZ"
+Warning--I didn't find a database entry for "JEFF"
+Warning--I didn't find a database entry for "YANNIS"
 Warning--I didn't find a database entry for "JEFF-PLDI14"
-Warning--I didn't find a database entry for "jeff"
-You've used 8 entries,
+You've used 10 entries,
             2118 wiz_defined-function locations,
-            558 strings with 5959 characters,
-and the built_in function-call counts, 4215 in all, are:
-= -- 456
-> -- 189
+            574 strings with 6248 characters,
+and the built_in function-call counts, 4823 in all, are:
+= -- 506
+> -- 225
 < -- 8
-+ -- 74
-- -- 66
-* -- 289
-:= -- 633
-add.period$ -- 32
-call.type$ -- 8
-change.case$ -- 57
++ -- 88
+- -- 78
+* -- 325
+:= -- 737
+add.period$ -- 38
+call.type$ -- 10
+change.case$ -- 69
 chr.to.int$ -- 0
-cite$ -- 8
-duplicate$ -- 180
-empty$ -- 307
-format.name$ -- 66
-if$ -- 954
+cite$ -- 10
+duplicate$ -- 208
+empty$ -- 363
+format.name$ -- 78
+if$ -- 1082
 int.to.chr$ -- 0
-int.to.str$ -- 8
-missing$ -- 8
-newline$ -- 43
-num.names$ -- 16
-pop$ -- 57
+int.to.str$ -- 10
+missing$ -- 10
+newline$ -- 53
+num.names$ -- 20
+pop$ -- 77
 preamble$ -- 1
-purify$ -- 49
+purify$ -- 59
 quote$ -- 0
-skip$ -- 147
+skip$ -- 160
 stack$ -- 0
-substring$ -- 280
-swap$ -- 76
+substring$ -- 290
+swap$ -- 80
 text.length$ -- 8
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 32
+type$ -- 40
 warning$ -- 0
-while$ -- 40
-width$ -- 9
-write$ -- 114
-(There were 3 warnings)
+while$ -- 44
+width$ -- 12
+write$ -- 134
+(There were 6 warnings)

@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{dataflow}
 R.~Chugh, J.~W. Voung, R.~Jhala, and S.~Lerner.
@@ -14,6 +14,12 @@ J.~Huang, P.~Liu, and C.~Zhang.
 \newblock In {\em Proceedings of the Eighteenth ACM SIGSOFT International
   Symposium on Foundations of Software Engineering}, FSE '10, pages 207--216,
   New York, NY, USA, 2010. ACM.
+
+\bibitem{pldi14}
+J.~Huang, P.~O. Meredith, and G.~Rosu.
+\newblock Maximal sound predictive race detection with control flow
+  abstraction.
+\newblock In {\em PLDI}, 2014.
 
 \bibitem{ucg}
 V.~Kahlon and C.~Wang.
@@ -51,6 +57,11 @@ S.~Savage, M.~Burrows, G.~Nelson, P.~Sobalvarro, and T.~Anderson.
 \newblock Eraser: A dynamic data race detector for multi-threaded programs.
 \newblock In {\em Proceedings of the Sixteenth ACM Symposium on Operating
   Systems Principles}, SOSP '97, pages 27--37, New York, NY, USA, 1997. ACM.
+
+\bibitem{maximal}
+T.~F. Serbanuta, F.~Chen, and G.~Rosu.
+\newblock Maximal causal models for sequentially consistent systems.
+\newblock In {\em RV}, 2012.
 
 \bibitem{ordervio}
 Y.~Shi, S.~Park, Z.~Yin, S.~Lu, Y.~Zhou, W.~Chen, and W.~Zheng.
