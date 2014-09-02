@@ -9,13 +9,10 @@ As input, we assume (i) a program $P$ as well as (ii) a trace of $P$ recorded du
 \subsection{Preliminaries}
 To facilitate our presentation, we first introduce some terminologies used throughout this paper.
 
-{\bf Trace \ } A trace $\tau$ is a sequence of events recorded during the observation run.
+{\bf Event\ .} An event is a concrete representation that captures the details about the runtime execution of a static instruction. It is a map that associates the variables in the instruction to the runtime values. Specifically, we are interested in the following types of events. 
 
-{\bf Event\ } An event, $e=<t, id, inst, map>$, is a concrete representation that captures the details about the runtime execution of a static instruction $inst$,
-where $t$ denotes the thread that issues the event, $id$ is the id associated with each event, $inst$ is the static instruction and $map$ maps the variable in the instruction to the runtime values. The key property of  $id$ is {\em uniqueness}, i.e., any two events in the trace own different ids. A natural id for each event is its index in the trace. We denote the thread and id as $t^e$ and $i^e$ respectively.
 
-The instructions are three-address instructions involving at most three operands, which modern compilers commonly support.  Specifically, we are interested in the following types of instructions. 
-
+These events are basic and can essentially express all event. Method call , virtual resolution.
 
 
 
@@ -24,10 +21,10 @@ The instructions are three-address instructions involving at most three operands
 		\begin{tabular}{rl}
 			\multicolumn{1}{l}{{\tt s} $::=$} & \\
 			{\tt y = x.f} $|$\ & {\bf (heapr)} \\ 
-			{\tt x.f = y} $|$\ & {\bf (heapw)} \\ %\ $|$\ {\tt x.f = $c$}\
-			{\tt z = x $bop$ y}\  $|$& {\bf (assign)} \\ %$|$\ {\tt z = $c$} $|$ {\tt z = new()}
-			{\tt if (x $bop$  y) goto ...  $|$&  {\bf (branch)} \\
-			{\tt lock(l)}\ $|$\ {\tt unlock(l)}  $|$& {\bf (sync)} \\
+			{\tt x.f = y}\ $|$\ {\tt x.f = $c$}\ $|$\ & {\bf (heapw)} \\
+			{\tt z = x \{ $bop$ \} y}\ $|$\ {\tt z = $c$} $|$ {\tt z = new()}\ & {\bf (assign)} \\
+			{\tt if (x \{ $bop$ \} y) \{ s \} {\bf (branch)} \\
+			{\tt lock(l)}\ $|$\ {\tt unlock(l)}  & {\bf (sync)}
 			{\tt fork(t)}\ $|$\ {\tt join(t)}$|$ {\tt begin(t)}\ $|$\ {\tt end(t)}$|$  & {\bf (thread)}
 		\end{tabular}
 	\end{center}
@@ -35,43 +32,32 @@ The instructions are three-address instructions involving at most three operands
 \end{table}
 
 
-When the variable does not appear on the left hand of an equation, such as $y$ in $x.f=y$, it may refer to a variable, a constant or event object creation expression $new (...)$.  The $bop$ stands for the binary operator, which may refer to $+, -, *, /, \%, \wedge, \vee$ in the assignment, or refer to $<, >, =$ in the branch. The target of the branch event is not important in our scope, therefore, we may omit the $goto$ part.
-The listed instructions are so basic that it can capture most events in a common imperative programming language. For example, the method call can be modeled by the above list, where the argument passing and value return are modeled as assignment events, and the virtual function resolution is modeled as the branch event conditioned on the type of the caller object.
+Throughout this paper, we assume a standard operational semantics, which defines (i) a mapping ${\sf thr}$ between
+execution threads, each having a unique identifier $i \in \mathbb{N}$, and their respective code, as well as (ii) per-thread stack and shared heap memory. 
 
-The map stores the value for each variable observed in the dynamic run. For simplicity, we use the notion $\lsyn x \rsyn^e$ to retrieve the value associated with the variable $x$ in $e$. 
+The code executed by a given thread follows the syntax in Table \ref{Ta:syntax}. The text of a program is a sequence of zero or more method declarations, as given in the definition of symbol {\tt p}. Methods accept zero or more arguments $\overline{{\tt x}}$, have a body ${\tt s}$, and may have a return value (which we leave implicit). For simplicity, we avoid from static typing as well as virtual methods. The body of a method consists of the core grammar for symbol {\tt s}. We avoid from specifying syntax checking rules, as the grammar is fully standard.
 
-In addition, we propose the projection operation  $|$  to help the reasoning of the trace: $\tau|t$ contains only the (ordered) events from the thread $t$; $\tau|i$ contains only the event of which the id equals $i$; $\tau|\leq e$ denotes the prefix of $e$, i.e., the events preceding the event $e$; $\tau|\geq e$ denotes the events after $e$; $\tau|>=e_1\wedge <=e_2$ denotes the events between $e_1$ and $e_2$.
+For simplicity, we assume that in the starting state each thread points to a parameter-free method. In this way, we can simply assume an empty starting state (i.e., an empty heap), and eliminate complexities such as user-provided inputs and initialization of arguments with default values. These extensions are of course possible, and in practice we handle these cases, but reflecting them in the formalism would result in needless complications.
 
-
-
-
-%We make use of the following helper functions:
-%\begin{itemize}
-%	\item ${\sf proj}\ t\ i$ projects trace $t$ onto all transitions involving thread $i$.
-%	\item $t[k]$ obtains the $k$th transition within trace $t$.
-%	\item ${\sf index}\ t\ \tau$ retrieves the index, or offset, of transition $\tau$ within trace $t$. When simply writing
-%	${\sf index}\ \tau$ (while omitting the trace parameter) we refer to the index of $\tau$ within the original trace. 
-%	\item ${\sf pre}\ t\ \tau$ is the prefix of trace $t$ preceding transition $\tau$. For the suffix beyond $\tau$, we 
-%	use ${\sf post}\ t\ \tau$. Finally, ${\sf bet}\ t\ \tau_1\ \tau_2$ returns the transitions delimited by $\tau_1$ and $\tau_2$.
-%\end{itemize}
-
-%Throughout this paper, we assume a standard operational semantics, which defines (i) a mapping ${\sf thr}$ between
-%execution threads, each having a unique identifier $i \in \mathbb{N}$, and their respective code, as well as (ii) per-thread stack and shared heap memory. 
-
-%The code executed by a given thread follows the syntax in Table \ref{Ta:syntax}. The text of a program is a sequence of zero or more method declarations, as given in the definition of symbol {\tt p}. Methods accept zero or more arguments $\overline{{\tt x}}$, have a body ${\tt s}$, and may have a return value (which we leave implicit). For simplicity, we avoid from static typing as well as virtual methods. The body of a method consists of the core grammar for symbol {\tt s}. We avoid from specifying syntax checking rules, as the grammar is fully standard.
-
-%For simplicity, we assume that in the starting state each thread points to a parameter-free method. In this way, we can simply assume an empty starting state (i.e., an empty heap), and eliminate complexities such as user-provided inputs and initialization of arguments with default values. These extensions are of course possible, and in practice we handle these cases, but reflecting them in the formalism would result in needless complications.
-
-%As is standard, we assume an interleaved semantics of concurrency. A \emph{transition}, or \emph{event}, is of the form
-%$\sigma \stackrel{i / {\tt s}}{\longrightarrow} \sigma'$, denoting that thread $i$ took an evaluation step
-%in prestate $\sigma$, wherein atomic
-%statement {\tt s} was executed, which resulted in poststate $\sigma'$. We refer to a sequence of transitions from
-%the starting state to either an exceptional state (e.g., due to null dereference) or a state where all the threads have 
-%reduced their respective code to $\epsilon$ as a \emph{trace}.
+As is standard, we assume an interleaved semantics of concurrency. A \emph{transition}, or \emph{event}, is of the form
+$\sigma \stackrel{i / {\tt s}}{\longrightarrow} \sigma'$, denoting that thread $i$ took an evaluation step
+in prestate $\sigma$, wherein atomic
+statement {\tt s} was executed, which resulted in poststate $\sigma'$. We refer to a sequence of transitions from
+the starting state to either an exceptional state (e.g., due to null dereference) or a state where all the threads have 
+reduced their respective code to $\epsilon$ as a \emph{trace}.
 
 
 
-%TODO this section is inconsistent with others. change it!
+We make use of the following helper functions:
+\begin{itemize}
+	\item ${\sf proj}\ t\ i$ projects trace $t$ onto all transitions involving thread $i$.
+	\item $t[k]$ obtains the $k$th transition within trace $t$.
+	\item ${\sf index}\ t\ \tau$ retrieves the index, or offset, of transition $\tau$ within trace $t$. When simply writing
+	${\sf index}\ \tau$ (while omitting the trace parameter) we refer to the index of $\tau$ within the original trace. 
+	\item ${\sf pre}\ t\ \tau$ is the prefix of trace $t$ preceding transition $\tau$. For the suffix beyond $\tau$, we 
+	use ${\sf post}\ t\ \tau$. Finally, ${\sf bet}\ t\ \tau_1\ \tau_2$ returns the transitions delimited by $\tau_1$ and $\tau_2$.
+\end{itemize}
+
 \subsection{Constraint System}
 
 We begin with an explanation of the encoding process. The resulting formula is provided in Figure \ref{fig:encoding}. We describe the conjuncts comprising the formula one by one.
