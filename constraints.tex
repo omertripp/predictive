@@ -24,11 +24,11 @@ Given pair $\tau$ and $\tau'$ of events that both access a common memory locatio
 $$
 \begin{array}{rl}
 					& {\sf thread}\ \tau \neq {\sf thread}\ \tau' \\
-\bigwedge 	& ({\sf writes}\ \tau\ \ell \vee \tau'\ {\tt s}'\ \ell) \\
+\bigwedge 	& (\ell \in {\sf writeset}\ \tau \vee \ell \in {\sf writeset}\ \tau') \\
 \bigwedge   & O_{\tau} = O_{\tau'}
 \end{array}
 $$
-That is, (i) events $\tau$ and $\tau'$ are executed by different threads, (ii) at least one of the events performs write access to $\ell$, and (iii) the events occur at the simultanesouly. This is a direct logical encoding of the definition of a race condition.
+That is, (i) events $\tau$ and $\tau'$ are executed by different threads, (ii) at least one of the events performs write access to $\ell$ (as judged by the ${\sf writeset}$ membership check), and (iii) the events occur simultanesouly. This is a direct logical encoding of the definition of a race condition.
 
 \paragraph{Path Constraints}
 
@@ -113,3 +113,7 @@ Beyond relaxing flow dependencies, \tool\ is also capable of exploring code bran
 Constraint solving is applied to each of the resulting traces analogously to the original trace.
 
 We emphasize that exploration of new execution paths is subject to all the known limitations of symbolic execution, including in particular loop structures and object allocation. \tool\ currently fails if (i) the unexplored branch containts loops or (ii) there are object references that cannot be fully resolved at the branching point. In case of failure, \tool\ moves on to other branches. We demonstrate in Section \ref{sec:eval} that despite these limitations, the increase in coverage thanks to exploration of new paths is significant.
+
+\subsection{Proof of Correctness}
+
+\input{proof}
