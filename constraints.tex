@@ -17,7 +17,3 @@ Beyond relaxing flow dependencies, \tool\ is also capable of exploring code bran
 Constraint solving is applied to each of the resulting traces analogously to the original trace.
 
 We emphasize that exploration of new execution paths is subject to all the known limitations of symbolic execution, including in particular loop structures and object allocation. \tool\ currently fails if (i) the unexplored branch containts loops or (ii) there are object references that cannot be fully resolved at the branching point. In case of failure, \tool\ moves on to other branches. We demonstrate in Section \ref{sec:eval} that despite these limitations, the increase in coverage thanks to exploration of new paths is significant.
-
-\paragraph{Proof of Correctness}
-
-\input{proof}
