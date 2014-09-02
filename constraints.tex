@@ -93,10 +93,12 @@ This achieves three guarantees: First, matching events in the original trace are
 Formally, given pair $\tau$ and $\tau'$ of candidate racing events such that ${\sf index}\ \tau < {\sf index}\ \tau'$, 
 we require that
 $$
-\bigwedge_{\tau'' \in t \cap {\bf heapr}.\
-	\tau'' \in {\sf pre}\ \tau'} \lsyn {\sf stmt}\ \tau'' \rsyn\ t \equiv \lsyn {\sf stmt}\ \tau'' \rsyn\ t'
-$$ 
-That is, all heap dereferences up to the later of the candidate racing events must retain their original meaning in the predicted trace $t'$. This ensures in particular that the base reference remains identical to the one in the original trace $t$. 
+\bigwedge_{\tau'' \equiv {\tt y=x.f} \in t \cap {\bf heapr}.\
+	\tau'' \in {\sf pre}\ \tau'} {\sf env}\ \sigma(t,\tau'')\ {\tt x} = {\sf env}\ \sigma(t',\tau'')\ {\tt x}
+$$
+where ${\sf env}$ is the state mapping from local variables to their value and $\sigma(t,\tau'')$ 
+(resp. $\sigma(t',\tau'')$) is the state arising at trace $t$ (resp. $t'$) immediately before event $\tau''$.
+This constraint fixes that all heap dereferences up to the later of the candidate racing events retain their original base object as in the predicted trace $t'$. 
 
 \paragraph{Relaxation of Branching Decisions}
 
