@@ -16,23 +16,25 @@ To facilitate our presentation, we first introduce some terminologies used throu
 
 \begin{itemize}
 \item $t$ refers to the thread that issues the event, denoted as $t^e$.
-\item  $id$ refers to the id associated with each event, denoted as $i^e$. The key property of  $id$ is {\em uniqueness}, i.e., any two events in the trace own different ids. The important property of $id$ is {\em monotonicity}, i.e.,  the events from the same thread should own the strictly increasing ids. Throughout this paper, we use  the index of an event in the trace as its id, which satisfies the above properties. 
-\item $inst$ is the static instruction. The instructions are three-address instructions involving at most three operands, which modern compilers commonly support.  Specifically, we are interested in the types of instructions listed in Table~\ref{Ta:syntax}. When the variable does not appear on the left hand of an equation, such as $y$ in $x.f=y$, it may refer to a variable, a constant or event object creation expression $new (...)$.  The $bop$ stands for the binary operator, which may refer to $+, -, *, /, \%, \wedge, \vee$ in the assignment, or refer to $<, >, =, \wedge, \vee$ in the branch. The target of the branch event is not important in our scope, therefore, we may abbreviate the branch instruction as the boolean expression afterwards. The listed instructions are so basic that it can capture most events in a common imperative programming language. For example, the method call can be modeled by the above list, where the argument passing and value return are modeled as assignment events, and the virtual function resolution is modeled as the branch event conditioned on the type of the caller object.
-\item $map$ maps the variable in the instruction to the runtime values. The map stores the value for each variable observed in the dynamic run. For simplicity, we use the notion $\lsyn x \rsyn^e$ to retrieve the value associated with the variable $x$ in $e$. 
+\item  $id$ refers to the id associated with each event, denoted as $i^e$. The key property of  $id$ is {\em uniqueness}, i.e., any two events in the trace own different ids. The important property of $id$ is {\em monotonicity}, i.e.,  the events from the same thread should own the strictly increasing ids. Throughout this paper, we use  the index of an event in the trace as its id, which satisfies the above properties. Throughout this paper, we use the event $e$ and its id $id$ interchangeably in our notation given the one-to-one correspondence between $e$ and $id$. Thus, for example, if the index of event $e$ is 3, then $t^e$ and $t^3$ refer to the same thread.
+\item $inst$ is the static instruction. The instructions are three-address instructions involving at most three operands, which modern compilers commonly support.  Specifically, we are interested in the types of instructions listed in Table~\ref{Ta:syntax}. When the variable does not appear on the left hand of an equation, such as $y$ in $x.f=y$, it may refer to a variable, a constant or event object creation expression $new (...)$.  The $bop$ stands for the binary operator, which may refer to $+, -, *, /, \%, \wedge, \vee$ in the assignment, or refer to $<, >, =, \wedge, \vee$ in the branch. The target of the branch event is not important in our scope, therefore, we may abbreviate the branch instruction as the boolean expression afterwards. The listed instructions suffice to represent all trace events of interest. This is because a concrete finite execution trace can be reduced to a straight-line loop-free intraprocedural path program (argument passing modeled via assignments to fresh variables). This standard form of simplification preserves all the data-race-related information contained in the original trace. 
+\item $map$ is a mapping from live expressions at the current event to their value (and thus a partial mapping from expressions to values). Live expressions include program variables, object fields, boolean expressions, etc. We use the notation $\lsyn exp \rsyn^e$ to retrieve the value associated with expression $exp$ at $e$.
+
+maps the variable in the instruction to the runtime values. The map stores the value for each variable observed in the dynamic run. For simplicity, we use the notion $\lsyn x \rsyn^e$ to retrieve the value associated with the variable $x$ in $e$. 
 \end{itemize}
 
 %Specially, $\lsyn x.f \rsyn^e$ returns the location of $x.f$ (rather than  the value stored in the location), which is denoted as a pair $(\lsyn x \rsyn^e, f)$.
 
 \begin{table}
 	\begin{center}
-		\begin{tabular}{rl}
-			\multicolumn{1}{l}{{\tt s} $::=$} & \\
-			{\tt y = x.f} $|$\ & {\bf (heapr)} \\ 
-			{\tt x.f = y} $|$\ & {\bf (heapw)} \\ %\ $|$\ {\tt x.f = $c$}\
-			{\tt z = x $bop$ y}\  $|$& {\bf (assign)} \\ %$|$\ {\tt z = $c$} $|$ {\tt z = new()}
-			{\tt if (x $bop$  y) goto ...  $|$&  {\bf (branch)} \\
-			{\tt lock(l)}\ $|$\ {\tt unlock(l)}  $|$& {\bf (sync)} \\
-			{\tt fork(t)}\ $|$\ {\tt join(t)}$|$ {\tt begin(t)}\ $|$\ {\tt end(t)}$|$  & {\bf (thread)}
+		\begin{tabular}{rcl}
+			\multicolumn{1}{l}{{\tt s} $::=$} & & \\
+			{\tt y = x.f} & $|$ & {\bf (heapr)} \\ 
+			{\tt x.f = y}  & $|$ & {\bf (heapw)} \\ %\ $|$\ {\tt x.f = $c$}\
+			{\tt z = x $bop$ y}\  & $|$ & {\bf (assign)} \\ %$|$\ {\tt z = $c$} $|$ {\tt z = new()}
+			{\tt if (x $bop$  y) goto ...} & $|$ &  {\bf (branch)} \\
+			{\tt lock(l)}\ $|$\ {\tt unlock(l)}  & $|$& {\bf (sync)} \\
+			{\tt fork(t)}\ $|$\ {\tt join(t)}$|$ {\tt begin(t)}\ $|$\ {\tt end(t)} &  & {\bf (thread)}
 		\end{tabular}
 	\end{center}
 	\caption{\label{Ta:syntax}Language syntax}
@@ -88,14 +90,14 @@ We begin with an explanation of the encoding process. The resulting formula is p
 $$
 	\begin{array}{rcl}
 	& \left( O_1 < O_2 < O_3 \wedge O_4 < O_5 \wedge O_4 < O_7 \right) & \textbf{(program order)} \\
-\bigwedge & \left( {\tt x}^0 = 0 \wedge {\tt y}^0 = 0 \wedge {\tt y}^1 = 3 \wedge 
-	{\tt x}^2 = 1 \wedge {\tt y}^3 = 5 \right) & \textbf{(variable definitions)} \\
-\bigwedge & \left(		(R_{\tt y}^4={\tt y}^0 \wedge O_4 < O_1) \bigvee	
-(R_{\tt y}^4={\tt y}^1 \wedge O_1 < O_4 < O_3) \bigvee
-(R_{\tt y}^4={\tt y}^3 \wedge O_3 < O_4)
+\bigwedge & \left( W_{\tt x}^0 = 0 \wedge W_{\tt y}^0 = 0 \wedge W_{\tt z}^0 = 3 \wedge W_{\tt y}^1 = 3 \wedge 
+	W_{\tt x}^2 = 1 \wedge W_{\tt y}^3 = 5 \right) & \textbf{(variable definitions)} \\
+\bigwedge & \left(		(R_{\tt y}^4=W_{\tt y}^0 \wedge O_4 < O_1) \vee	
+(R_{\tt y}^4=W_{\tt y}^1 \wedge O_1 < O_4 < O_3) \vee
+(R_{\tt y}^4=W_{\tt y}^3 \wedge O_3 < O_4)
 		\right) & \textbf{(thread interference)} \\
-\bigwedge & R_{\tt y}^4 > 2 & \textbf{(path conditions)} \\
-\bigwedge & O_2 = O_5 & \textbf{(race condition)}
+\bigwedge & R_{\tt y}^4 > 2 \equiv {\bf true} & \textbf{(path conditions)} \\
+\bigwedge & t^2 \neq t^5 \wedge (2\ writes\ {\tt x} \vee 5\ writes\ {\tt x}) \wedge O_2 = O_5 & \textbf{(race condition)}
 	\end{array} 
 $$
 \end{center}
@@ -108,10 +110,10 @@ $$
 $$
 That is, the first 3 statements are totally ordered, and the {\tt if} statement executes before the body (either $O_5$ or $O_7$).
 
-\paragraph{Variable Definitions} The next set of constraints, denoted ${\tt z}^i=k$, capture variable definitions: Variable {\tt z} is assigned value $k$ at statement $i$. For our running example, we obtain:
+\paragraph{Variable Definitions} The next set of constraints, denoted ${\tt w}^i=k$ for local variables and $W_{\tt w}^i=k$ for shared variables, capture variable definitions: Variable {\tt w} is assigned value $k$ at statement $i$. For our running example, we obtain:
 $$
-	{\tt x}^0 = 0 \wedge {\tt y}^0 = 0 \wedge {\tt y}^1 = 3 \wedge 
-			{\tt x}^2 = 1 \wedge {\tt y}^3 = 5
+	W_{\tt x}^0 = 0 \wedge W_{\tt y}^0 = 0 \wedge W_{\tt z}^0 = 3 \wedge W_{\tt y}^1 = 3 \wedge
+			W_{\tt x}^2 = 1 \wedge W_{\tt y}^3 = 5
 $$
 As an example, ${\tt y}^3 = 5$ denotes that the value assigned to variable {\tt y} 
 at line {\tt 3} is $5$.
@@ -119,20 +121,20 @@ at line {\tt 3} is $5$.
 \paragraph{Thread Interference} To express inter-thread flow constraints, we utilize expressions of the form $R_{\tt z}^i={\tt z}^j$, which denotes that line $i$ reads variable {\tt z}, and the definition it reads comes from line $j$. The resulting formula for our example is
 $$
 \begin{array}{lcl}
-	& & (R_{\tt y}^4={\tt y}^0 \wedge O_4 < O_1)  \\
+	& & (R_{\tt y}^4=W_{\tt y}^0 \wedge O_4 < O_1)  \\
 & \bigvee &
-	(R_{\tt y}^4={\tt y}^1 \wedge O_1 < O_4 < O_3) \\
+	(R_{\tt y}^4=W_{\tt y}^1 \wedge O_1 < O_4 < O_3) \\
 & \bigvee &
-	(R_{\tt y}^4={\tt y}^3 \wedge O_3 < O_4)
+	(R_{\tt y}^4=W_{\tt y}^3 \wedge O_3 < O_4)
 \end{array}
 $$    
 Notice, importantly, that the formula combines flow constraints with order constraints, which are essential to determinize the value read at a given statement. As an example, 
-$(R_{\tt y}^4={\tt y}^1 \wedge O_1 < O_4 < O_3)$ means that the value of {\tt y} read at 
+$(R_{\tt y}^4=W_{\tt y}^1 \wedge O_1 < O_4 < O_3)$ means that the value of ${\tt y}$ read at 
 line {\tt 4} is that set at line {\tt 1} assuming an execution order whereby the first statement executes followed by the fourth then third statements. 
 
 \paragraph{Path Conditions} To preserve path conditions while potentially permitting dependence-violating reordering (e.g., a context switch after line {\tt 1} in Figure \ref{fig:running}), we model explicitly the condition. For the running example (ignoring the statements in red), this yields:
 $$
-	R_{\tt y}^4 > 2
+	R_{\tt y}^4 > 2 \equiv {\bf true}
 $$
 That is, the value of variable {\tt y} read at line {\tt 4} is greater than $2$. Indeed, this constraint is satisfied by the assignments to {\tt y} both at line {\tt 1} and at line {\tt 3}.
 
@@ -144,7 +146,7 @@ This asserts that both statements occur simultaneously, which --- together with 
 
 \paragraph{Unexplored Branches} Beyond the encoding steps so far, which focus on the given trace, we can often encode constraints along unexplored branches. In our running example, this is essential to discover the race between lines {\tt 2} and {\tt 7}. 
 
-The conflicting accesses in this case, determined based on static analysis of $P$, are expressed as $O_2=O_7$. In addition, we negate the path condition, thereby obtaining $R_{\tt y}^4 \leq 2$ in place of $R_{\tt y}^4 \leq 2$. 
+The conflicting accesses in this case, determined based on static analysis of $P$, are expressed as $O_2=O_7$. In addition, we negate the path condition, thereby obtaining $R_{\tt y}^4 > 2 \equiv {\bf false}$ in place of $R_{\tt y}^4 > 2 \equiv {\bf true}$. 
 
 \paragraph{Constraint Solving} Having conjoined the formuals from the different encoding steps into (i) a global representation of all feasibility constraints (path, ordering, assignment and other constraints) and (ii) the requirement for a given race to occur (expressed as simultaneous execution of the conflicting accesses), we discharge the resulting formula to an off-the-shelf constraint solver, such as Z3 or Yices. If successful, the solver returns a solution for the specified constraints. 
 
