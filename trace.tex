@@ -20,8 +20,7 @@ First of all, we require the SSA form of the trace, i.e., each variable in defin
 \item {\bf Heap accesses\ } The accesses of the local heap locations and the accesses of shared locations behave differently, therefore, we introduce different SSA form for them. 
 \begin{itemize}
 \item {\bf Local Heap Accesses\ } The accesses of local heap locations behave similarly to the local assignment as both the definition and uses belong to the single thread. Therefore we model them as local assignments: We introduce a fresh local variable {\tt l$_{\lsyn o.f \rsyn}^{id}$} to replace each definition and  the corresponding uses of a  field {\tt f} of the local object $o$. An assumption here is the uses and the definition still refer to the same base object $o$ in the predicted run, which is enforced through the constraint specification (Section~\ref{sec:...}).
-\item  {\bf Shared Heap Accesses\ } The accesses of shared locations are more complex. Each shared read may read from one of multiple writes that define the shared location, under different schedules.     To correlate the reads and the writes, we introduce two symbols, $W^{id}_{\tt \lsyn o.f\rsyn }$, which denotes write access to 
-the field $f$ of the shared object $o$ by the event $id$, and $R^{id}_{\tt \lsyn o.f\rsyn }$,  which denotes the read access of the location $o.f$ by the event $id$. 
+\item  {\bf Shared Heap Accesses\ } The accesses of shared locations are more complex. Each shared read may read from one of multiple writes that define the shared location, under different schedules.     Given the write $x.f=y$ or the read $y=x.f$, we introduce two symbols, $W^{id}_{\tt x.f }$, which denotes the write access by the event $id$ to the field $f$ of the shared object referenced by $x$, and $R^{id}_{\tt  x.f }$,  which denotes the read access  by the event $id$ to the location $x.f$.  Note that, $x.f$ in the subscript is interpreted as the location, denoted as a pair $(\lsyn x \rsyn^e, f)$, rather than the value stored in the location. 
 Similar to the local heap accesses, an assumption for the correlation is that the writes and reads still refer to the same base object $o$ in the predicted run, which we guarantee by specifying additional constraints (Section~\ref{sec:...}). 
 \end{itemize}
 \end{itemize}
@@ -76,7 +75,7 @@ Similar to the local heap accesses, an assumption for the correlation is that th
 \centering
 \begin{tabular}{l|l}
 \hline
-\multicolumn{1}{c}{$Trace$} & \multicolumn{1}{c}{$SSA form of  Trace$} \\
+\multicolumn{1}{c}{$Trace$} & \multicolumn{1}{c}{$SSA \ form \ of\   Trace$} \\
 \hline
 {\tt 0: {\bf x}=0} &  {\tt 0: $W^0_x$=0}    \\
 {\tt 1: {\bf y}=0} &   {\tt 1: $W^1_y$=0}   \\
@@ -105,64 +104,69 @@ Each label in  Figure~\ref{fig:t4running2} on the left hand denotes the id of th
 
 
 
-
+%TODO value or symbol for o.f, rethink about it.
 \subsection{Constraint System}
+Based on the SSA form of the trace, we build the constraints to compute a new trace with the new schedule and new mapping of variables to values.
+To model the schedule, we introduce the order variable $O_{e}$ for each event $e$. Given two events $e_i, e_j$ from two different threads, $O_{e_i}<O_{e_j}$ in a trace means $e_i$ is scheduled before $e_j$. We omit the synchronization constraints purposely, which are well explained in all existing predictive analysis techniques~\cite{yannis, pldi14}.
 
-Having explained how the trace is encoded, we now describe in detail how constraints are derived from the trace, such that any permutation considered by the analysis is guaranteed to represent a feasible execution schedule.
+%TODO synchronization constraint
 
-\paragraph{Intra-thread Order}
 
-The first set of constraints reflects control flow within the individual threads, which must remain unchanged under the reordering transformation. Given input trace $t$, this is expressed as the following formula:
+%Having explained how the trace is encoded, we now describe in detail how constraints are derived from the trace, such that any permutation considered by the analysis is guaranteed to represent a feasible execution schedule.
+
+{\bf Race Condition\ } Given any pair  of events, $e$ and $e'$,  that both access a common memory location $l$, we demand that
 $$
 \begin{array}{rl}
-\forall \tau,\tau' \in t. & {\sf thread}\ \tau \equiv {\sf thread}\ \tau'. \\
-& {\sf index}\ \tau < {\sf index}\ \tau' \Rightarrow O_{\tau} < O_{\tau'}
-\end{array}
-$$ 
-The logical variables $O_x$ express ordering constraints. The requirement, as stated above, is that these variables
-reflect the same order as the projection of ${\sf index}$ onto individual threads.
-
-\paragraph{Race Condition}
-
-Given pair $\tau$ and $\tau'$ of events that both access a common memory location $\ell$, we demand that
-$$
-\begin{array}{rl}
-& {\sf thread}\ \tau \neq {\sf thread}\ \tau' \\
-\bigwedge 	& (\ell \in {\sf writeset}\ \tau \vee \ell \in {\sf writeset}\ \tau') \\
-\bigwedge   & O_{\tau} = O_{\tau'}
+& t^e \neq t^{e'} \\
+\bigwedge 	& (e\  writes\  l\   \vee e'\  writes\  l) \\
+\bigwedge   & O_{e} = O_{e'}
 \end{array}
 $$
-That is, (i) events $\tau$ and $\tau'$ are executed by different threads, (ii) at least one of the events performs write access to $\ell$ (as judged by the ${\sf writeset}$ membership check), and (iii) the events occur simultanesouly. This is a direct logical encoding of the definition of a race condition.
+That is, (i) events $e$ and $e'$ are executed by different threads, (ii) at least one of the events performs write access to $l$, and (iii) the events run concurrently. This is a direct logical encoding of the definition of a race condition. We refer to both $e$ and $e'$ as the racy event.
 
-\paragraph{Path Constraints}
+{\bf Intra-thread Constraints\ } Given a racy pair under analysis, $e$ and $e'$, suppose $e$ is after $e'$ in the original trace $\tau$, the predictive analysis reschedules the events in the prefix of $e$, i.e., prior to $e$, so that $e$ and $e'$ can run concurrently. A necessary condition applied to predictive analysis techniques is that each thread should follow the same event sequence prior to $e$ as in the original run.  We explain the rationale underlying this requirement in Section~\ref{sec:proof}, but now proceed to explain how to guarantee it using constraints. The preservation of the event sequence for each thread requires the intra-thread constraints:
 
-The requirement with respect to branching is that the prefix of the original trace $t$ up to the pair $\tau$ and $\tau'$ of candidate racing events remains identical in the predicted trace $t'$. More accurately, under the assumption that ${\sf index}\ \tau < {\sf index}\ \tau'$, 
+\begin{itemize}
+\item {\bf Branch Decision Constraints\ } The branches in the prefix should take the same decisions to reproduce the same set of events. More formally,  
 we require that 
 $$
-\bigwedge_{\tau'' \in t \cap {\bf bexp}.\
-	\tau'' \in {\sf pre}\ \tau'} \lsyn {\sf stmt}\ \tau'' \rsyn\ t \equiv \lsyn {\sf stmt}\ \tau'' \rsyn\ t'
+\bigwedge_{e_i \in \tau|\leq e \wedge  inst^{e_i}=x<y.\ }  x<y 	\equiv \lsyn x<y \rsyn^{e_i}
 $$ 
-where ${\sf stmt}$ is a helper function that obtains the code statement incident in a given transition. That is, all branching transitions up to $\tau'$ (which occurs after $\tau$) preserve their boolean interpretation under $t'$. This ensures that there are no divergences from the path containing the racing events, though beyond that path any feasible continuation is permitted. Importantly, contrary to \cite{JEFF-PLDI14}, we do not pose the requirement that the values flowing into branching statements remain the same, but suffice with the relaxed requirement that the evaluation of branching expressions is invariant under the input and predicted traces.
-
-\paragraph{Variable Definitions}
-
-A final requirement for the basic setting is that left-hand variables are defined according to the same right-hand variables as before. That is, version $i$ of variable ${\tt u}$ is defined as version $j$ of variable ${\tt v}$ in input trace $t$, then the same remains true in predicted  trace $t'$. This is enforced as the formula
+where $e_i$ is a branch event of which the boolean expression is $x<y$ (we use the binary operator $<$ for illustration) and  $\lsyn x<y \rsyn^{e_i}$ stores the  evaluation result of the boolean expression in the original trace $\tau$. The constraint specifies that the boolean expression in the derived trace should be evaluated to the same boolean value. Importantly, different from existing analyses \cite{yannis,pldi14}, we do not pose the requirement that the values flowing into branching statements remain the same, but suffice with the relaxed requirement that the evaluation of branching expressions remain the same. For example, suppose  the branch event $x<y$ takes the value $1<2$ in the original trace, existing analyses require the same values for the variables $x$ and $y$ in the predicted run, while we allow  the branch event to take other values of the variables, such as $3<4$. 
+\item {\bf Intra-thread Order Constraints\ } The events in the sequence should follow the same order as in the original trace. More formally, we require that
 $$
-\bigwedge_{\tau'' \in t \cap {\bf asgn}.\
-	\tau'' \in {\sf pre}\ \tau'} {\sf stmt}\ \tau'' \in t' 
+\begin{array}{rl}
+\forall e_i, e_j \in \tau. & t^{e_i}\equiv t^{e_j}. \\
+& i^{e_i} < i^{e_j}\  \Rightarrow O_{e_i} < O_{e_j}
+\end{array}
+$$ 
+The constraint specifies that the two events from the same thread should follow the same order as reflected by the ids of the events.
+\item {\bf Assignment Constraints\ } The mapping of local variables should not contradict each instruction.   More formally, we require that
 $$
-where we again assume that ${\sf index}\ \tau < {\sf index}\ \tau'$. That is, the same statement occurring in $t$ is also present in $t'$ (though the transitions may differ). Since the statements of $t'$ are a permutation of the statements of $t$, we are assured that use/def flow is constrained appropriately.
+\bigwedge_{e_i \in \tau|<=e \wedge type(e_i)=assign|heapr|heapw}\
+	inst^{e_i}
+$$
+where $inst^{e_i}$, such as $x=y+z$ or $R^{id}_{x}=y$, captures the constraint over the values of the variables imposed by the instruction. For example, $x=y+z$ is not satisfied if the solver computes a mapping from the three variables to $3, 4, 5$ respectively. Again we consider only the events in the prefix $\tau|e$, where $e$ is the racy event that happens later. Specially, for the instruction involving object creation, $x=new (...)$, we encode the object as its address, i.e., a constant integer returned by $System.identityHashcode(x)$ at runtime.
+\end{itemize}
 
-\paragraph{Relaxation of Flow Dependencies}
 
-We now move to the novel feature of \tool, which is its ability to explore execution schedules that depart from the data flow exhibited in the original trace. More precisely, \tool\ is able to relax flow dependencies in the original trace, whereby a thread reads a shared memory location written by another thread, while enforcing feasibility. This is strictly beyond the coverage potential of existing predictive analyses, which restrict trace transformations to ones where any read access to a shared memory location must correspond to the same write access as in the original trace.
 
-To ensure feasibility under relaxation of flow dependencies, we need to secure the link between the execution schedule and the write/read flow. As an illustration from the example in Figure \ref{fig:running}, $R_{\tt y}^4={\tt y}^1 \wedge O_1 < O_4 < O_3$ specifies that in a schedule where thread $T_1$ executes line {\tt 1}, then $T_2$ executes line {\tt 4}, and then the schedule switches again to $T_1$ to execute line {\tt 3}, the read access to ${\tt y}$ at line {\tt 4} obtains the value assigned to ${\tt y}$ at line {\tt 1}: $R_{\tt y}^4={\tt y}^1$.
 
-The full and general constraint formula, given read $R_{\ell}$ of location $\ell$ as part of event $e$ with set ${\cal W}$ of matching write events (i.e., events including write access to $\ell$), takes the following form:
+{\bf Rescheduling through Relaxation of Flow Dependencies\ } We now move to the novel feature of \tool, which is its ability to explore execution schedules that depart from the value flow exhibited in the original trace. More precisely, \tool\ is able to relax value flow dependencies in the original trace, whereby a thread reads a
+different value possibly written by other events (or even events from other threads) to the shared memory location, while enforcing feasibility.
+ This is strictly beyond the coverage potential of existing predictive analyses, which restrict trace transformations to ones where any read access to a shared memory location must correspond to the same written values as in the original trace, which are usually from the same write events. 
+
+To ensure feasibility under relaxation of flow dependencies, we need to secure the flow between the read/write with the execution schedule. 
+For example, in Figure \ref{fig:running}, for the read access to ${\tt y}$ at line {\tt 4} obtains the value assigned to ${\tt y}$ at line {\tt 1}, we need the schedule where  thread $T_1$ executes line {\tt 1}, then $T_2$ executes line {\tt 4}, and then the schedule switches again to $T_1$ to execute line {\tt 3}.
+
+
+% $R_{\tt y}^4={\tt y}^1 \wedge O_1 < O_4 < O_3$ specifies that in a schedule , the $R_{\tt y}^4={\tt y}^1$.
+
+%TODO l and ell
+In general, the constraint formula, given read $R_{\ell}$ of location $\ell$ as part of event $e$ with set ${\cal W}$ of matching write events (i.e., events including write access to $\ell$), takes the following form:
 $$
 \begin{array}{rll}
-\bigvee_{e_w \in {\cal W}} &  & (R_{\ell} = {\ell}^{{\sf index}\ e_w}) \\
+\bigvee_{e_w \in {\cal W}} &  & (R^{e}_{\ell} = W^{e_w}_{\ell}) \\
 &		\bigwedge 	&  O(e_w) < O(e) \\
 &		\bigwedge_{e' \in {\cal W} \setminus \{ e_w \}} & (O(e') < O(e_w) \vee O(e) < O(e'))
 \end{array}
@@ -170,7 +174,7 @@ $$
 This disjunctive formula iterates over all matching write events, and demands for each that (i) it occurs prior to the read event ($O(e_w) < O(e)$) and (ii) all other write events either occur before ($O(e') < O(e_w)$) it or after the read event
 ($O(e) < O(e')$).
 
-An important concern that arises due to relaxation of flow dependencies is that heap accesses may change their meaning. As an illustration, we refer to Figure \ref{fig:heapAccess}. While the read at line {\tt 7} appears to match the write at line {\tt 5}, this is conditioned on the read at line {\tt 6} being linked to the assignment at line {\tt 4}. If the predicted run violates this link, then feasibility is no longer guaranteed. In particular, if reordering results in {\tt z} being assigned the first rather than second allocated object, then the write at line {\tt 5} no longer matches the read at line {\tt 7}.
+An important concern that arises due to relaxation of flow dependencies is that heap accesses may change their meaning, i.e., they involve different base objects and do no longer match with each other. As an illustration, we refer to Figure \ref{fig:heapAccess}. While the read at event {\tt 7} appears to match the write at event {\tt 5}, this is conditioned on the read at event {\tt 6} being linked to the assignment at event {\tt 4}. If the predicted run violates this link, then feasibility is no longer guaranteed. In particular, if reordering results in {\tt z} being assigned the first rather than second allocated object, then the read at event {\tt 7} no longer matches the write  at event {\tt 5}.
 
 \begin{figure}
 	\centering
@@ -186,18 +190,26 @@ An important concern that arises due to relaxation of flow dependencies is that 
 		& {\tt 6: z = y;} \\
 		& {\tt 7: w = z.f;} \\
 	\end{tabular}
-	\caption{\label{fig:heapAccess}Example illustrating the need to account for heap accesses during trace transformation}
+	\caption{\label{fig:heapAccess}Example illustrating the need to account for heap accesses during trace transformation, where the labelled number denotes the event id.}
 \end{figure}
 
-To address this challenge, we enhance the constraint system with the requirement that heap objects that are dereferenced before the candidate racing events retain their original address in the predicted trace.
-This achieves three guarantees: First, matching events in the original trace are guaranteed to also match in the predicted trace. Second, candidate races in the original trace remain viable in the predicted trace. Finally, in a practical setting involving virtual method calls (which goes beyond our core grammar in Table \ref{Ta:syntax}), call-site resolutions are the same across the original and predicted traces. Notice that in this setting, we consider as relevant not only the targets of field dereferences but also the targets of virtual method invocations.
+To address this challenge, we enhance the constraint system with the requirement that heap objects that are dereferenced in the following field reference before the candidate racing events retain their original address in the predicted trace.
+This achieves two guarantees: First, matching heap access events in the original trace are guaranteed to also match in the predicted trace. Second, candidate races in the original trace remain viable in the predicted trace as they still refer to same location. Note that, the resolution of the virtual method call is modeled as the branch events that check the type of the target object, for which the constraints naturally guarantee the branch to take the same decision, i.e., the call to be resolved to the same method implementation.
 
-Formally, given pair $\tau$ and $\tau'$ of candidate racing events such that ${\sf index}\ \tau < {\sf index}\ \tau'$, 
+%Finally, in a practical setting involving virtual method calls, call-site resolutions are the same across the original and predicted traces. 
+%Notice that in this setting, we consider as relevant not only the targets of field dereferences but also the targets of virtual method invocations.
+
+Formally, given pair $e$ and $e'$ of candidate racing events such that $e$ happens after $e'$ in the trace $\tau$, 
 we require that
 $$
-\bigwedge_{\tau'' \equiv {\tt y=x.f} \in t \cap {\bf heapr}.\
-	\tau'' \in {\sf pre}\ \tau'} {\sf env}\ \sigma(t,\tau'')\ {\tt x} = {\sf env}\ \sigma(t',\tau'')\ {\tt x}
+\bigwedge_{ e_i \equiv {\tt y=x.f}|x.f=y \wedge e_i \in \tau|e }\
+	x \equiv  \lsyn x \rsyn^{e_i}
 $$
-where ${\sf env}$ is the state mapping from local variables to their value and $\sigma(t,\tau'')$ 
-(resp. $\sigma(t',\tau'')$) is the state arising at trace $t$ (resp. $t'$) immediately before event $\tau''$.
-This constraint fixes that all heap dereferences up to the later of the candidate racing events retain their original base object as in the predicted trace $t'$. 
+%where ${\sf env}$ is the state mapping from local variables to their value and $\sigma(t,\tau'')$ 
+%(resp. $\sigma(t',\tau'')$) is the state arising at trace $t$ (resp. $t'$) immediately before event $\tau''$.
+This constraint fixes that all heap dereferences  prior to the racy event retain their original base object as in the original trace $\tau$. 
+
+
+By sending the above constraints to a solver, we compute the necessary schedule orders among the events as well as the mapping of the variables. The necessary schedule orders define a partial order among the events, which permit a set of schedules that define the complete order that complies with it.
+
+

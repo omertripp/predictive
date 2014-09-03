@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  2 SEP 2014 22:13
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  3 SEP 2014 08:33
 entering extended mode
  %&-line parsing enabled.
 **paper
@@ -362,7 +362,7 @@ LaTeX Warning: Citation `JEFF' on page 1 undefined on input line 60.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.32 			{\tt if (x $bop$  y) goto ...  $|$&
+l.33 			{\tt if (x $bop$  y) goto ...  $|$&
                                              {\bf (branch)} \\
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
@@ -373,21 +373,27 @@ Try to go on, since this might almost work.
 LaTeX Warning: Reference `sec:...' on page 3 undefined on input line 22.
 
 
-LaTeX Warning: Reference `sec:...' on page 3 undefined on input line 25.
+LaTeX Warning: Reference `sec:...' on page 3 undefined on input line 24.
 
 [3]
-Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Warning: Citation `yannis' on page 4 undefined on input line 110.
 
 
-Underfull \hbox (badness 1803) in paragraph at lines 139--141
- \OT1/ptm/m/it/10 Path Con-straints: [][] \OT1/ptm/m/n/10 The re-quire-ment wit
-h re-spect to
- []
+LaTeX Warning: Reference `sec:proof' on page 4 undefined on input line 127.
 
 
-LaTeX Warning: Citation `JEFF-PLDI14' on page 4 undefined on input line 145.
+LaTeX Warning: Citation `yannis' on page 4 undefined on input line 135.
 
-[4]) (./constraints.tex) (./proofsec.tex (./proof.tex [5]
+[4]) (./constraints.tex
+
+LaTeX Warning: Reference `sec:relax' on page 5 undefined on input line 3.
+
+[5]
+Underfull \vbox (badness 1097) has occurred while \output is active []
+
+)
+(./proofsec.tex (./proof.tex [6]
 Underfull \hbox (badness 7777) in paragraph at lines 55--56
 []\OT1/ptm/b/n/10 Theorem 1 \OT1/ptm/m/n/10 (Sound-ness)\OT1/ptm/b/n/10 . []\OT
 1/ptm/m/it/10 All traces in the clo-sure
@@ -424,19 +430,19 @@ it/10 th \OMS/cmsy/m/n/10 ^^Y
 LaTeX Font Info:    Try loading font information for OT1+phv on input line 3.
  (/usr/share/texmf-texlive/tex/latex/psnfss/ot1phv.fd
 File: ot1phv.fd 2001/06/04 scalable font definitions for OT1/phv.
-) [6]
+) [7]
 
-LaTeX Warning: Reference `' on page 7 undefined on input line 43.
+LaTeX Warning: Reference `' on page 8 undefined on input line 43.
 
 
-LaTeX Warning: Reference `' on page 7 undefined on input line 43.
+LaTeX Warning: Reference `' on page 8 undefined on input line 43.
 
-[7]
+
 Overfull \hbox (7.60513pt too wide) in paragraph at lines 70--91
 []  
  []
 
-
+[8]
 
 pdfTeX warning: pdflatex (file ./cases/Visio-bbuffer.pdf): PDF inclusion: found
  PDF version <1.5>, but at most version <1.4> allowed
@@ -455,7 +461,7 @@ Overfull \hbox (2.20961pt too wide) in paragraph at lines 136--137
  [][] 
  []
 
-) (./paper.bbl [8 <./cases/Visio-bbuffer.pdf>])
+) (./paper.bbl [9 <./cases/Visio-bbuffer.pdf>])
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -467,42 +473,40 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[9 <./cases/Visio-msort.pdf>] (./paper.aux)
+[10 <./cases/Visio-msort.pdf>] (./paper.aux)
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 4829 strings out of 493848
- 68180 string characters out of 1152823
- 177539 words of memory out of 3000000
- 8012 multiletter control sequences out of 15000+50000
- 54632 words of font info for 114 fonts, out of 3000000 for 9000
+ 4838 strings out of 493848
+ 68394 string characters out of 1152823
+ 178539 words of memory out of 3000000
+ 8028 multiletter control sequences out of 15000+50000
+ 51579 words of font info for 104 fonts, out of 3000000 for 9000
  717 hyphenation exceptions out of 8191
- 27i,10n,40p,1146b,290s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 27i,10n,40p,1159b,290s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
-ve/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/share/texmf-texlive/fonts/typ
-e1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-texlive/fonts/type1/public/a
-msfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/
-cmmi5.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi7.pfb></
-usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/te
-xmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-texlive/
-fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-texlive/fonts/type1/p
-ublic/amsfonts/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfont
-s/cm/cmss10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmss8.
-pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/s
-hare/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texmf-t
-exlive/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texmf-texlive/fonts
-/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-texlive/fonts/type1/publi
-c/amsfonts/cm/cmtt10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/
-cm/cmtt8.pfb></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr
-/share/texmf-texlive/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texmf-texl
-ive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/
-times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb></
-usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (9 pages, 366039 bytes).
+ve/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-texlive/fonts/ty
+pe1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/fonts/type1/public/
+amsfonts/cm/cmmi5.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/
+cmmi7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi8.pfb></
+usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/te
+xmf-texlive/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-texlive/f
+onts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/pu
+blic/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfon
+ts/cm/cmsy5.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy7.
+pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/sh
+are/texmf-texlive/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texmf-t
+exlive/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texmf-texlive/fonts
+/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helveti
+c/uhvr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/s
+hare/texmf-texlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/
+fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/time
+s/utmri8a.pfb>
+Output written on paper.pdf (10 pages, 351180 bytes).
 PDF statistics:
- 255 PDF objects out of 1000 (max. 8388607)
+ 246 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  11 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -1,19 +1,70 @@
 \section{Exploration of Unexecuted Branches}
-
 We now switch to the second feature of \tool, which is its ability to reason about unexplored branches.
+At the high level, we simply need to derive a trace that contains the unexplored branch, after that, we can reduce the analysis to the analysis in Section~\ref{sec:relax} (starting from the SSA processing).  \tool\ derives such traces by symbolically executing the unexplored branches to record the events and including these events in the new traces.
 
-\paragraph{Relaxation of Branching Decisions}
 
-Beyond relaxing flow dependencies, \tool\ is also capable of exploring code branches that were not executed in the original trace. This is achieved via a symbolic representation of the input trace. Given branching event $e_b$,
-\begin{enumerate}
-	\item model the branching condition symbolically to execute along the negation of the original branch;
-	\item apply depth-first search (DFS) to uncover all execution suffixes under the unexplored branch (which may itself contain branching statements); and
-	\item for each suffix $t^s$,
-	\begin{enumerate}
-		\item truncate the original trace at $e_b$ yielding prefix $t_s$; and
-		\item concatenate $t_s$ with the negation of $e_b$ followed by $t^s$.
-	\end{enumerate}
-\end{enumerate}
-Constraint solving is applied to each of the resulting traces analogously to the original trace.
+%TODO | and projection, abuse the terms?
+As shown in the following, suppose the symbolic execution  $symEngine(\tau, e)$ returns the single-thread traces starting from the branch $e$, which now takes a different decision. The resultant trace is computed by first removing the events thread-locally after $e$ (inclusively) and then appending one of the single-thread traces that represents a path in the unexplored branch of $e$. The negation $neg(e)$ of $e$, which is the same as $e$ except the evaluation result of the boolean expression differs, is also appended.
 
-We emphasize that exploration of new execution paths is subject to all the known limitations of symbolic execution, including in particular loop structures and object allocation. \tool\ currently fails if (i) the unexplored branch containts loops or (ii) there are object references that cannot be fully resolved at the branching point. In case of failure, \tool\ moves on to other branches. We demonstrate in Section \ref{sec:eval} that despite these limitations, the increase in coverage thanks to exploration of new paths is significant.
+
+
+\begin{algorithmic}[3]
+\For {$e: \tau$}
+  \If {$type(e)=branch$}
+    \State $S=symEngine(\tau, e)$
+	\For {$\tau': S$}
+	\State $\tau_r=\tau-((\tau|t^e)|>=e)$
+	\State $\tau_r=\tau_r.replace(e, neg(e) + \tau')$
+	\EndFor
+ \EndIf
+\EndFor
+\end{algorithmic}
+
+
+{\bf Symbolic Execution\ } Our symbolic execution is realized on top of the dataflow analysis, which generates events for each instruction within the unexplored branch.
+The symbolic execution has known limitations in reasoning about the schedules and loops (and recursion). Therefore, our analysis assumes all the events in the unexplored branch happen atomically at the branch event $e$ without interleavings from other threads, as illustrated also in the above algorithm (line 6). In this way, our analysis adopts the sequential reasoning. \tool\ will reschedule the events based on the relaxation. As for loop (or recursion), the analysis terminates the current data flow immediately after one iteration, i.e., we expand the loop for only once. Otherwise, the analysis terminates the data flow normally if the flow goes out of the scope of the unexplored branch.
+
+The analysis starts with the event $e$ (exclusively), with the current state $\sigma$ at $e$ as the initial state. 
+Remember that we use the runtime values for two types of events: the heap value of the base objects and the evaluation result of the boolean expression in the branch. 
+Other values are maintained but not used. Therefore, we also need to maintain the heap value and the boolean expression value in the symbolic execution.
+
+First, we propose standard kill/gen rules for three basic heap instructions to maintain the heap update along a given path. Specially, we separate the object creation from the local assignment. In the object creation, we assign a unique integer to represent the newly created object and store it into the state $\sigma$. For field reference, $\sigma[x.f]$ is actually short for two-level interpretation $\sigma[\sigma[x].f]$, where the first finds out the base object $\sigma[x]$ and the second searches for the object referenced by its field $f$. The kill/gen rules take effect only when $x.f$ is not of the primitive type.
+
+The analysis also generates the events, where the heap values are stored in the map of the event for latter use. For the branch, we store its boolean evaluation result.
+As the boolean result is available only after the branch takes the decision, we delay the generation of the branch event until the first event after the branch. 
+
+
+
+
+\begin{table*}
+\centering
+%\begin{small}
+\begin{tabular}{l|c|c}
+\multicolumn{1}{c|}{Operation} & {Kill} & {Gen} \\
+\hline
+{\tt $y$=$new (...)$} 			&  $\sigma[y] \mapsto \star$		&  $\sigma[y] \mapsto newI$, $<t, cnt, y=newI, \bot>$\\
+{\tt $y$=$x.f$} 			&   $\sigma[y]\mapsto \star$			&  $\sigma[y] \mapsto \sigma[x.f]$, $<t, cnt, y=x.f, \lsyn x \rsyn=\sigma[x]>$  \\
+{\tt $x.f=y$} & $\sigma[x.f] \mapsto \star$		&  $\sigma[x.f] \mapsto \sigma[y]$, $<t, cnt, x.f=y, \lsyn x \rsyn=\sigma[x]>$ \\
+{\tt $z=x\  bop\  y$} & 		&  $<t, cnt, z=x\  bop\  y, \bot>$ \\
+{\tt $if(x<y)$} & 	  &  $<t, cnt, if(x<y), \lsyn x<y \rsyn=bool>$\\
+\end{tabular}
+\caption{\label{table:killgen}Dataflow analysis}
+%\end{small}
+\end{table*}
+
+
+
+
+%Beyond relaxing flow dependencies, \tool\ is also capable of exploring code branches that were not executed in the original trace. This is achieved via a symbolic representation of the input trace. Given branching event $e_b$,
+%\begin{enumerate}
+%	\item model the branching condition symbolically to execute along the negation of the original branch;
+%	\item apply depth-first search (DFS) to uncover all execution suffixes under the unexplored branch (which may itself contain branching statements); and
+%	\item for each suffix $t^s$,
+%	\begin{enumerate}
+%		\item truncate the original trace at $e_b$ yielding prefix $t_s$; and
+%		\item concatenate $t_s$ with the negation of $e_b$ followed by $t^s$.
+%	\end{enumerate}
+%\end{enumerate}
+%Constraint solving is applied to each of the resulting traces analogously to the original trace.
+
+%We emphasize that exploration of new execution paths is subject to all the known limitations of symbolic execution, including in particular loop structures and object allocation. \tool\ currently fails if (i) the unexplored branch containts loops or (ii) there are object references that cannot be fully resolved at the branching point. In case of failure, \tool\ moves on to other branches. We demonstrate in Section \ref{sec:eval} that despite these limitations, the increase in coverage thanks to exploration of new paths is significant.
