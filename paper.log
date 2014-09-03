@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  2 SEP 2014 18:41
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  2 SEP 2014 22:13
 entering extended mode
  %&-line parsing enabled.
 **paper
@@ -312,31 +312,7 @@ LaTeX Warning: No \author given.
 
 (./introduction.tex
 
-LaTeX Warning: Citation `eraser' on page 1 undefined on input line 3.
-
-
-LaTeX Warning: Citation `learning' on page 1 undefined on input line 3.
-
-
-LaTeX Warning: Citation `avio' on page 1 undefined on input line 3.
-
-
-LaTeX Warning: Citation `ordervio' on page 1 undefined on input line 3.
-
-
-LaTeX Warning: Citation `dataflow' on page 1 undefined on input line 3.
-
-
-LaTeX Warning: Citation `leap' on page 1 undefined on input line 3.
-
-
-LaTeX Warning: Citation `replay2012' on page 1 undefined on input line 3.
-
-
 LaTeX Warning: Citation `XXX' on page 1 undefined on input line 5.
-
-
-LaTeX Warning: Citation `ucg' on page 1 undefined on input line 9.
 
 
 LaTeX Warning: Citation `XXX' on page 1 undefined on input line 9.
@@ -371,106 +347,47 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 13.
 (/usr/share/texmf-texlive/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 )
-
-LaTeX Warning: Reference `sec:eval' on page 1 undefined on input line 16.
-
-
-LaTeX Warning: Reference `fig:running' on page 1 undefined on input line 18.
-
 LaTeX Font Info:    Try loading font information for OT1+pcr on input line 18.
+
 (/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 
 LaTeX Warning: Citation `JEFF' on page 1 undefined on input line 60.
 
-
-LaTeX Warning: Reference `fig:running' on page 1 undefined on input line 68.
-
-
-LaTeX Warning: Reference `fig:running' on page 1 undefined on input line 73.
-
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
 ]) (./overview.tex
+! Missing } inserted.
+<inserted text> 
+                }
+l.32 			{\tt if (x $bop$  y) goto ...  $|$&
+                                             {\bf (branch)} \\
+I've put in what seems to be necessary to fix
+the current column of the current alignment.
+Try to go on, since this might almost work.
 
-LaTeX Warning: Reference `fig:running' on page 2 undefined on input line 3.
+[2]) (./trace.tex
 
-
-LaTeX Warning: Reference `fig:encoding' on page 2 undefined on input line 77.
-
-
-LaTeX Warning: Reference `fig:running' on page 2 undefined on input line 95.
-
-
-LaTeX Warning: Reference `fig:running' on page 2 undefined on input line 98.
-
-
-LaTeX Warning: Reference `fig:running' on page 2 undefined on input line 126.
-
-[2]) (./trace.tex [3]
-
-LaTeX Warning: Reference `Se:techoverview' on page 4 undefined on input line 43
-.
+LaTeX Warning: Reference `sec:...' on page 3 undefined on input line 22.
 
 
-Underfull \hbox (badness 1803) in paragraph at lines 81--83
+LaTeX Warning: Reference `sec:...' on page 3 undefined on input line 25.
+
+[3]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Underfull \hbox (badness 1803) in paragraph at lines 139--141
  \OT1/ptm/m/it/10 Path Con-straints: [][] \OT1/ptm/m/n/10 The re-quire-ment wit
 h re-spect to
  []
 
 
-LaTeX Warning: Citation `JEFF-PLDI14' on page 4 undefined on input line 87.
+LaTeX Warning: Citation `JEFF-PLDI14' on page 4 undefined on input line 145.
 
-
-LaTeX Warning: Reference `fig:running' on page 4 undefined on input line 102.
-
-
-LaTeX Warning: Reference `fig:heapAccess' on page 4 undefined on input line 115
-.
-
-[4]
-
-LaTeX Warning: Reference `Ta:syntax' on page 5 undefined on input line 135.
-
-) (./constraints.tex
-
-LaTeX Warning: Reference `sec:eval' on page 5 undefined on input line 19.
-
-) (./proofsec.tex (./proof.tex
-
-LaTeX Warning: Citation `pldi14' on page 5 undefined on input line 1.
-
-
-LaTeX Warning: Citation `maximal' on page 5 undefined on input line 1.
-
-[5]
-
-LaTeX Warning: Citation `pldi14' on page 6 undefined on input line 36.
-
-
-LaTeX Warning: Citation `maximal' on page 6 undefined on input line 36.
-
-
-LaTeX Warning: Citation `pldi14' on page 6 undefined on input line 39.
-
-
-LaTeX Warning: Citation `maximal' on page 6 undefined on input line 48.
-
-
-LaTeX Warning: Citation `maximal' on page 6 undefined on input line 49.
-
-
-LaTeX Warning: Citation `pldi14' on page 6 undefined on input line 49.
-
-
-LaTeX Warning: Reference `axiom:prefix' on page 6 undefined on input line 55.
-
-
-LaTeX Warning: Reference `axiom:local' on page 6 undefined on input line 55.
-
-
+[4]) (./constraints.tex) (./proofsec.tex (./proof.tex [5]
 Underfull \hbox (badness 7777) in paragraph at lines 55--56
 []\OT1/ptm/b/n/10 Theorem 1 \OT1/ptm/m/n/10 (Sound-ness)\OT1/ptm/b/n/10 . []\OT
 1/ptm/m/it/10 All traces in the clo-sure
@@ -507,29 +424,19 @@ it/10 th \OMS/cmsy/m/n/10 ^^Y
 LaTeX Font Info:    Try loading font information for OT1+phv on input line 3.
  (/usr/share/texmf-texlive/tex/latex/psnfss/ot1phv.fd
 File: ot1phv.fd 2001/06/04 scalable font definitions for OT1/phv.
-)
-
-LaTeX Warning: Reference `tab:main' on page 6 undefined on input line 30.
-
-[6]
-
-LaTeX Warning: Reference `tab:main' on page 7 undefined on input line 36.
-
+) [6]
 
 LaTeX Warning: Reference `' on page 7 undefined on input line 43.
 
 
 LaTeX Warning: Reference `' on page 7 undefined on input line 43.
 
-
+[7]
 Overfull \hbox (7.60513pt too wide) in paragraph at lines 70--91
 []  
  []
 
 
-LaTeX Warning: Reference `fig:relax1' on page 7 undefined on input line 110.
-
-[7]
 
 pdfTeX warning: pdflatex (file ./cases/Visio-bbuffer.pdf): PDF inclusion: found
  PDF version <1.5>, but at most version <1.4> allowed
@@ -537,10 +444,6 @@ pdfTeX warning: pdflatex (file ./cases/Visio-bbuffer.pdf): PDF inclusion: found
 File: cases/Visio-bbuffer.pdf Graphic file (type pdf)
 
 <use cases/Visio-bbuffer.pdf>
-
-LaTeX Warning: Reference `fig:relax2' on page 8 undefined on input line 123.
-
-
 
 pdfTeX warning: pdflatex (file ./cases/Visio-msort.pdf): PDF inclusion: found P
 DF version <1.5>, but at most version <1.4> allowed
@@ -568,18 +471,15 @@ Before submitting the final camera ready copy, remember to:
 
 LaTeX Warning: There were undefined references.
 
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
  ) 
 Here is how much of TeX's memory you used:
- 4826 strings out of 493848
- 68141 string characters out of 1152823
+ 4829 strings out of 493848
+ 68180 string characters out of 1152823
  177539 words of memory out of 3000000
- 8009 multiletter control sequences out of 15000+50000
+ 8012 multiletter control sequences out of 15000+50000
  54632 words of font info for 114 fonts, out of 3000000 for 9000
  717 hyphenation exceptions out of 8191
- 27i,10n,40p,1146b,288s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 27i,10n,40p,1146b,290s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
 ve/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/share/texmf-texlive/fonts/typ
 e1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-texlive/fonts/type1/public/a
@@ -600,7 +500,7 @@ cm/cmtt8.pfb></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr
 ive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/
 times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb></
 usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (9 pages, 362373 bytes).
+Output written on paper.pdf (9 pages, 366039 bytes).
 PDF statistics:
  255 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

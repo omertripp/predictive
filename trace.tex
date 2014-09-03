@@ -1,52 +1,110 @@
 \section{Relaxation of Flow Dependencies}
+The main goal of our analysis is to, given an original trace $\tau$ over the events $\mathcal{E}$, derive a trace $\tau'$ over the same set of events, which has a new scheduling $\pi$ of the events (the order of events inside each thread should remain unchanged) and a new mapping $\theta$ from variables to values in the events. Our first relaxation comes from the insight that, we allow the variables to read different values than in the original trace even if such variables are used to determine the control flow, while existing approaches enforce them to read the same values as in the original trace. As a result, our relaxation allows more schedules, which are likely to expose more races.
+ 
+Not every scheduling or every mapping $\theta$ guarantees a new feasible trace $\tau'$, therefore, we need to compute the scheduling and mapping that lead to feasible trace. We explain the technique details in the following.
+
 
 % % 
 % TODO: Explain the format of the raw trace in impl.tex.
 % %
 
-We begin by describing the first relaxation, whereby the dependence structure defined by the original trace is potentially violated while retaining soundness.
+
+%We begin by describing the first relaxation, whereby the dependence structure defined by the original trace is potentially violated while retaining soundness.
 
 \subsection{SSA Form of the Trace}
+First of all, we require the SSA form of the trace, i.e., each variable in defined exactly once in the trace. Such requirement is a prerequisite for the computation of the mapping $\theta$, as it can map each variable to only one value. Another side effect is that the def/use chains become explicit in the SSA form, which simplifies the following analysis steps.
 
-The first step of the process is to rewrite the concrete execution trace into a symbolic form that enables \tool\ to 
-derive reordering constraints. We describe how \tool\ encodes a trace into symbolic form in two steps. We first start with ``local'' intraprocedural events --- i.e., 
-transitions that manipulate memory accessed by at most a single thread during an invocation-free run --- and then extend our encoding scheme to the entire set of possible events.
-
-\paragraph{Basic Encoding: Local Accesses}
-
-The fundamental encoding transformation is to induce Static Single Assignment (SSA) form on the raw trace, such that
-a variable is defined exactly once. In this way, def/use chains become explicit, and encoding of trace events as constraints is simplified. As an illustration, trace
-\begin{quote}
-	{\tt 1: x=1; 2: x<3; 3: x=3;} \\
-	{\tt 4: y=1;} \\
-	{\tt 5: z=x+y}
-\end{quote}
-becomes
-\begin{quote}
-	{\tt 1: x$^1$=1; 2: x$^1$<3; 3: x$^3$=3;} \\
-	{\tt 4: y$^4$=1;} \\
-	{\tt 5: z$^5$=x$^3$+y$^4$}
-\end{quote}
-(For readability, we version variables according to the line number of their definition.)
-
-Beyond the default SSA rewriting algorithm, we apply a specialized transformation to handle local heap accesses. While in general determining whether a given heap access is local is an undecidable problem, in the context
-of a concrete execution trace this determination is straightforward. We can thus improve upon the baseline SSA form, where def/use chains over heap accesses are ignored. Indeed, to ensure feasibility, we must account for such accesses. Hence, we replace accesses to field {\tt f} of local object $o$ with a fresh local variable {\tt l$_{o{\tt .f}}$}, where $o{\tt .f}$ denotes the memory location itself and not its value. This is done prior to the standard SSA transformation, and under the assumption that in the predicted run, the base object $o$ remains the same.
-
-\paragraph{Full Encoding: Method Calls and Shared Accesses}
-
-To complete the encoding algorithm, we next explain how shared heap accesses and method calls are dealt with. Similarly to the case of local heap accesses, we take advantage of the fact that the full execution trace is available for analysis to detect shared accesses (the dual of local accesses) as well as call-site resolutions (which is more relevant in practice, where we support virtual method calls).
-
-To account for method invocations, we induce additional context on variable accesses. Instead of recording only the version of a variable, we also represent as part of the variable's identifier its enclosing method and its invocation counter. Thus, symbol ${\tt m}^2 \colon {\tt v}^7$ is interpreted as the definition of local variable ${\tt v}$ within the second invocation of method ${\tt m}$ that occurs at trace index 7.
-
-In this way, the trace is flattened. Method invocations are substituted with qualified variable names, and the rest of the encoding steps, described above, remain unchanged. Because the trace is finite and fully resolved, challenges such as looping, recursion and mutual recursion are all obviated.
-
-The final aspect of our encoding process is representation of shared heap accesses. As illustrated in Section \ref{Se:techoverview}, this is done via designated symbols:
+\tool\ handles the local assignment and heap accesses differently.
 \begin{itemize}
-	\item $W^{k}_{\tt v}$ denotes write access to variable ${\tt v}$ at trace index $k$ (where ${\tt v}$ is assumed to be a qualified identifier to account for the interprocedural setting).
-	\item Analogously, $R^{k}_{\tt v}$ denotes that ${\tt v}$ is read at index $k$.
+\item {\bf Local Assignment\ } The SSA form for local assignment resembles the SSA form of static instructions in compiler optimization, except that the loops and recursions are fully resolved in a concrete trace and there is no need for the Phi node. More concretely, we replace the variable $v$ defined in an event, as well as the following uses of the definition, to a new variable $v^{id}$, where $id$ is the unique id of the event. The uniqueness of the id guarantees that no two events define the same variable, i.e., each variable is defined exactly once. Note that the uses of a definition can be computed easily by scanning the trace afterwards for the variables of the same name before the next redefinition. 
+\item {\bf Heap accesses\ } The accesses of the local heap locations and the accesses of shared locations behave differently, therefore, we introduce different SSA form for them. 
+\begin{itemize}
+\item {\bf Local Heap Accesses\ } The accesses of local heap locations behave similarly to the local assignment as both the definition and uses belong to the single thread. Therefore we model them as local assignments: We introduce a fresh local variable {\tt l$_{\lsyn o.f \rsyn}^{id}$} to replace each definition and  the corresponding uses of a  field {\tt f} of the local object $o$. An assumption here is the uses and the definition still refer to the same base object $o$ in the predicted run, which is enforced through the constraint specification (Section~\ref{sec:...}).
+\item  {\bf Shared Heap Accesses\ } The accesses of shared locations are more complex. Each shared read may read from one of multiple writes that define the shared location, under different schedules.     To correlate the reads and the writes, we introduce two symbols, $W^{id}_{\tt \lsyn o.f\rsyn }$, which denotes write access to 
+the field $f$ of the shared object $o$ by the event $id$, and $R^{id}_{\tt \lsyn o.f\rsyn }$,  which denotes the read access of the location $o.f$ by the event $id$. 
+Similar to the local heap accesses, an assumption for the correlation is that the writes and reads still refer to the same base object $o$ in the predicted run, which we guarantee by specifying additional constraints (Section~\ref{sec:...}). 
+\end{itemize}
 \end{itemize}
 
-The main motivation to encode shared heap accesses using special symbols is to simplify downstream processing, and in particular, the definition of candidate races. We could encode the question of shared versus local accesses as additional constraints (requiring that a variable be accessed by more than one thread), but that would be more complicated and less efficient.
+% We could encode the question of shared versus local accesses as additional constraints (requiring that a variable be accessed by more than one thread), but that would be more complicated and less efficient.
+
+
+%\paragraph{Basic Encoding: Local Accesses}
+%
+%The fundamental encoding transformation is to induce Static Single Assignment (SSA) form on the raw trace, such that
+%a variable is defined exactly once. In this way, , and encoding of trace events as constraints is simplified. As an illustration, trace
+%\begin{quote}
+%	{\tt 1: x=1; 2: x<3; 3: x=3;} \\
+%	{\tt 4: y=1;} \\
+%	{\tt 5: z=x+y}
+%\end{quote}
+%becomes
+%\begin{quote}
+%	{\tt 1: x$^1$=1; 2: x$^1$<3; 3: x$^3$=3;} \\
+%	{\tt 4: y$^4$=1;} \\
+%	{\tt 5: z$^5$=x$^3$+y$^4$}
+%\end{quote}
+%(For readability, we version variables according to the line number of their definition.)
+
+
+
+%%TODO update the intro+moti, make sure the same style
+\begin{figure}
+\centering
+\begin{tabular}{ll}
+\multicolumn{2}{c}{{\tt {\bf x} = 0; {\bf y} = 0;}} \\
+\hline
+\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$} \\
+\hline
+{\tt 1: s=0; } & \\
+{\tt 2: for(i=1;i<3;i++)} & \\
+{\tt 3: \ \ \ s+=i;} & \\
+{\tt 4: {\bf y} = s;} & \\
+{\tt 5: {\bf x} = 1;} & \\
+{\tt 6: {\bf y} = 5;} & \\
+& {\tt 7: if ({\bf y} > 2)} \\
+& {\tt 8:~~print({\bf x}+1);} \\	
+& {\color{Gray} {\tt 9: else}} \\
+& {\color{Gray} {\tt 10:~~print({\bf x}+2);}}
+\end{tabular}
+\caption{Running Example (shared variables are in bold font). }
+\label{fig:running2}
+\end{figure}
+
+ 
+\begin{figure}
+\centering
+\begin{tabular}{l|l}
+\hline
+\multicolumn{1}{c}{$Trace$} & \multicolumn{1}{c}{$SSA form of  Trace$} \\
+\hline
+{\tt 0: {\bf x}=0} &  {\tt 0: $W^0_x$=0}    \\
+{\tt 1: {\bf y}=0} &   {\tt 1: $W^1_y$=0}   \\
+{\tt 2: s=0} &  {\tt 2: $s^2$=0}   \\
+{\tt 3: i=1} &     {\tt 3: $i^3$=1}   \\
+{\tt 4: i<3} &    {\tt 4: $i^3$<3} \\
+{\tt 5: s=s+i} & {\tt 5: $s^5$=$s^2$+$i^3$}   \\
+{\tt 6: i=2} &       {\tt 6: $i^6$=2}  \\
+{\tt 7: i<3} &      {\tt 7: $i^6$<3}  \\
+{\tt 8: s=s+i} &  {\tt 8: $s^8$=$s^5$+$i^6$}  \\
+{\tt 9: i=3} &     {\tt 9: $i^9$=3}  \\
+{\tt 10: i<3} &    {\tt 10: $i^9$<3}  \\
+{\tt 11: {\bf y} = s;} &  {\tt 11: $W^{11}_y$ = $s^8$;}  \\
+{\tt 12: {\bf x} = 1;} &    {\tt 12: $W^{12}_x$ = 1;}   \\
+{\tt 13: {\bf y} = 5;} &    {\tt 13: $W^{13}_y$ = 5;}  \\
+{\tt 14: {\bf y} > 2}  &    {\tt 14: $R^{14}_y$ > 2} \\
+{\tt 15: tmp={\bf x}+1;}  & {\tt 15: tmp=$R^{15}_x$+1;}   \\	
+{\tt 16: print(tmp);} &  {\tt 16: print(tmp);}  \\
+\end{tabular}
+\caption{Trace}
+\label{fig:t4running2}
+\end{figure}
+
+Figure~\ref{fig:t4running2} exemplifies a trace and its SSA form, where the trace is generated from the program in Figure~\ref{fig:running2}.
+Each label in  Figure~\ref{fig:t4running2} on the left hand denotes the id of the event. As seen, event 5 uses the variable $s^2$ defined at event 2 and defines the variable $s^5$, which is used afterwards. The read/write of the shared variables are denoted in the special form, such as $R^{14}_y$ and $W^{13}_y$. We use $x, y$ to represent the location for simplicity.
+
+
+
 
 \subsection{Constraint System}
 

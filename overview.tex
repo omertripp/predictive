@@ -7,16 +7,19 @@ As input, we assume (i) a program $P$ as well as (ii) a trace of $P$ recorded du
 % in Static Single Assignment (SSA) form, such that every variable is defined exactly once.
 
 \subsection{Preliminaries}
-To facilitate our presentation, we first introduce some terminologies used throughout this paper.
-
-{\bf Trace \ } A trace $\tau$ is a sequence of events recorded during the observation run.
-
-{\bf Event\ } An event, $e=<t, id, inst, map>$, is a concrete representation that captures the details about the runtime execution of a static instruction $inst$,
-where $t$ denotes the thread that issues the event, $id$ is the id associated with each event, $inst$ is the static instruction and $map$ maps the variable in the instruction to the runtime values. The key property of  $id$ is {\em uniqueness}, i.e., any two events in the trace own different ids. A natural id for each event is its index in the trace. We denote the thread and id as $t^e$ and $i^e$ respectively.
-
-The instructions are three-address instructions involving at most three operands, which modern compilers commonly support.  Specifically, we are interested in the following types of instructions. 
+To facilitate our presentation, we first introduce some terminologies used throughout this paper. At the high level, a trace is a sequence of events recorded during the observation run.
 
 
+
+
+{\bf Event\ } An event, $e=<t, id, inst, map>$, is a concrete representation that captures the details about the runtime execution of a static instruction $inst$.
+
+\begin{itemize}
+\item $t$ refers to the thread that issues the event, denoted as $t^e$.
+\item  $id$ refers to the id associated with each event, denoted as $i^e$. The key property of  $id$ is {\em uniqueness}, i.e., any two events in the trace own different ids. A natural id for each event is its index in the trace. 
+\item $inst$ is the static instruction. The instructions are three-address instructions involving at most three operands, which modern compilers commonly support.  Specifically, we are interested in the types of instructions listed in Table~\ref{Ta:syntax}. When the variable does not appear on the left hand of an equation, such as $y$ in $x.f=y$, it may refer to a variable, a constant or event object creation expression $new (...)$.  The $bop$ stands for the binary operator, which may refer to $+, -, *, /, \%, \wedge, \vee$ in the assignment, or refer to $<, >, =$ in the branch. The target of the branch event is not important in our scope, therefore, we may omit the $goto$ part. The listed instructions are so basic that it can capture most events in a common imperative programming language. For example, the method call can be modeled by the above list, where the argument passing and value return are modeled as assignment events, and the virtual function resolution is modeled as the branch event conditioned on the type of the caller object.
+\item $map$ maps the variable in the instruction to the runtime values. The map stores the value for each variable observed in the dynamic run. For simplicity, we use the notion $\lsyn x \rsyn^e$ to retrieve the value associated with the variable $x$ in $e$. Specially, $\lsyn x.f \rsyn^e$ returns the location of $x.f$ (rather than  the value stored in the location), which is denoted as a pair $(\lsyn x \rsyn^e, f)$.
+\end{itemize}
 
 
 \begin{table}
@@ -25,8 +28,8 @@ The instructions are three-address instructions involving at most three operands
 			\multicolumn{1}{l}{{\tt s} $::=$} & \\
 			{\tt y = x.f} $|$\ & {\bf (heapr)} \\ 
 			{\tt x.f = y} $|$\ & {\bf (heapw)} \\ %\ $|$\ {\tt x.f = $c$}\
-			{\tt z = x $bop$ y}\  $|$ & {\bf (assign)} \\ %$|$\ {\tt z = $c$} $|$ {\tt z = new()}
-			{\tt if (x $bop$  y) goto ...  $|$} &  {\bf (branch)} \\
+			{\tt z = x $bop$ y}\  $|$& {\bf (assign)} \\ %$|$\ {\tt z = $c$} $|$ {\tt z = new()}
+			{\tt if (x $bop$  y) goto ...  $|$&  {\bf (branch)} \\
 			{\tt lock(l)}\ $|$\ {\tt unlock(l)}  $|$& {\bf (sync)} \\
 			{\tt fork(t)}\ $|$\ {\tt join(t)}$|$ {\tt begin(t)}\ $|$\ {\tt end(t)}$|$  & {\bf (thread)}
 		\end{tabular}
@@ -35,12 +38,15 @@ The instructions are three-address instructions involving at most three operands
 \end{table}
 
 
-When the variable does not appear on the left hand of an equation, such as $y$ in $x.f=y$, it may refer to a variable, a constant or event object creation expression $new (...)$.  The $bop$ stands for the binary operator, which may refer to $+, -, *, /, \%, \wedge, \vee$ in the assignment, or refer to $<, >, =$ in the branch. The target of the branch event is not important in our scope, therefore, we may omit the $goto$ part.
-The listed instructions are so basic that it can capture most events in a common imperative programming language. For example, the method call can be modeled by the above list, where the argument passing and value return are modeled as assignment events, and the virtual function resolution is modeled as the branch event conditioned on the type of the caller object.
+{\bf Trace \ } 
+We propose the projection operation and domains to facilitate the reasoning of the trace.
+\begin{itemize}
+\item projection operation  ``$|$'': $\tau|t$ contains only the (ordered) events from the thread $t$; $\tau|l$ contains the events involving the location $l$; $\tau|i$ contains only the event of which the id equals $i$; $\tau|\leq e$ denotes the prefix of $e$, i.e., the events preceding the event $e$; $\tau|\geq e$ denotes the events after $e$; $\tau|>=e_1\wedge <=e_2$ denotes the events between $e_1$ and $e_2$.
+\item sets: $\mathcal{T}$ denotes the set of threads involved;  $\mathcal{L}$ denotes the set of memory locations involved; 
+$\mathcal{SV}$ denotes the set of shared variables, which reference the shared locations, the shared location $l$ can be judged by counting the number of threads in $\tau|l$;  $\mathcal{E}$ denotes the set of events involved.
+\end{itemize}
 
-The map stores the value for each variable observed in the dynamic run. For simplicity, we use the notion $\lsyn x \rsyn^e$ to retrieve the value associated with the variable $x$ in $e$. 
 
-In addition, we propose the projection operation  $|$  to help the reasoning of the trace: $\tau|t$ contains only the (ordered) events from the thread $t$; $\tau|i$ contains only the event of which the id equals $i$; $\tau|\leq e$ denotes the prefix of $e$, i.e., the events preceding the event $e$; $\tau|\geq e$ denotes the events after $e$; $\tau|>=e_1\wedge <=e_2$ denotes the events between $e_1$ and $e_2$.
 
 
 

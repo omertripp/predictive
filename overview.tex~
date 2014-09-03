@@ -26,7 +26,7 @@ The instructions are three-address instructions involving at most three operands
 			{\tt y = x.f} $|$\ & {\bf (heapr)} \\ 
 			{\tt x.f = y} $|$\ & {\bf (heapw)} \\ %\ $|$\ {\tt x.f = $c$}\
 			{\tt z = x $bop$ y}\  $|$ & {\bf (assign)} \\ %$|$\ {\tt z = $c$} $|$ {\tt z = new()}
-			{\tt if (x $bop$  y) goto ...  $|$ &  {\bf (branch)} \\
+			{\tt if (x $bop$  y) goto ...  $|$} &  {\bf (branch)} \\
 			{\tt lock(l)}\ $|$\ {\tt unlock(l)}  $|$& {\bf (sync)} \\
 			{\tt fork(t)}\ $|$\ {\tt join(t)}$|$ {\tt begin(t)}\ $|$\ {\tt end(t)}$|$  & {\bf (thread)}
 		\end{tabular}
