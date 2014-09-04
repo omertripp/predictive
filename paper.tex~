@@ -1,3 +1,10 @@
+%TODO
+% 1 update the symbols in overview so that they are consistent with the following. 
+% 2 add examples to technique section to make it easier to understand
+% 3 theorems problem
+% 4 improve technique, eval. 
+% 5 related work, proofread...
+
 \documentclass[conference]{IEEEtran}
 
 \usepackage{graphicx}
@@ -11,7 +18,7 @@
 % conflict with the following commands
 %\newdef{definition}{Definition}
 \newtheorem{definition}{Definition}
-\newtheorem{axiom}{Axiom}
+\newtheorem{myaxiom}{Axiom}
 \newtheorem{mytheorem}{Theorem}
 \newtheorem{myproperty}{Property}
 \newtheorem{myrule}{Rule}
@@ -19,6 +26,9 @@
 \newcommand{\tool}{{\sc Recipe}}
 \newcommand{\lsyn}{\lbrack\!\lbrack}
 \newcommand{\rsyn}{\rbrack\!\rbrack}
+
+
+\setcounter{secnumdepth}{3}
 
 
 \ifCLASSINFOpdf

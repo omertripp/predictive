@@ -6,6 +6,7 @@ As input, we assume (i) a program $P$ as well as (ii) a trace of $P$ recorded du
 
 % in Static Single Assignment (SSA) form, such that every variable is defined exactly once.
 
+
 \subsection{Preliminaries}
 To facilitate our presentation, we first introduce some terminologies used throughout this paper. At the high level, a trace is a sequence of events recorded during the observation run.
 
@@ -14,16 +15,16 @@ To facilitate our presentation, we first introduce some terminologies used throu
 
 {\bf Event\ } An event, $e=<t, id, inst, map>$, is a concrete representation that captures the details about the runtime execution of a static instruction $inst$.
 
+%TODO denote the event_{id} format?
 \begin{itemize}
 \item $t$ refers to the thread that issues the event, denoted as $t^e$.
-\item  $id$ refers to the id associated with each event, denoted as $i^e$. The key property of  $id$ is {\em uniqueness}, i.e., any two events in the trace own different ids. The important property of $id$ is {\em monotonicity}, i.e.,  the events from the same thread should own the strictly increasing ids. Throughout this paper, we use  the index of an event in the trace as its id, which satisfies the above properties. Throughout this paper, we use the event $e$ and its id $id$ interchangeably in our notation given the one-to-one correspondence between $e$ and $id$. Thus, for example, if the index of event $e$ is 3, then $t^e$ and $t^3$ refer to the same thread.
-\item $inst$ is the static instruction. The instructions are three-address instructions involving at most three operands, which modern compilers commonly support.  Specifically, we are interested in the types of instructions listed in Table~\ref{Ta:syntax}. When the variable does not appear on the left hand of an equation, such as $y$ in $x.f=y$, it may refer to a variable, a constant or event object creation expression $new (...)$.  The $bop$ stands for the binary operator, which may refer to $+, -, *, /, \%, \wedge, \vee$ in the assignment, or refer to $<, >, =, \wedge, \vee$ in the branch. The target of the branch event is not important in our scope, therefore, we may abbreviate the branch instruction as the boolean expression afterwards. The listed instructions suffice to represent all trace events of interest. This is because a concrete finite execution trace can be reduced to a straight-line loop-free intraprocedural path program (argument passing modeled via assignments to fresh variables). This standard form of simplification preserves all the data-race-related information contained in the original trace. 
+\item  $id$ refers to the id associated with each event, denoted as $i^e$. The key property of  $id$ is {\em uniqueness}, i.e., any two events in the trace own different ids. The other important property of $id$ is {\em monotonicity}, i.e.,  the events from the same thread should own the strictly increasing ids. Throughout this paper, unless otherwise specified, we use  the index of an event in the trace as its id, which satisfies the above properties. Throughout this paper,  we denote an event as $e_{id}$ with the id as the subscript. We may use the terms $e_{id}$ and $id$ interchangeably given their one-to-one correspondence, e.g., $t^{e_3}$ and $t^3$. 
+\item $inst$ is the static instruction. The instructions are three-address instructions involving at most three operands, which modern compilers commonly support.  Specifically, we are interested in the types of instructions listed in Table~\ref{Ta:syntax}. When the variable does not appear on the left hand of an equation, such as $y$ in $x.f=y$, it may refer to a variable, a constant or event object creation expression $new (...)$.  The $bop$ stands for the binary operator, which may refer to $+, -, *, /, \%, \wedge, \vee$ in the assignment, or refer to $<, >, =, \wedge, \vee$ in the branch. The target of the branch event is not important in our scope, therefore, we may abbreviate the branch instruction as the boolean expression afterwards. The listed instructions suffice to represent all trace events of interest. This is because a concrete finite execution trace can be reduced to a straight-line loop-free call-free path program  (argument passing and value return of the method call are modeled as assignments). This standard form of simplification preserves all the data-race-related information contained in the original trace. 
 \item $map$ is a mapping from live expressions at the current event to their value (and thus a partial mapping from expressions to values). Live expressions include program variables, object fields, boolean expressions, etc. We use the notation $\lsyn exp \rsyn^e$ to retrieve the value associated with expression $exp$ at $e$.
-
-maps the variable in the instruction to the runtime values. The map stores the value for each variable observed in the dynamic run. For simplicity, we use the notion $\lsyn x \rsyn^e$ to retrieve the value associated with the variable $x$ in $e$. 
+Specially,  we also store the heap location value  $\lsyn \overline{x.f} \rsyn^e$ for a field $x.f$. Note the difference between $\lsyn \overline{x.f} \rsyn^e$ and $\lsyn x.f \rsyn^e$, which represent the location and the value stored in it respectively. The location value $\lsyn \overline{x.f} \rsyn^e$ is computed as a pair $(\lsyn x \rsyn^e, f)$.
 \end{itemize}
 
-%Specially, $\lsyn x.f \rsyn^e$ returns the location of $x.f$ (rather than  the value stored in the location), which is denoted as a pair $(\lsyn x \rsyn^e, f)$.
+%TODO virtual method call
 
 \begin{table}
 	\begin{center}
@@ -79,46 +80,86 @@ $\mathcal{SV}$ denotes the set of shared variables, which reference the shared l
 %reduced their respective code to $\epsilon$ as a \emph{trace}.
 
 
-
 %TODO this section is inconsistent with others. change it!
 \subsection{Constraint System}
+The predictive analysis takes the program and a trace as the input.  Suppose it starts with the following trace of the program in  Figure \ref{fig:running}:  $e_1 e_2 e_3 e_4 e_5$, where the line number is used as the event id (subscript). A potential race is between the pair, $(e_2, e_5)$, as they access the shared variable $x$ from different threads and one is a write. 
 
-We begin with an explanation of the encoding process. The resulting formula is provided in Figure \ref{fig:encoding}. We describe the conjuncts comprising the formula one by one.
+Given the trace, the predictive analysis preserves the same event sequence for each thread, i.e., $T_1$ still executes $e_1 e_2 e_3$ and $T_2$ still executes $e_4 e_5$, 
+while rescheduling the events from different threads so that the potential race pair can run concurrently, i.e., $e_2$ and $e_5$ run concurrently. Therefore, our goal is to compute a new schedule that witnesses a race, under the (both inter-thread and intra-thread) data flow constraints, control flow constraints and synchronization constraints. In the following, we explain only the necessary constraints (the full description of constraints is explained in Section~\ref{sec:tech}).
 
-\begin{figure*}
-	\begin{center}
-$$
-	\begin{array}{rcl}
-	& \left( O_1 < O_2 < O_3 \wedge O_4 < O_5 \wedge O_4 < O_7 \right) & \textbf{(program order)} \\
-\bigwedge & \left( W_{\tt x}^0 = 0 \wedge W_{\tt y}^0 = 0 \wedge W_{\tt z}^0 = 3 \wedge W_{\tt y}^1 = 3 \wedge 
-	W_{\tt x}^2 = 1 \wedge W_{\tt y}^3 = 5 \right) & \textbf{(variable definitions)} \\
-\bigwedge & \left(		(R_{\tt y}^4=W_{\tt y}^0 \wedge O_4 < O_1) \vee	
-(R_{\tt y}^4=W_{\tt y}^1 \wedge O_1 < O_4 < O_3) \vee
-(R_{\tt y}^4=W_{\tt y}^3 \wedge O_3 < O_4)
-		\right) & \textbf{(thread interference)} \\
-\bigwedge & R_{\tt y}^4 > 2 \equiv {\bf true} & \textbf{(path conditions)} \\
-\bigwedge & t^2 \neq t^5 \wedge (2\ writes\ {\tt x} \vee 5\ writes\ {\tt x}) \wedge O_2 = O_5 & \textbf{(race condition)}
-	\end{array} 
-$$
-\end{center}
-\caption{\label{fig:encoding}\tool\ encoding of the trace in Figure \ref{fig:running} as a constraint system}
-\end{figure*}
+% We purposely omit the synchronization constraints, as they are already well explained in existing techniques~\cite{yannis, pecan}.
 
-\paragraph{Program Order} The first set of constraints reflects ordering constraints between program statements. We use the symbol $O_i$ to denote the $i$th program statement, which yields the following formula for Figure \ref{fig:running}:
-$$
-	O_1 < O_2 < O_3 \wedge O_4 < O_5 \wedge O_4 < O_7
-$$
-That is, the first 3 statements are totally ordered, and the {\tt if} statement executes before the body (either $O_5$ or $O_7$).
+To model the schedule, we assign an order (integer) variable to each event, e.g., $O_{e_1}$. The event with smaller order variable is scheduled earlier.
+Also, we introduce symbols to denote shared accesses, e.g., $W^{id}_{x}$ ($R^{id}_{x}$) denotes the write (read) of the shared variable $x$ by the event $e_{id}$.
+The local accesses are not used in this example and therefore omitted.
 
-\paragraph{Variable Definitions} The next set of constraints, denoted ${\tt w}^i=k$ for local variables and $W_{\tt w}^i=k$ for shared variables, capture variable definitions: Variable {\tt w} is assigned value $k$ at statement $i$. For our running example, we obtain:
+
+
+
+
+
+%We begin with an explanation of the encoding process. The resulting formula is provided in Figure \ref{fig:encoding}. We describe the conjuncts comprising the formula one by one.
+
+%\begin{figure*}
+%	\begin{center}
+%$$
+%	\begin{array}{rcl}
+%	& \left( O_1 < O_2 < O_3 \wedge O_4 < O_5 \wedge O_4 < O_7 \right) & \textbf{(program order)} \\
+%\bigwedge & \left( W_{\tt x}^0 = 0 \wedge W_{\tt y}^0 = 0 \wedge W_{\tt z}^0 = 3 \wedge W_{\tt y}^1 = 3 \wedge 
+%	W_{\tt x}^2 = 1 \wedge W_{\tt y}^3 = 5 \right) & \textbf{(variable definitions)} \\
+%\bigwedge & \left(		(R_{\tt y}^4=W_{\tt y}^0 \wedge O_4 < O_1) \vee	
+%(R_{\tt y}^4=W_{\tt y}^1 \wedge O_1 < O_4 < O_3) \vee
+%(R_{\tt y}^4=W_{\tt y}^3 \wedge O_3 < O_4)
+%		\right) & \textbf{(thread interference)} \\
+%\bigwedge & R_{\tt y}^4 > 2 \equiv {\bf true} & \textbf{(path conditions)} \\
+%\bigwedge & t^2 \neq t^5 \wedge (2\ writes\ {\tt x} \vee 5\ writes\ {\tt x}) \wedge O_2 = O_5 & \textbf{(race condition)}
+%	\end{array} 
+%$$
+%\end{center}
+%\caption{\label{fig:encoding}\tool\ encoding of the trace in Figure \ref{fig:running} as a constraint system}
+%\end{figure*}
+
+
+{\bf Race Condition\ } The potential race pair involves two accesses of the same shared variable from different threads, where one access is a write. Given any potential race pair, e.g., ($e_2$, $e_5$), it is a real race if and only if the two accesses can occur at the same time (race condition), which is captured by the race condition constraint
+$$
+	O_2 = O_5
+$$.
+The race condition constraint--- together with the other constraints --- guarantees the feasibility of the predicted race if a solution is found for the overall constraint system.
+
+{\bf Intra-thread Constraints\ } The predictive analysis needs to preserve the same event sequence for each thread, which further requires 
+
+\begin{itemize}
+\item {\bf Control Flow Constraints\ } Each thread takes the same control flows (or branch decisions) to reproduce the events.
+ For the running example (ignoring the statements in red), this yields:
+$$
+	R_{\tt y}^4 > 2 \equiv {\bf true}
+$$
+That is, the value of variable {\tt y} read at $e_4$ is greater than $2$. 
+
+
+\item {\bf Intra-thread Order Constraints\ } The events should follow the same thread-local order as in the original trace. This constraint is imposed by the fact that the two runs share the same instruction sequence and take the same control flows. 
+We yield the following formula:
+$$
+	O_1 < O_2 < O_3 \wedge O_4 < O_5
+$$
+That is, the three events from $T_1$ are totally ordered, and the branch event $e_4$ in $T_2$ executes before the event $e_5$ inside the branch body (We do not include $e_7$ as it is not in the trace).
+
+\item {\bf Intra-thread Data Flow Constraints\ } The events should respect the data flow constraints imposed by each instruction.
+ For our running example, we obtain:
 $$
 	W_{\tt x}^0 = 0 \wedge W_{\tt y}^0 = 0 \wedge W_{\tt z}^0 = 3 \wedge W_{\tt y}^1 = 3 \wedge
 			W_{\tt x}^2 = 1 \wedge W_{\tt y}^3 = 5
 $$
-As an example, ${\tt y}^3 = 5$ denotes that the value assigned to variable {\tt y} 
-at line {\tt 3} is $5$.
+As an example, $W_{\tt y}^3= 5$ denotes that the value assigned to variable {\tt y}  by event $e_3$ is $5$.
+\end{itemize}
 
-\paragraph{Thread Interference} To express inter-thread flow constraints, we utilize expressions of the form $R_{\tt z}^i={\tt z}^j$, which denotes that line $i$ reads variable {\tt z}, and the definition it reads comes from line $j$. The resulting formula for our example is
+%The next set of constraints, denoted ${\tt w}^i=k$ for local variables and $W_{\tt w}^i=k$ for shared variables, capture variable definitions: Variable {\tt w} is assigned value $k$ at statement $i$.
+
+
+Indeed, this constraint is satisfied by the assignments to {\tt y} both at line {\tt 1} and at line {\tt 3}.
+
+
+{\bf Inter-thread Data Flow Constraints\ } The inter-thread data flow constraints capture what writes the read events read from and under what scheduling condition the data flow occurs.  The resulting formula for our example is
 $$
 \begin{array}{lcl}
 	& & (R_{\tt y}^4=W_{\tt y}^0 \wedge O_4 < O_1)  \\
@@ -128,26 +169,16 @@ $$
 	(R_{\tt y}^4=W_{\tt y}^3 \wedge O_3 < O_4)
 \end{array}
 $$    
-Notice, importantly, that the formula combines flow constraints with order constraints, which are essential to determinize the value read at a given statement. As an example, 
-$(R_{\tt y}^4=W_{\tt y}^1 \wedge O_1 < O_4 < O_3)$ means that the value of ${\tt y}$ read at 
-line {\tt 4} is that set at line {\tt 1} assuming an execution order whereby the first statement executes followed by the fourth then third statements. 
+Notice, importantly, that the formula associates the data flow constraints with the scheduling order constraints. 
+ As an example, 
+$(R_{\tt y}^4=W_{\tt y}^1 \wedge O_1 < O_4 < O_3)$ means that the read $e_4$ reads from the write $e_1$, under the condition that $e_4$ happens after $e_1$ and no other     writes (such as $e_3$) interleave them.
 
-\paragraph{Path Conditions} To preserve path conditions while potentially permitting dependence-violating reordering (e.g., a context switch after line {\tt 1} in Figure \ref{fig:running}), we model explicitly the condition. For the running example (ignoring the statements in red), this yields:
-$$
-	R_{\tt y}^4 > 2 \equiv {\bf true}
-$$
-That is, the value of variable {\tt y} read at line {\tt 4} is greater than $2$. Indeed, this constraint is satisfied by the assignments to {\tt y} both at line {\tt 1} and at line {\tt 3}.
 
-\paragraph{Race Condition} The final constraint, forcing the check whether a particular race is feasible, is to demand that two conflicting statements occur at the same time. For the potential race between lines {\tt 2} and {\tt 5}, we obtain:
-$$
-	O_2 = O_5
-$$ 
-This asserts that both statements occur simultaneously, which --- together with the other constraints --- guarantees the feasibility of the predicted race if a solution is found for the overall constraint system.
 
-\paragraph{Unexplored Branches} Beyond the encoding steps so far, which focus on the given trace, we can often encode constraints along unexplored branches. In our running example, this is essential to discover the race between lines {\tt 2} and {\tt 7}. 
+{\bf Unexplored Branches\ } Beyond the encoding steps so far, which focus on the given trace, we can often encode constraints along unexplored branches. In our running example, this is essential to discover the race between lines {\tt 2} and {\tt 7}. 
 
-The conflicting accesses in this case, determined based on static analysis of $P$, are expressed as $O_2=O_7$. In addition, we negate the path condition, thereby obtaining $R_{\tt y}^4 > 2 \equiv {\bf false}$ in place of $R_{\tt y}^4 > 2 \equiv {\bf true}$. 
+The conflicting accesses in this case, determined based on static analysis of $P$, are expressed as $O_2=O_7$. In addition, we negate the path condition, thereby obtaining $R_{\tt y}^4 > 2 \equiv {\bf false}$ in place of $R_{\tt y}^4 > 2 \equiv {\bf true}$. We also model the other necessary constraints such as the intra-thread order constraint $O_4 < O_7$.
 
-\paragraph{Constraint Solving} Having conjoined the formuals from the different encoding steps into (i) a global representation of all feasibility constraints (path, ordering, assignment and other constraints) and (ii) the requirement for a given race to occur (expressed as simultaneous execution of the conflicting accesses), we discharge the resulting formula to an off-the-shelf constraint solver, such as Z3 or Yices. If successful, the solver returns a solution for the specified constraints. 
+{\bf Constraint Solving\ } Having conjoined the formuals from the different encoding steps into (i) a global representation of all feasibility constraints (path, ordering, assignment and other constraints) and (ii) the requirement for a given race to occur (expressed as simultaneous execution of the conflicting accesses), we discharge the resulting formula to an off-the-shelf constraint solver, such as Z3 or Yices. If successful, the solver returns a solution for the specified constraints. 
 
 In particular, the solution discloses a feasible trace that gives rise to the race at hand. The trace is identified uniquely via the order enforced in the solution over the variables $O_i$, which represent scheduling order. 

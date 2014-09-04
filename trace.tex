@@ -1,3 +1,7 @@
+
+
+
+
 \section{Relaxation of Flow Dependencies}
 The main goal of our analysis is to, given an original trace $\tau$ over the events $\mathcal{E}$, derive a trace $\tau'$ over the same set of events, which has a new scheduling $\pi$ of the events (the order of events inside each thread should remain unchanged) and a new mapping $\theta$ from variables to values in the events. Our first relaxation comes from the insight that, we allow the variables to read different values than in the original trace even if such variables are used to determine the control flow, while existing approaches enforce them to read the same values as in the original trace. As a result, our relaxation allows more schedules, which are likely to expose more races.
  

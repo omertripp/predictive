@@ -29,6 +29,11 @@ V.~Kahlon and C.~Wang.
   Aided Verification}, CAV'10, pages 434--449, Berlin, Heidelberg, 2010.
   Springer-Verlag.
 
+\bibitem{Lamport}
+L.~Lamport.
+\newblock Time, clocks, and the ordering of events in a distributed system.
+\newblock {\em CACM '1987}.
+
 \bibitem{replay2012}
 D.~Lee, P.~M. Chen, J.~Flinn, and S.~Narayanasamy.
 \newblock Chimera: Hybrid program analysis for determinism.
