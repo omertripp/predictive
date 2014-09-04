@@ -1,7 +1,5 @@
 \section{Related Work}
 
-%TODO be careful about the word "maximal". Ours is not, Jeff's is not, Said's is not. They restrict same value dependences, we relax them.
-
 In this section, we survey related research on race detection with special emphasis on predictive trace analysis (PTA).
 
 \subsection{Race Detection Techniques: Broad Survey} 
