@@ -27,7 +27,7 @@ The symbolic execution has known limitations in reasoning about the schedules an
 The analysis starts at the event $e$ (exclusively), with the state $\sigma$.  Initially, the state includes the runtime heap value for the base objects that are already resolved. During the symbolic execution, the state is updated to maintain the heap value and also the boolean expression values for branches. The values for other variables are not used indeed and therefore treated as symbolic. The update of the state is realized through the   standard kill/gen rules for three basic heap instructions. In the object creation, which we separate from the local assignment, we assign a unique integer to represent the newly created object and store it into the state $\sigma$. For field access, $\sigma[x.f]$ actually denotes $\sigma[o.f]$, where  $o$ is the base object resolved in the state. 
 These kill/gen rules take effect only when $x.f$  is not of the primitive type.
 
-The analysis also generates the events, where the heap values are stored in the map of the event for latter use. For the branch, we store its boolean evaluation result.
+The analysis also generates the events, where the heap values are stored in the map of the event for later use. For the branch, we store its boolean evaluation result.
 As the boolean result is available only after the branch takes the decision, we delay the generation of the branch event until the first event after the branch. 
 
 
