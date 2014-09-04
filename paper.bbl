@@ -34,6 +34,12 @@ L.~Lamport.
 \newblock Time, clocks, and the ordering of events in a distributed system.
 \newblock {\em CACM '1987}.
 
+\bibitem{scmodel}
+L.~Lamport.
+\newblock How to make a multiprocessor computer that correctly executes
+  multiprocess programs.
+\newblock {\em IEEE Trans. Comput.}, 1979.
+
 \bibitem{replay2012}
 D.~Lee, P.~M. Chen, J.~Flinn, and S.~Narayanasamy.
 \newblock Chimera: Hybrid program analysis for determinism.
@@ -75,5 +81,10 @@ Y.~Shi, S.~Park, Z.~Yin, S.~Lu, Y.~Zhou, W.~Chen, and W.~Zheng.
 \newblock In {\em Proceedings of the ACM International Conference on Object
   Oriented Programming Systems Languages and Applications}, OOPSLA '10, pages
   160--174, New York, NY, USA, 2010. ACM.
+
+\bibitem{YANNIS}
+Y.~Smaragdakis, J.~Evans, C.~Sadowski, J.~Yi, and C.~Flanagan.
+\newblock Sound predictive race detection in polynomial time.
+\newblock In {\em POPL}, 2012.
 
 \end{thebibliography}

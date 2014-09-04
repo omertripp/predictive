@@ -159,9 +159,10 @@ The abstract goes here.
 
 \input{introduction}
 \input{overview}
-\input{trace}
-\input{constraints}
-\input{proofsec}
+\input{relax1}
+\input{relax2}
+\input{guarantee}
+\input{related}
 %\input{tech}
 \input{eval}
 

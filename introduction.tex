@@ -29,15 +29,15 @@ As an illustration, we refer to the trace in Figure \ref{fig:running}, where the
 \begin{figure}
 \centering
 \begin{tabular}{ll}
-\multicolumn{2}{c}{{\tt x = 0; y = 0; z = 3;}} \\
-\multicolumn{2}{c}{{\color{red} {\tt z = 2;}}} \\
+\multicolumn{2}{c}{{\tt x = 0; y = 0;}} \\  % z = 3;
+%\multicolumn{2}{c}{{\color{red} {\tt z = 2;}}} \\
 \hline
 \multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$} \\
 \hline
 {\tt 1: y = 3;} & \\
 {\tt 2: x = 1;} & \\
 {\tt 3: y = 5;} & \\
-& {\tt 4: if (y > z)} \\
+& {\tt 4: if (y > 2)} \\
 & {\tt 5:~~print(1/x);} \\	
 & {\color{red} {\tt 6: else}} \\
 & {\color{red} {\tt 7:~~print(2/x);}}
@@ -57,7 +57,7 @@ As an illustration, we refer to the trace in Figure \ref{fig:running}, where the
 %\end{enumerate}
 % Due to these restrictions, enforced as a conservative means of ensuring soundness, existing predictive analysis suffer from limited coverage.
  
- \paragraph{Our Approach} We describe a novel approach to predictive race detection, which we have implemented as the \tool\ analysis tool, that is able to relax both of these constraints. Compared to the state of the art \cite{JEFF}, \tool\ is able to detect x$1.5$ more races with only the first restriction relaxed, and x$2.5$ more races with both restrictions relaxed. 
+ \paragraph{Our Approach} We describe a novel approach to predictive race detection, which we have implemented as the \tool\ analysis tool, that is able to relax both of these constraints. Compared to the state of the art \cite{pldi14}, \tool\ is able to detect x$1.5$ more races with only the first restriction relaxed, and x$2.5$ more races with both restrictions relaxed. 
  
  The departure point of our approach is to consider the explicit values of shared memory locations instead of dependencies between trace events. The gain in coverage is twofold:
  \begin{enumerate}
@@ -66,7 +66,7 @@ As an illustration, we refer to the trace in Figure \ref{fig:running}, where the
  \end{enumerate}
  
  Returning to the example in Figure \ref{fig:running}, we demonstrate how value-based reasoning improves coverage. First, value-based reasoning reveals that trace 
- [{\tt 1}, {\tt 4}, {\tt 5}, {\tt 2}, {\tt 3}] is feasible, since the first assignment, {\tt y = 3}, satisfies the condition {\tt y > z}. Hence the race is discovered. A second race, between lines {\tt 2} and {\tt 7}, is detected by negating the condition. This is possible because the effects of the {\tt else} branch can be modeled precisely.
+ [{\tt 1}, {\tt 4}, {\tt 5}, {\tt 2}, {\tt 3}] is feasible, since the first assignment, {\tt y = 3}, satisfies the condition {\tt y > 2}. Hence the race is discovered. A second race, between lines {\tt 2} and {\tt 7}, is detected by negating the condition. This is possible because the effects of the {\tt else} branch can be modeled precisely.
  Negation leads to an execution starting at line {\tt 4} (where {\tt y $\equiv$ 0}). The race between lines {\tt 2} and {\tt 7} then becomes visible.
  
  Concretely, we achieve value-level (rather than dependence-level) granularity computationally via a unique encoding of the input execution trace as a constraint system. The constraints are then processed by a satisfiability checker. This gives us the flexibility to explore nontrivial constraints, such as 

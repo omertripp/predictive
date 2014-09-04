@@ -1,3 +1,7 @@
+
+In this section, we prove formally the soundness of \tool.
+
+\input{proof}
 Researchers~\cite{pldi14,maximal} propose two axioms, {\em prefix closedness} and {\em local determinism}, which we adapt to establish our feasibility guarantee. 
 Suppose $\mathcal{F}$ denotes the domain of feasible traces.
 

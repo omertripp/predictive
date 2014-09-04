@@ -6,7 +6,9 @@ In this section, we survey related research on race detection with special empha
 
 Initial attempts to address the challenge of race detection focused on built-in synchronization primitives \cite{XXX,YYY}. These include locks as well as the wait/notify and start/join scheduling controls. Notable among these efforts is \emph{lockset} analysis, which considers only locks \cite{XXX}. Because the derived constraints are partial, permitting certain infeasible event reorderings, lockset analysis cannot guarantee soundness \cite{Huang}. 
 
-A different tradeoff is struck by the \emph{happens-before (HB)} approach \cite{Lamport}. In this style of analysis, all synchronization primitives are accounted for, though reordering constraints are conservative. As an example, HB inhibits reordering of two synchronized blocks governed by the same lock. PTA is an instance  of the HB approach, whose starting point is a concrete execution trace.
+A different tradeoff is struck by the \emph{happens-before (HB)} approach \cite{Lamport}. In this style of analysis, all synchronization primitives are accounted for, though reordering constraints are conservative. As an example, HB inhibits reordering of two synchronized blocks governed by the same lock. 
+
+%PTA is an instance  of the HB approach, whose starting point is a concrete execution trace.
 
 Recently there have been successful attempts to relax HB constraints. Among these are hybrid analysis \cite{XXX}, which permits both orderings of lock-synchronized blocks, as well as the \emph{Universal Causal Graph (UCG)} representation~\cite{ucg}, which also enables both orderings but only if these are consistent with wait/notify- and start/join-induced constraints.
 
