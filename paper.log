@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  5 SEP 2014 04:45
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  5 SEP 2014 04:49
 entering extended mode
  %&-line parsing enabled.
 **paper
@@ -312,53 +312,58 @@ LaTeX Warning: No \author given.
 
 (./introduction.tex
 
-LaTeX Warning: Citation `XXX' on page 1 undefined on input line 5.
+LaTeX Warning: Citation `...' on page 1 undefined on input line 24.
 
-
-LaTeX Warning: Citation `XXX' on page 1 undefined on input line 9.
-
-
-LaTeX Warning: Citation `YYY' on page 1 undefined on input line 9.
-
-
-LaTeX Warning: Citation `ZZZ' on page 1 undefined on input line 9.
-
-
-LaTeX Warning: Citation `XXX' on page 1 undefined on input line 9.
-
-
-LaTeX Warning: Citation `YYY' on page 1 undefined on input line 9.
-
-
-LaTeX Warning: Citation `ZZZ' on page 1 undefined on input line 9.
-
-
-LaTeX Warning: Citation `JEFF' on page 1 undefined on input line 9.
-
-LaTeX Font Info:    Try loading font information for U+msa on input line 13.
+LaTeX Font Info:    Try loading font information for U+msa on input line 46.
 (/usr/share/texmf-texlive/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2009/06/22 v3.00 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 13.
+LaTeX Font Info:    Try loading font information for U+msb on input line 46.
 
 (/usr/share/texmf-texlive/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 18.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 47.
 
 (/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
-) [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
+)
+! Undefined control sequence.
+l.82 Therefore in this paper, we propose \sysname
+                                                 , a relaxed predictive anal...
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+! Undefined control sequence.
+l.86 we forbid \sysname
+                        to explore an unexecuted branch if the effect of the...
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
-]) (./overview.tex
+]
+! Undefined control sequence.
+l.98 \item We develop a propotype \sysname
+                                          . Our results show XXX.
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+) (./overview.tex
 Underfull \hbox (badness 2903) in paragraph at lines 43--45
 \OT1/ptm/m/n/10 also be rep-re-sented more com-pre-hen-sively as, $\OML/cmm/m/i
 t/10 ^^\ \OT1/cmr/m/n/10 =\OML/cmm/m/it/10 <
  []
-
-
-LaTeX Warning: Citation `yannis' on page 2 undefined on input line 98.
 
 
 LaTeX Warning: Citation `pecan' on page 2 undefined on input line 98.
@@ -384,16 +389,9 @@ LaTeX Font Info:    Try loading font information for OT1+phv on input line 193.
 File: ot1phv.fd 2001/06/04 scalable font definitions for OT1/phv.
 )
 
-LaTeX Warning: Citation `yannis' on page 3 undefined on input line 195.
-
-
 LaTeX Warning: Citation `jeff' on page 3 undefined on input line 195.
 
-) (./relax1.tex [3]
-
-LaTeX Warning: Citation `yannis' on page 4 undefined on input line 111.
-
-[4]
+) (./relax1.tex [3] [4]
 Overfull \hbox (14.51147pt too wide) detected at line 135
 [] \OML/cmm/m/it/10 ^^R[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x\OT1/cmr/m/n/10 ) \
 OML/cmm/m/it/10 < ^^R[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 y\OT1/cmr/m/n/10 ) \OM
@@ -401,9 +399,6 @@ S/cmsy/m/n/10 ^^Q \OML/cmm/m/it/10 ^^R\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x\OT1/c
 mr/m/n/10 ) \OML/cmm/m/it/10 < ^^R\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 y\OT1/cmr/m
 /n/10 )
  []
-
-
-LaTeX Warning: Citation `yannis' on page 5 undefined on input line 137.
 
 
 Overfull \hbox (21.60861pt too wide) detected at line 177
@@ -424,9 +419,6 @@ LaTeX Warning: Reference `sec:relax' on page 6 undefined on input line 3.
 LaTeX Warning: Citation `chao' on page 6 undefined on input line 12.
 
 [6]
-
-LaTeX Warning: Citation `yannis' on page 7 undefined on input line 22.
-
 
 LaTeX Warning: Citation `jeff' on page 7 undefined on input line 22.
 
@@ -523,13 +515,13 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 4863 strings out of 493848
- 68716 string characters out of 1152823
+ 4854 strings out of 493848
+ 68640 string characters out of 1152823
  178554 words of memory out of 3000000
- 8045 multiletter control sequences out of 15000+50000
+ 8036 multiletter control sequences out of 15000+50000
  53127 words of font info for 109 fonts, out of 3000000 for 9000
  717 hyphenation exceptions out of 8191
- 27i,10n,40p,1264b,290s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 27i,10n,40p,1264b,297s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
 ve/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texmf-texlive/fonts/ty
 pe1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-texlive/fonts/type1/public/
@@ -549,7 +541,7 @@ urier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helvetic/uhvr8a.pfb>
 xlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/u
 rw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb
 >
-Output written on paper.pdf (11 pages, 398941 bytes).
+Output written on paper.pdf (11 pages, 396133 bytes).
 PDF statistics:
  285 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
