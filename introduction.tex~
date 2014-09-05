@@ -1,29 +1,44 @@
+%Limitations of static analysis: scalability when it is path sensitive, difficulty in modeling heap, cannot reason about concrete values, have to use
+%abstraction, so that may not be sound, dynamic analysis is precise, easily scale to long and complex runs, but it only reasons about problems that
+%did occur. 
+
+%Predictive analysis is so good
+
+%But it restricts too much, only relax schedule space and a little bit of the dependence space.
+
+%We observe many dynamic aspects can be relaxed without affecting soundness.  as a result, instead of reasoning one
+%execution, we can reason the neighborhood of the execution, in order words, we leverage dynamic analysis to provide
+%the information that is difficult to analyze statically such as aliasing and a long execution path that covers the
+%intended workflow, then we relax the predictive analysis to analyze neighborhood.  
+
+
 \section{Introduction}\label{Se:introduction}
+Program analyses can be largely classified to static and dynamic analyses. Static analyses abstract programs statically.
+They are usually complete and do not require concrete program inputs to drive the analyses. However, they have difficulty in
+scaling to large and complex programs when the analyses are path-sensitive, due to the sheer number of paths and the 
+complexity of the paths. Path-insensitive analyses often do not have sufficient precision on the other hand. 
+Static analyses also have difficulty in modeling complex aliasing behavior. In contrast, dynamic analysese focus 
+on analyzing a few executions, usually just one. They are sound and easily scale to long and complex executions. But they 
+can only reason about properties that manifest themselves in the execution(s). 
 
-In a multithreaded application, a data race occurs when two concurrent threads access the same memory location, such that (i) at least one of the accesses is write access, and (ii) no explicit mechanism is enforced to prevent the threads from simultaneous access to the location \cite{eraser}. Race detection is important not only because races often reveal bugs in the implementation, but also as the basis of other techniques and analyses like atomicity checking \cite{learning,avio,ordervio}, data-flow analysis \cite{dataflow} and record/replay \cite{leap,replay2012}.
+Recently, a novel kind of analysis called predictive analysis~\cite{...} was proposed. It has the capabilities of 
+achieving soundness as dynamic analyses and reasoning about properties that did not occur during execution 
+just like in static analysis. The basic idea is to leverage dynamic analysis to provide the information that 
+is difficult to acquire through static analysis, such as a complex execution path that covers important functionalities 
+and aliasing information. Note that during execution, we know precisely which write access reaches any given read 
+access. While such information is encoded in a trace, predictive analysis reaons about mutation of the trace to 
+expose problems or study properties that may not manifest during execution. It was used in sound data race detection. 
+In particular, it collects a trace of threaded execution that contains rich runtime information such as concrete values, 
+execution path, and memory accsses. It then leverages constraint solving to reason about if races can occur with
+a different thread schedule, {\em while enforcing the critical runtime information (e.g. values, thread
+local paths, and memory accesses) remains the same during schedule pertubation}. The rationale is that 
+it becomes as difficult as static analysis if we allow these critical runtime information change. 
+Preditive analysis has been shown to be very effective. It can detect real data races from complex programs.
+And more importantly, it guarantees the results are sound (i.e. no false positives).
 
-In this paper, we focus on \emph{sound} race detection, whereby reported races are guaranteed to be real. This is the key requirement for adoption of the tool by developers \cite{XXX}. Ensuring soundness is a difficult challenge, which mandates dynamic forms of analysis. Indeed, extensive research has been carried out on dynamic race detection. The general goal has been to derive constraints from a given execution trace on event reordering, and check for the remaining reorderings whether they disclose data races. The key question then becomes about constraint extraction.
-
-%Fasttrack PLDI paper claims happens-before analysis never reports false positives. Check.
-\paragraph{Existing Approaches} 
-Numerous techniques have been proposed to date for race detection, which either sacrifice soundness~\cite{ucg,XXX,YYY,ZZZ}  or have significant coverage limitations~\cite{XXX,YYY,ZZZ}. Recently \emph{predictive analysis} has emerged as a promising alternative, whereby a single trace is considered, and races are discovered by permuting the execution schedule governing the trace \cite{JEFF,YANNIS}. 
-
-Predictive analysis guarantees soundness, and has the potential for high coverage, though current predictive analyses suffer from two major limitations:
-\begin{enumerate}
-	\item All the permutations attempted by the analysis must preserve the flow dependencies exhibited by the original trace. As an example, if in the original trace thread $t_1$ reads a shared variable that was written by thread $t_2$, then the same must hold in the permuted trace.
-	\item The analysis cannot step outside the boundaries of the input trace, e.g. by exploring branches that were not followed in that trace.
-\end{enumerate}
-Both of these constraints are a conservative means of ensuring soundness. In an empirical study we conducted, which we describe in Section \ref{sec:eval}, we found that these restrictions often lead to serious loss in coverage. 
-
-As an illustration, we refer to the trace in Figure \ref{fig:running}, where the statements in red denote an unexplored branch outside the trace. Existing predictive analyses are unable to detect the race between lines {\tt 2} and {\tt 5} because of the dependence between lines {\tt 3} and {\tt 4}, which is a barrier to the needed reorderings. A second race that is missed, as it involves the statements in red, is between lines {\tt 2} and {\tt 7}.
-
-
-
-%Initial attempts to address this challenge focused on built-in synchronization primitives. These include locks as well as the wait/notify and start/join scheduling controls. Notable among these efforts is \emph{lockset} analysis, which considers only locks. Because the derived constraints are partial, permitting certain infeasible event reorderings, lockset analysis cannot guarantee soundness. 
-%
-%A different tradeoff is struck by the \emph{happens-before (HB)} approach. In this style of analysis, all synchronization primitives are accounted for, though reordering constraints are conservative. As an example, HB inhibits reordering of two synchronized blocks governed by the same lock. Recently there have been successful attempts to relax HB constraints. Among these are hybrid analysis, which permits both orderings of lock-synchronized blocks, and the \emph{Universal Causal Graph (UCG)}~\cite{ucg} representation, which also enables both orderings but only if these are consistent with wait/notify- and start/join-induced constraints.
-%
-%Unfortunately, even full consideration of synchronization constructs is insufficient. Branching decisions must also be respected to ensure the feasibility of a reported race. As an example, we refer to the trace in Figure \ref{fig:running}. (For now, ignore the statements in red.) This trace is free of any explicit synchronization statements, and so a race between the assignment to variable {\tt x} at line {\tt 2} and the use of {\tt x} at line {\tt 5} may appear possible. This race is, however, spurious, since the use of {\tt x} at line {\tt 5} is governed by positive evaluation of the test at line {\tt 4}, which is conditioned on the assignment at line {\tt 3}. Hence, line {\tt 2} necessarily preceds line {\tt 5}.
+Despite its effectiveness, we observe that existing predictive analyes are too restrictive. They 
+require too much runtime information to remain unchanged during analysis such that coverage is unnecessarily
+limited. 
 
 
 \begin{figure}
@@ -38,41 +53,55 @@ As an illustration, we refer to the trace in Figure \ref{fig:running}, where the
 {\tt 2: x = 1;} & \\
 {\tt 3: y = 5;} & \\
 & {\tt 4: if (y > 2)} \\
-& {\tt 5:~~print(1/x);} \\	
+& {\tt 5:~~z=1+x;} \\	
 & {\color{red} {\tt 6: else}} \\
-& {\color{red} {\tt 7:~~print(2/x);}}
+& {\color{red} {\tt 7:~~w=2+x;}}
 \end{tabular}
 \caption{Example illustrating ordering constraints beyond synchronization primitives}
 \label{fig:running}
 \end{figure}
 
-%As an alternative, driven by the requirement for soundness, 
-%Smagardakis et al. have recently proposed \emph{predictive analysis}. In this approach, both synchronization constraints and inter-thread dependencies are preserved, where inter-thread dependencies are respected by 
-%only allowing reorderings that leave the dependence structure exhibited by the original trace in tact. This ensures that the values of shared memory locations remain the same, which secures the soundness argument. As a soundness-preserving relaxation, Huang et al. \cite{XXX} permit reorderings as long as control dependencies are respected.
-%
-%While being sound and able to find real races, existing predictive analyses are conservative in two respects:
-%\begin{enumerate}
-%	\item Constraints imposed by branch conditions are abided by preserving the exact values flowing into the condition as in the original trace.
-%	\item A second limitation, implied by the first, is that traces that diverge from the original trace in their branching history are strictly out of scope. 
-%\end{enumerate}
-% Due to these restrictions, enforced as a conservative means of ensuring soundness, existing predictive analysis suffer from limited coverage.
- 
- \paragraph{Our Approach} We describe a novel approach to predictive race detection, which we have implemented as the \tool\ analysis tool, that is able to relax both of these constraints. Compared to the state of the art \cite{pldi14}, \tool\ is able to detect x$1.5$ more races with only the first restriction relaxed, and x$2.5$ more races with both restrictions relaxed. 
- 
- The departure point of our approach is to consider the explicit values of shared memory locations instead of dependencies between trace events. The gain in coverage is twofold:
- \begin{enumerate}
- 	\item Reorderings that violate the original dependence structure but preserve the branching history become possible. The values read by a branching statement may change so long as the branch condition evaluates to its original truth value.
- 	\item In addition, in certain cases we can guarantee soundness while directing execution toward branches that diverge from the original trace. This mandates that the effects of an unexplored branch can be modeled precisely, which holds frequently in practice because the original and new branchees often access the same set of shared memory locations.
- \end{enumerate}
- 
- Returning to the example in Figure \ref{fig:running}, we demonstrate how value-based reasoning improves coverage. First, value-based reasoning reveals that trace 
- [{\tt 1}, {\tt 4}, {\tt 5}, {\tt 2}, {\tt 3}] is feasible, since the first assignment, {\tt y = 3}, satisfies the condition {\tt y > 2}. Hence the race is discovered. A second race, between lines {\tt 2} and {\tt 7}, is detected by negating the condition. This is possible because the effects of the {\tt else} branch can be modeled precisely.
- Negation leads to an execution starting at line {\tt 4} (where {\tt y $\equiv$ 0}). The race between lines {\tt 2} and {\tt 7} then becomes visible.
- 
- Concretely, we achieve value-level (rather than dependence-level) granularity computationally via a unique encoding of the input execution trace as a constraint system. The constraints are then processed by a satisfiability checker. This gives us the flexibility to explore nontrivial constraints, such as 
- forcing a context switch after the first assignment to {\tt y} or negating the condition in Figure \ref{fig:running}. Importantly, these manipulations are beyond what dependence-based reasoning can achieve, since this view of the trace is too conservative.
- 
-\paragraph{Contributions} This paper makes the following principal contributions:
+Consider the example in Figure \ref{fig:running}, which shows an execution trace of two threads. The statements in red 
+denote an unexplored branch outside the trace. Existing predictive analyses are unable to detect the race between 
+lines {\tt 2} and {\tt 5} because they require that during trace permutations (by different schedules), a variable must not have
+a different value in a permuted trace\footnote{They allow the variable involved in a race to have different values.}.
+As such, they cannot execute line {\tt 4} before line {\tt 3}, which is needed to expose the race between lines {\tt 2}
+and {\tt 5}. 
+%the dependence between lines {\tt 3} and {\tt 4}, which is a barrier to the needed reorderings. 
+A second race between lines {\tt 2} and {\tt 7} is also missed as the mutated trace must have the same thread local
+path as the original trace. 
+
+However, we observe that such restrictions are unnecessary. For example, we can allow line {\tt 4} to receive its
+value from line {\tt 1} as it has the same effect on thread local execution (i.e. the same branch is taken). 
+However, the relaxation would allow us to execute lines {\tt 4} and {\tt 5} before line {\tt 2}, exposing 
+the first missing race. We can also allow the trace to take the else branch such that the second race is also exposed. 
+Note that even though the else branch was not executed originally, its effect can be precisely modeled as the value 
+of $x$ is known from the original trace. As such, we can still perform sound analysis.
+
+%that is missed, as it involves the statements in red, is between lines {\tt 2} and {\tt 7}.
+Therefore in this paper, we propose \sysname, a relaxed predictive analysis. We identify the critical runtime
+informantion that needs to be preserved during trace perturbation and relax the remaining information. 
+In particular, we preserve all the addresses de-referenced (e.g. heap and array accesses) in the original execution,
+and some of the branch outcomes such that part of the thread local paths stay intact. The criterion is that
+we forbid \sysname\ to explore an unexecuted branch if the effect of the branch cannot be precisely modeled
+(e.g. an array element is read while it was not defined in the original trace). The essence of our technique 
+is to {\em explore the neighborhood of the original execution as much as possible}. Due to the substantially
+enlarged search space, our results show that a race detector based on our relaxed predictive analysis 
+can detect XXX times more races than existing predictive analysis, while guaranteeing soundness. 
+
+Our contrituions are summarized as follows.
+\begin{itemize}
+\item We propose to relax existing predictive analysis and identify a bound of relaxation (i.e. what can
+be relaxed).
+\item We develop a constraint encoding scheme that encodes the necessary information (i.e. the
+part that must be preserved) and the relaxed information (i.e., the part that may be mutated) uniformly as part of a single logical representation.
+\item We develop a propotype \sysname. Our results show XXX.
+\end{itemize}
+
+
+
+
+
 
 
 
