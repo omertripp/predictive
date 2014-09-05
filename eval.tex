@@ -2,6 +2,49 @@
 Our evaluation focuses on the effectiveness  and scalability of our approach.
 To measure the effectiveness, we compare with the predictive analysis, {\sf RV}~\cite{}. We chose RV for two main reasons: (1) {\sf RV} is the only open source predictive analysis, (2) {\sf RV} represents the state-of-the-art approach, which is theoretically proven to have higher detection capability than other approaches. 
 
+{\bf Prototype Implementation}  In our prototype implementation of \tool, we used the Z3 SMT solver for constraint resolution \cite{DeMoura:2008}. For static analysis, to discover unexecuted branches, we utilize the SOOT compiler framework \cite{Vallee-Rai:1999}.
+
+For scalability, as well as to constrain memory footprint, we have applied several engineering optimizations. In specific, (i) events are stored in a database rather than in an in-memory buffer; and (ii) the analysis is split into several segments, between which we restart the VM and resume the last snapshot, such that the different logs are fused together at the end. 
+
+To address the scalability limitations of the constraint solver (Z3 in our case), we again apply a splitting optimization. The full trace is split into $N$ equal-length subtraces or ``time windows'' (in our experiments, $N=1,000$). The values of local and shared variables are then passed at the end of a given window as inputs to the next window. For lack of space, we omit the concrete details of this optimization, and instead refer the reader to Huang et al. \cite{HuangMR14}, who apply a similar optimization.
+
+The trace is typically long and the constraint solver cannot scale to the whole trace. This is a known limitation to solver-based predictive analysis. Instead, we adopt the notion of time window. 
+We divide the trace into $N$ traces of the same length, where $N$ is configurable parameter (1000 in our experiment). To support the time window, we need to store the values of the shared variables and local variables at the end of a window and encode such values as the inputs of the next window. 
+
+We maintain two maps,  $sstore$ and $lstore$, for the shared variables and local variables respectively. Suppose the trace for the last window is $\tau$. The following code illustrates how we maintain the $sstore$, i.e., storing the value written by the last write with each address. Beside, the variable $e.ins.left$ represents the left hand variable inside the instruction $e.ins$.
+
+\begin{algorithmic}[3]
+	\For {$a \in \mathcal{A}$}
+	\State $\tau_a=W(a)$
+	\State $sstore.put(a,\tau_a[|\tau_a|-1].v)$ 
+	\EndFor
+\end{algorithmic}
+
+%TODO define left:
+\begin{algorithmic}[3]
+	\For {$e \in \tau$}
+	\If {$e.isLocalAcc()$}
+	\State $ lstore.put(e.\_def, e.v)$
+	\Else
+	\If{$e.isRead()$}      
+	\State $ lstore.put(e.\_def, e.v)$
+	\EndIf
+	\EndIf 
+	\EndFor
+\end{algorithmic}
+
+
+When constructing the constraints for the next window, we specify the following constraints to encode the input values.
+
+The following formula enhances the thread interfernce constraint to include the case that the read reads from the initial values. 
+
+$$\Phi_{TI}=\Phi_{TI} \wedge  R=sstore.get(e_R.a) \wedge \bigvee_{e\in S} O(e_R)<O(e)$$.
+
+The following formula encodes the input values of local variables. 
+
+$$\Phi_{IN}=\bigvee_{l\in lstore.keys()} l=lstore.get(l)$$.
+
+
 {\bf Evaluation Method} We conducted our experiments on a set of 16 applications, which were also used to evaluate {\sf RV}. Specifically, the set includes large applications such as {\sf Jigsaw}, {\sf Xalan} and {\sf Lusearch}. To handle large applications that make use of reflection, we applied the {\sf Tamiflex} tool~\cite{}, which replaces reflective calls with the concrete method invocations recorded in the observed run for the purpose of effective static analysis.  We omit the benchmark {\sf eclipse} because the current version of {\sf Tamiflex}  leads to abnormal execution after the instrumentation, which throws an exception when the main service is started. By applying our tool to such abnormal execution, we identify only 3 races, similarly to the report of RV~\cite{}.
 In addition, the {\sf montecarlo} benchmark requires an external input that we downloaded from the internet and simplified. For the large applications, we utilized the most lightweight available configuration.
 
