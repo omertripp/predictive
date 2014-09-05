@@ -83,7 +83,7 @@ Therefore in this paper, we propose \sysname, a relaxed predictive analysis. We 
 informantion that needs to be preserved during trace perturbation and relax the remaining information. 
 In particular, we preserve all the addresses de-referenced (e.g. heap and array accesses) in the original execution,
 and some of the branch outcomes such that part of the thread local paths stay intact. The criterion is that
-we forbid \sysname to explore an unexecuted branch if the effect of the branch cannot be precisely modeled
+we forbid \sysname\ to explore an unexecuted branch if the effect of the branch cannot be precisely modeled
 (e.g. an array element is read while it was not defined in the original trace). The essence of our technique 
 is to {\em explore the neighborhood of the original execution as much as possible}. Due to the substantially
 enlarged search space, our results show that a race detector based on our relaxed predictive analysis 
@@ -91,10 +91,10 @@ can detect XXX times more races than existing predictive analysis, while guarant
 
 Our contrituions are summarized as follows.
 \begin{itemize}
-\item We propose to relax existing preditive analysis and identify a bound of relaxation (i.e. what can
+\item We propose to relax existing predictive analysis and identify a bound of relaxation (i.e. what can
 be relaxed).
-\item We develop a constraint encoding scheme that uniformally encodes the strict information (i.e. the
-part must be preserved) and the relaxed information. 
+\item We develop a constraint encoding scheme that encodes the necessary information (i.e. the
+part that must be preserved) and the relaxed information (i.e., the part that may be mutated) uniformly as part of a single logical representation.
 \item We develop a propotype \sysname. Our results show XXX.
 \end{itemize}
 
