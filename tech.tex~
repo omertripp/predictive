@@ -230,9 +230,27 @@ The branches do not need to include those after both racy events as we only need
 The branches include not only those from the two threads executing $e_1$ and $e_2$ but also those from other threads, as other threads the feasibility may require the interference from other threads.
 
 One important requirement is that we need to preserve the same branch decisions for all preceding branches, rather than those of the guarding branches. 
+Consider the following code, where $sx$ and $sy$ are shared variables with the initial values 0 and $tmp$ is a local variable with initial value 0, there are two branches, one is the guarding branch for update of the shared variable at line 4, the other is not. Suppose in the observation run, the first branch takes the false branch (hence, $tmp=5$ is not included in the trace), and the second takes the true branch. If the solver only guarantees the same branch decision for the guarding branch, i.e., the second, it risks reporting the false feasibility of line 4. Specifically, line 4 is infeasible if the first branch is after some remote update that forces it to take the true branch. However, in this case, the solver still judges line 4 as feasible as it does not model the true branch of the first branch, which is not in the trace. Therefore, we need to respect all branch decisions so that the 
+set of events under reasoning are all captured in the trace.
 
 
- 
+
+
+
+
+ \begin{figure}
+\centering
+\begin{tabular}{ll}
+               & {\tt // sx=4;}  \\ 
+{\tt if(sx>3) } &  \\ 
+ {\tt \ \ \  {tmp=5;}} &  \\
+ {\tt if(tmp$\neq$ 5 ) } & \\
+  {\tt {sy=0;}} & \\
+\end{tabular}
+\caption{Method Calls}
+\label{fig:methcall}
+\end{figure}
+
 
 
 
@@ -458,12 +476,11 @@ The following formula encodes the input values of local variables.
 $$\Phi_{IN}=\bigvee_{l\in lstore.keys()} l=lstore.get(l)$$.
  
 
-{\bf Object Creation\ } Given the event in the form of $x=new Object()$, we encode the created object as a unique integer and treats the instruction as a normal integer assignment. The unique integer is the address of the object, calculated by $System.identityHashcode(x)$.
 
-
-{\bf Array access\ } For array access event $arr[i]=x$, we treat them as the field access event $arr.i=x$, where the index $i$ is treated as a field. 
-
-{\bf Shared Analysis\ } We distinguish the accesses of the shared fields and local fields. To collect the shared fields, we preprocess the trace and map each field to a set of accessing threads. If a field is written by two or more threads, it is shared. If a field is written by one thread and read by other threads, it is shared. Otherwise, it is a local field. 
 
 {\bf Optimization\ }. Before the symbolic analysis, we conduct the backward slicing by treating the racy pair as the seeds. Only those selected in the slices are preserved while the rest events are removed. 
 
+
+
+\subsection{Scalability Issues}
+Like existing predictive analyses, our approach suffers from scalability issues for two reasons. First, as we record local access events in the monitoring run,  the monitoring run takes long time, e.g., more than 2 hours, and our trace is typically large, e.g., at the GB level. To avoid the out of memory issue during the monitoring run, we store the event to the database on the fly, rather than storing them in a buffer. Besides, we terminate the monitoring run with a shutdown hook if it is beyond 30 minutes. Second,  the prediction phase needs to load the trace to memory, which easily causes out of memory problem. To solve the problem, we separate the analysis into several runs, each run restarting the JVM and resuming from the window of last run. Different runs communicate the window id using the external file. These runs are organized together automatically using the ant. The outputs of the files are merged into one summary.
