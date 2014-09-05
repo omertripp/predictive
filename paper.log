@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  5 SEP 2014 04:49
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  5 SEP 2014 07:17
 entering extended mode
  %&-line parsing enabled.
 **paper
@@ -392,7 +392,7 @@ File: ot1phv.fd 2001/06/04 scalable font definitions for OT1/phv.
 LaTeX Warning: Citation `jeff' on page 3 undefined on input line 195.
 
 ) (./relax1.tex [3] [4]
-Overfull \hbox (14.51147pt too wide) detected at line 135
+Overfull \hbox (14.51147pt too wide) detected at line 132
 [] \OML/cmm/m/it/10 ^^R[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x\OT1/cmr/m/n/10 ) \
 OML/cmm/m/it/10 < ^^R[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 y\OT1/cmr/m/n/10 ) \OM
 S/cmsy/m/n/10 ^^Q \OML/cmm/m/it/10 ^^R\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x\OT1/c
@@ -401,35 +401,46 @@ mr/m/n/10 ) \OML/cmm/m/it/10 < ^^R\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 y\OT1/cmr/m
  []
 
 
-Overfull \hbox (21.60861pt too wide) detected at line 177
+Overfull \hbox (21.60861pt too wide) detected at line 174
 []
  []
 
 
-Overfull \hbox (9.20114pt too wide) in paragraph at lines 187--199
+Overfull \hbox (9.20114pt too wide) in paragraph at lines 184--196
  [][] 
  []
 
 [5]) (./relax2.tex
+Overfull \hbox (7.20721pt too wide) in paragraph at lines 9--30
+ [][] 
+ []
 
-LaTeX Warning: Reference `sec:relax' on page 6 undefined on input line 3.
+! Missing } inserted.
+<inserted text> 
+                }
+l.49 \end{figure}
+                 
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
 
 ) (./guarantee.tex
 
 LaTeX Warning: Citation `chao' on page 6 undefined on input line 12.
 
+
+LaTeX Warning: Citation `jeff' on page 6 undefined on input line 22.
+
+
+LaTeX Warning: Citation `said' on page 6 undefined on input line 22.
+
 [6]
-
-LaTeX Warning: Citation `jeff' on page 7 undefined on input line 22.
-
-
-LaTeX Warning: Citation `said' on page 7 undefined on input line 22.
-
-
 
 pdfTeX warning: pdflatex (file ./figs/Visio-discuss.pdf): PDF inclusion: found 
 PDF version <1.5>, but at most version <1.4> allowed
-<figs/Visio-discuss.pdf, id=40, 207.53696pt x 257.45685pt>
+<figs/Visio-discuss.pdf, id=41, 207.53696pt x 257.45685pt>
 File: figs/Visio-discuss.pdf Graphic file (type pdf)
 
 <use figs/Visio-discuss.pdf>) (./related.tex
@@ -451,27 +462,26 @@ LaTeX Warning: Citation `XXX' on page 7 undefined on input line 15.
 
 LaTeX Warning: Citation `XXX' on page 7 undefined on input line 21.
 
-[7 <./figs/Visio-discuss.pdf>]
 
-LaTeX Warning: Citation `XXX' on page 8 undefined on input line 24.
-
-
-LaTeX Warning: Citation `XXX' on page 8 undefined on input line 24.
+LaTeX Warning: Citation `XXX' on page 7 undefined on input line 24.
 
 
-LaTeX Warning: Citation `XXX' on page 8 undefined on input line 26.
+LaTeX Warning: Citation `XXX' on page 7 undefined on input line 24.
 
 
-LaTeX Warning: Citation `XXX' on page 8 undefined on input line 28.
-
-) (./eval.tex [8]
-
-LaTeX Warning: Reference `' on page 9 undefined on input line 42.
+LaTeX Warning: Citation `XXX' on page 7 undefined on input line 26.
 
 
-LaTeX Warning: Reference `' on page 9 undefined on input line 42.
+LaTeX Warning: Citation `XXX' on page 7 undefined on input line 28.
+
+) (./eval.tex [7 <./figs/Visio-discuss.pdf>]
+
+LaTeX Warning: Reference `' on page 8 undefined on input line 42.
 
 
+LaTeX Warning: Reference `' on page 8 undefined on input line 42.
+
+[8]
 Overfull \hbox (7.60513pt too wide) in paragraph at lines 69--90
 []  
  []
@@ -483,11 +493,11 @@ pdfTeX warning: pdflatex (file ./cases/Visio-bbuffer.pdf): PDF inclusion: found
 <cases/Visio-bbuffer.pdf, id=80, 337.69041pt x 192.4279pt>
 File: cases/Visio-bbuffer.pdf Graphic file (type pdf)
 
-<use cases/Visio-bbuffer.pdf> [9 <./cases/Visio-bbuffer.pdf>]
+<use cases/Visio-bbuffer.pdf>
 
 pdfTeX warning: pdflatex (file ./cases/Visio-msort.pdf): PDF inclusion: found P
 DF version <1.5>, but at most version <1.4> allowed
-<cases/Visio-msort.pdf, id=130, 363.15907pt x 444.27982pt>
+<cases/Visio-msort.pdf, id=81, 363.15907pt x 444.27982pt>
 File: cases/Visio-msort.pdf Graphic file (type pdf)
 
 <use cases/Visio-msort.pdf>
@@ -495,7 +505,7 @@ Overfull \hbox (2.20961pt too wide) in paragraph at lines 135--136
  [][] 
  []
 
-) (./paper.bbl [10 <./cases/Visio-msort.pdf>])
+) (./paper.bbl [9 <./cases/Visio-bbuffer.pdf>])
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -507,18 +517,16 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[11
-
-] (./paper.aux)
+[10 <./cases/Visio-msort.pdf>] (./paper.aux)
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 4854 strings out of 493848
- 68640 string characters out of 1152823
- 178554 words of memory out of 3000000
- 8036 multiletter control sequences out of 15000+50000
+ 4831 strings out of 493848
+ 68279 string characters out of 1152823
+ 176554 words of memory out of 3000000
+ 8013 multiletter control sequences out of 15000+50000
  53127 words of font info for 109 fonts, out of 3000000 for 9000
  717 hyphenation exceptions out of 8191
  27i,10n,40p,1264b,297s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -541,9 +549,9 @@ urier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helvetic/uhvr8a.pfb>
 xlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/u
 rw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb
 >
-Output written on paper.pdf (11 pages, 396133 bytes).
+Output written on paper.pdf (10 pages, 388539 bytes).
 PDF statistics:
- 285 PDF objects out of 1000 (max. 8388607)
+ 282 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  16 words of extra memory for PDF output out of 10000 (max. 10000000)
 

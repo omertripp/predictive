@@ -1,53 +1,112 @@
 \section{Exploration of Unexecuted Branches}~\label{sec:relax2}
-We now switch to the second feature of \tool, which is its ability to reason about unexplored branches.
-At the high level, we simply need to derive a trace that contains the unexplored branch, after that, we can reduce the analysis to the analysis in Section~\ref{sec:relax} (starting from the SSA processing).  \tool\ derives such traces by symbolically executing the unexplored branches to record the events and including these events in the new traces.
+We now switch to the second feature of \tool, which is its ability to reason about neighboring branches that are not executed in the original trace $\tau$.
+At the high level, we replace the constraints that model the executed branch to the constraints that conservatively model the possible executions in both branches.
+We leverage the static analysis to  realize this relaxation. We explain the details below.
 
 
-%TODO | and projection, abuse the terms?
-As shown in the following, suppose the symbolic execution  $symEngine(\tau, e)$ returns the single-thread traces starting from the branch $e$, which now takes a different decision. The resultant trace is computed by first removing the events thread-locally after $e$ (inclusively) and then appending one of the single-thread traces that represents a path in the unexplored branch of $e$. The negation $neg(e)$ of $e$, which is the same as $e$ except the evaluation result of the boolean expression differs, is also appended.
-
-
-
-\begin{algorithmic}[3]
-\For {$e: \tau$}
-  \If {$type(e)=branch$}
-    \State $S=symEngine(\tau, e)$
-	\For {$\tau': S$}
-	\State $\tau_r=\tau-\tau\downarrow_{t^e \wedge \geq e}$
-	\State $\tau_r=\tau_r.replace(e, neg(e) + \tau')$
-	\EndFor
- \EndIf
-\EndFor
-\end{algorithmic}
-
-
-{\bf Symbolic Execution\ } Our symbolic execution is realized on top of the dataflow analysis, which generates events for each instruction within the unexplored branch.
-The symbolic execution has known limitations in reasoning about the schedules and loops (and recursion). Therefore, our analysis assumes all the events in the unexplored branch happen atomically at the branch event $e$ without interleavings from other threads, as illustrated also in the above algorithm (line 6). In this way, our analysis adopts the sequential reasoning. \tool\ will reschedule the events based on the relaxation. As for loop (or recursion), the analysis terminates the current data flow immediately after one iteration, i.e., we expand the loop for only once. Otherwise, the analysis terminates the data flow normally if the flow goes out of the scope of the unexplored branch.
-
-The analysis starts at the event $e$ (exclusively), with the state $\sigma$.  Initially, the state includes the runtime heap value for the base objects that are already resolved. During the symbolic execution, the state is updated to maintain the heap value and also the boolean expression values for branches. The values for other variables are not used indeed and therefore treated as symbolic. The update of the state is realized through the   standard kill/gen rules for three basic heap instructions. In the object creation, which we separate from the local assignment, we assign a unique integer to represent the newly created object and store it into the state $\sigma$. For field access, $\sigma[x.f]$ actually denotes $\sigma[o.f]$, where  $o$ is the base object resolved in the state. 
-These kill/gen rules take effect only when $x.f$  is not of the primitive type.
-
-The analysis also generates the events, where the heap values are stored in the map of the event for later use. For the branch, we store its boolean evaluation result.
-As the boolean result is available only after the branch takes the decision, we delay the generation of the branch event until the first event after the branch. 
-
-
-
-
-\begin{table*}
+\begin{figure}
 \centering
-%\begin{small}
-\begin{tabular}{l|c|c}
-\multicolumn{1}{c|}{Operation} & {Kill} & {Gen} \\
-\hline
-{\tt $y$=$new (...)$} 			&  $\sigma[y] \mapsto \star$		&  $\sigma[y] \mapsto newI$, $<t, cnt, y=newI, \bot>$\\
-{\tt $y$=$x.f$} 			&   $\sigma[y]\mapsto \star$			&  $\sigma[y] \mapsto \sigma[x.f]$, $<t, cnt, y=x.f, \lsyn x \rsyn=\sigma[x]>$  \\
-{\tt $x.f=y$} & $\sigma[x.f] \mapsto \star$		&  $\sigma[x.f] \mapsto \sigma[y]$, $<t, cnt, x.f=y, \lsyn x \rsyn=\sigma[x]>$ \\
-{\tt $z=x\  bop\  y$} & 		&  $<t, cnt, z=x\  bop\  y, \bot>$ \\
-{\tt $if(x<y)$} & 	  &  $<t, cnt, if(x<y), \lsyn x<y \rsyn=bool>$\\
+\begin{tabular}{ll|l}
+\multicolumn{3}{c}{{\tt {\bf P} = new();//$o1$}} \\
+\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$}  &  \multicolumn{1}{c}{$Trace$}\\
+{\tt 1: {\bf P}.f=100; } &  & {\tt $W^{1}_{o1.f}$=100;}\\
+{\tt 2: {\bf Q}=101; } &  & {\tt $W^{2}_{Q}$=101;}\\
+{\tt 3: {\bf Q}=11; } & & {\tt $W^{3}_{Q}$=11;} \\
+{\tt 4: {\bf Q}=1; } & & {\tt $W^{4}_{Q}$=1;} \\
+{\tt 5: {\bf S}=1; } & & {\tt $W^{5}_{S}$=1;} \\
+& {\tt 6: x={\bf Q};} & {\tt $x^6$=$R^6_{Q}$;}\\
+& {\tt 7: if(x<10)} & {\tt if($x^6$<10)}\\
+& {\tt 8: \ {\bf S}=0;}  & {\tt $W^8_{S}$=0;}\\
+& {\color{Gray}{\tt 9:  else}} &  {\color{Gray}{\tt if($x^6\geq$10)}}\\
+& {\color{Gray}{\tt 10: \ z={\bf P}.f;}} & {\color{Gray}{\tt $z^{10}$=$R^{10}_{o1.f}$;}}\\
+& {\color{Gray}{\tt 11: \ if(x<z)}} & {\color{Gray}{\tt if($x^6<z^{10}$)}}\\
+& {\color{Gray}{\tt 12: \ \ {\bf S}=0;}}& {\color{Gray}{\tt $W^{12}_{S}$=0;}}\\ 
+& {\color{Gray}{\tt 13: \ else }}  & {\color{Gray}{\tt if($x^6\geq z^{10}$)}}\\
+& {\color{Gray}{\tt 14: \ \ w=new(); }}  & {\color{Gray}{\tt $w^{14}$=$o2$;}}\\
+& {\color{Gray}{\tt   \ \ \ \ \ \  //o2 }}  & {}\\
+& {\color{Gray}{\tt 15: \ \ w.f=0; }}  & {\color{Gray}{\tt $l^{15}_{o2.f}$=0;}}\\
+& {\color{Gray}{\tt 16: \ \ {\bf S}=w.f; }}  & {\color{Gray}{\tt $W^{16}_{S}$=$l^{15}_{o2.f}$;}}\\
 \end{tabular}
-\caption{\label{table:killgen}Dataflow analysis}
-%\end{small}
-\end{table*}
+\caption{Running Example (shared variables are in bold font). }
+\label{fig:path}
+\end{figure}
+
+Consider the example in Figure~\ref{fig:path}, only the if-branch of $T_2$ is executed in the original trace $\tau$.
+Following the rules in Section~\ref{sec:relax1},   we derive a set of constraints to find the new trace $\tau'$ to witness the race pair ($e_5$, $e_8$). We list those specific to if-branch below.
+
+\begin{figure}
+	\begin{center}
+$$
+	\begin{array}{rcl}
+		&  O'_{e_5}=O'_{e_8} & \textbf{(race condition)} \\
+			& \theta'(x^6)<10 & \textbf{(Intra-thread control flow constraint)} \\
+	&  O'_{e_7}<O'_{e_8} & \textbf{(Intra-thread order constraint)} \\
+		& \theta'(W^8_S)=0 & \textbf{(Intra-thread value constraint)} \\
+	\end{array} 
+$$
+\end{center}
+caption{\label{fig:pathencode}
+\end{figure}
+
+
+We  replace these constraints to another set of constraints that account for both if-branch and else-branch from the event $e_7$. We refer to the branch event $e_7$ as the root branch event, denoted as $e_{root}$.
+
+First, we conduct the DFS traversal of the branch structure and produce an event, $<t, id, inst>$, to represent the potential execution of each instruction $inst$. Here, $t$ is the same as that of the root branch event as the exploration is conducted thread-locally, $id$ is a unique value different from existing ids. Specifically,  
+ we maintain an increasing counter to assign the id following the traversal order. For this example, we simply use the line number as the event id.
+
+
+
+similar to Section~\ref{sec:relax1}, we need the SSA form of 
+
+
+
+
+
+%%TODO | and projection, abuse the terms?
+%As shown in the following, suppose the symbolic execution  $symEngine(\tau, e)$ returns the single-thread traces starting from the branch $e$, which now takes a different decision. The resultant trace is computed by first removing the events thread-locally after $e$ (inclusively) and then appending one of the single-thread traces that represents a path in the unexplored branch of $e$. The negation $neg(e)$ of $e$, which is the same as $e$ except the evaluation result of the boolean expression differs, is also appended.
+%
+%
+%
+%\begin{algorithmic}[3]
+%\For {$e: \tau$}
+%  \If {$type(e)=branch$}
+%    \State $S=symEngine(\tau, e)$
+%	\For {$\tau': S$}
+%	\State $\tau_r=\tau-\tau\downarrow_{t^e \wedge \geq e}$
+%	\State $\tau_r=\tau_r.replace(e, neg(e) + \tau')$
+%	\EndFor
+% \EndIf
+%\EndFor
+%\end{algorithmic}
+%
+%
+%{\bf Symbolic Execution\ } Our symbolic execution is realized on top of the dataflow analysis, which generates events for each instruction within the unexplored branch.
+%The symbolic execution has known limitations in reasoning about the schedules and loops (and recursion). Therefore, our analysis assumes all the events in the unexplored branch happen atomically at the branch event $e$ without interleavings from other threads, as illustrated also in the above algorithm (line 6). In this way, our analysis adopts the sequential reasoning. \tool\ will reschedule the events based on the relaxation. As for loop (or recursion), the analysis terminates the current data flow immediately after one iteration, i.e., we expand the loop for only once. Otherwise, the analysis terminates the data flow normally if the flow goes out of the scope of the unexplored branch.
+%
+%The analysis starts at the event $e$ (exclusively), with the state $\sigma$.  Initially, the state includes the runtime heap value for the base objects that are already resolved. During the symbolic execution, the state is updated to maintain the heap value and also the boolean expression values for branches. The values for other variables are not used indeed and therefore treated as symbolic. The update of the state is realized through the   standard kill/gen rules for three basic heap instructions. In the object creation, which we separate from the local assignment, we assign a unique integer to represent the newly created object and store it into the state $\sigma$. For field access, $\sigma[x.f]$ actually denotes $\sigma[o.f]$, where  $o$ is the base object resolved in the state. 
+%These kill/gen rules take effect only when $x.f$  is not of the primitive type.
+%
+%The analysis also generates the events, where the heap values are stored in the map of the event for later use. For the branch, we store its boolean evaluation result.
+%As the boolean result is available only after the branch takes the decision, we delay the generation of the branch event until the first event after the branch. 
+%
+%
+%
+%
+%\begin{table*}
+%\centering
+%%\begin{small}
+%\begin{tabular}{l|c|c}
+%\multicolumn{1}{c|}{Operation} & {Kill} & {Gen} \\
+%\hline
+%{\tt $y$=$new (...)$} 			&  $\sigma[y] \mapsto \star$		&  $\sigma[y] \mapsto newI$, $<t, cnt, y=newI, \bot>$\\
+%{\tt $y$=$x.f$} 			&   $\sigma[y]\mapsto \star$			&  $\sigma[y] \mapsto \sigma[x.f]$, $<t, cnt, y=x.f, \lsyn x \rsyn=\sigma[x]>$  \\
+%{\tt $x.f=y$} & $\sigma[x.f] \mapsto \star$		&  $\sigma[x.f] \mapsto \sigma[y]$, $<t, cnt, x.f=y, \lsyn x \rsyn=\sigma[x]>$ \\
+%{\tt $z=x\  bop\  y$} & 		&  $<t, cnt, z=x\  bop\  y, \bot>$ \\
+%{\tt $if(x<y)$} & 	  &  $<t, cnt, if(x<y), \lsyn x<y \rsyn=bool>$\\
+%\end{tabular}
+%\caption{\label{table:killgen}Dataflow analysis}
+%%\end{small}
+%\end{table*}
 
 
 
