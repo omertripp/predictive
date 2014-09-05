@@ -1,7 +1,7 @@
 \section{Relaxation of Flow Dependencies}~\label{sec:relax1}
-The main goal of our analysis is to derive, given an original trace $\tau$, a trace $\tau'$ over the same set of events in $\tau$, which has a new scheduling  of the events (the order of events inside each thread should remain unchanged) and a new mapping from variables to values in the events. Our first relaxation comes from the insight that we allow the variables to read different values than in the original trace even if such variables are used to determine the control flow, while existing approaches enforce them to read the same values as in the original trace. As a result, our relaxation allows more schedules, which are likely to expose more races.
- 
-Not every scheduling or every mapping  leads to a new feasible trace $\tau'$. Therefore, we need to compute scheduling and mapping instances that lead to feasible traces. We achieve this via constraint solving. We explain the details of our technique in the following.
+Given the trace, $\tau=<\Gamma , \{\tau_{t_1}, \tau_{t_2}, \dots \tau_{t_n} \}, O, \theta>$, the main goal of our analysis is to derive a new trace,  $\tau'=<\Gamma , \{\tau_{t_1}, \tau_{t_2}, \dots \tau_{t_n} \}, O', \theta'>$, which reschedules the events from different threads (the order of events inside each thread should remain unchanged) to witness the race. The key insight underlying our first relaxation is that, the read events in $\tau'$ are allowed by our analysis to read different values from different writes (than in trace $\tau$), but they are required by existing approaches to read the same values as in $\tau$. Therefore, our relaxation allows more schedules, which are likely to expose more races. Note that we also need to compute the new value mapping $\theta'$ because the rescheduling may alter the value every variable is assigned to. The computation of the new schedule and new value mapping is explained in the following.
+
+
 
 
 % % 
@@ -16,12 +16,13 @@ First of all, we rewrite the trace into SSA form, such that every variable in de
 
 \tool\ handles the local assignment and heap accesses differently.
 \begin{itemize}
-\item {\bf Local Assignment\ } The SSA form for local assignment resembles the SSA form of static instructions in compiler optimization, except that the loops and recursions are fully resolved in a concrete trace, obviating the need for the {\sf Phi} node. More concretely, we replace the variable $v$ defined in an event, as well as the following uses of the definition, to a new variable $v^{id}$, where $id$ is the unique id of the event. The uniqueness of the id guarantees that no two events define the same variable, i.e., each variable is defined exactly once. Note that uses of a definition can be computed easily by scanning the trace suffix for accesses to the same variable name before its next definition. 
-\item {\bf Heap accesses\ } The accesses of the local heap locations and the accesses of shared locations play different roles in our analysis. We therefore introduce different SSA form for them. 
+\item {\bf Local Assignment\ } The SSA form for local assignment resembles the SSA form of static instructions in compiler optimization, except that the loops and recursions are fully resolved in a concrete trace, obviating the need for the {\sf Phi} node. More concretely, we replace the variable $v$ defined in an event, as well as the following uses of the definition, to a new variable $v^{id}$, where $id$ is the unique id of the event. The uniqueness of the id guarantees that no two events define the same variable, i.e., each variable is defined exactly once.  Consider the example in Figure~\ref{fig:running2}, where the line number is also used as event id,  the local variable $x$ defined at line 4 is renamed as $x^4$ in the trace, while $x$ defined at line 9 is renamed as $x^9$, which is used in the following two events.  At line 5, where the object $o3$ is created,  we define a reference variable $w^5$.  Internally,  the object $o3$ is encoded as a unique integer that indicates its heap address.
+\item {\bf Heap accesses\ } The def/use relation between local heap accesses can be locally determined. Therefore, we treat them in the same way as local assignment. The def/use relations between shared heap accesses are more complex. We may link a read with different writes under different schedules, e.g., the read access to {\tt y} at line 4 in Figure \ref{fig:running} can either obtain the definition before line 1 or at line 1 or at line 3. Therefore, we introduce two symbols to represent the shared read and shared write respectively and use them to establish different links flexibly. The details are as follows. 
 \begin{itemize}
-\item {\bf Local Heap Accesses\ } The accesses of local heap locations behave similarly to the local assignment as both the definition and uses belong to a single thread. Therefore we model them as local assignments: We introduce a fresh local variable {\tt $l_{o.f }$} to replace each definition and  the corresponding uses of the location of $o.f$ ($o$ denotes an object referenced by the variable $x$ in $x.f$).  
+\item {\bf Local Heap Accesses\ } Given the write $x.f=y$ to a local heap location at event $e_{id}$,  we introduce a fresh local variable {\tt $l^{id}_{o.f}$} ($o$ is the runtime object referenced by $x$) to replace $x.f$. We also replace the uses of the location $o.f$ accordingly.
+Here  the subscript $o.f$ is interpreted as a heap location, i.e., the field $f$ of the object $o$. Consider the example in Figure~\ref{fig:running2}, at lines 6-7, we replace the local heap accesses as the local variable $l^6_{o3.f}$.
 %An assumption here is the uses and the definition still refer to the same base object $o$ in the predicted run, which is enforced through the constraint specification %(Section~\ref{sec:relax1}).
-\item  {\bf Shared Heap Accesses\ } The accesses of shared locations are more complex. Each shared read may read from one of multiple writes that update the shared location under different schedules (e.g., the read access to {\tt y} at line 4 in Figure \ref{fig:running}, which can either obtain the definition before line 1 or at line 1 or at line 3).   Given the write $x.f=y$ or the read $y=x.f$, we introduce two symbols, $W^{id}_{\tt o.f }$, which denotes the write access by the event $id$ to the  shared heap location  $o.f$  ($o$ denotes an object referenced by the variable $x$ in $x.f$), and $R^{id}_{\tt  o.f }$,  which denotes the read access  by the event $id$ to the location $o.f$. 
+\item  {\bf Shared Heap Accesses\ }    Given the write $x.f=y$ or the read $y=x.f$ of a shared location at event $e_{id}$, we introduce two symbols, $W^{id}_{\tt o.f }$ and $R^{id}_{\tt  o.f }$ respectively, where $o$ is the runtime object referenced by the $x$. Similarly, the subscript $o.f$ is interpreted as a heap location, i.e., the field $f$ of the object $o$.
 \end{itemize}
 We use the heap location such as $o.f$ in the the symbolic form of heap accesses. An underlying assumption is that the heap location remains unchanged in our predictive analysis, which we ensure through additional constraints (Section~\ref{sec:relax1}).
 \end{itemize}
@@ -54,57 +55,60 @@ We use the heap location such as $o.f$ in the the symbolic form of heap accesses
 %%TODO update the intro+moti, make sure the same style
 \begin{figure}
 \centering
-\begin{tabular}{ll}
-\multicolumn{2}{c}{{\tt {\bf x} = 0; {\bf y} = 0;}} \\
-\hline
-\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$} \\
-\hline
-{\tt 1: s=0; } & \\
-{\tt 2: for(i=1;i<2;i++)} & \\
-{\tt 3: \ \ \ s+=i;} & \\
-{\tt 4: {\bf y} = s;} & \\
-& {\tt 5: if ({\bf y} > 2)} \\
-& {\tt 6:~~print({\bf x});} \\	
+\begin{tabular}{ll|l}
+\multicolumn{3}{c}{{\tt {\bf s1} = new();//$o1$}} \\
+\multicolumn{3}{c}{{\tt {\bf s2} = new();//$o2$}} \\
+\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$}  &  \multicolumn{1}{c}{$Trace$}\\
+{\tt 1: {\bf s1}.f=3; } &  & {\tt $W^{1}_{o1.f}$=3;}\\
+{\tt 2: {\bf s2}.f=1; } &  & {\tt $W^{2}_{o2.f}$=1;}\\
+{\tt 3: {\bf s1}.f=2; } & & {\tt $W^{3}_{o1.f}$=2;} \\
+& {\tt 4: x=0;} & {\tt $x^4$=0;}\\
+& {\tt 5: w=new();//$o3$} & {\tt $w^5$=$o3$;}\\
+& {\tt 6: w.f=10;}  & {\tt $l^6_{o3.f}$=10;}\\
+& {\tt 7: z=w.f;} & {\tt $z^7$=$l^6_{o3.f}$;}\\
+& {\tt 8: y={\bf s1}.f;} & {\tt $y^8$=$R^8_{o1.f}$;}\\
+& {\tt 9: x=y+z;} & {\tt $x^9$=$y^8$+$z^7$;}\\
+& {\tt 10: if(x>11)}& {\tt if($x^9$>11)}\\ 
+& {\tt 11: \ \ {\bf s2}.f=x;}  & {\tt $W^{11}_{o2.f}$=$x^9$;}\\
 \end{tabular}
-\caption{Running Example (shared variables are in bold font). }
+\caption{Running Example (shared variables are in bold font, the line number is used as the event id). }
 \label{fig:running2}
 \end{figure}
 
  
-\begin{figure}
-\centering
-\begin{tabular}{l|l}
-\hline
-\multicolumn{1}{c}{$Trace$} & \multicolumn{1}{c}{$SSA \ form \ of\   Trace$} \\
-\hline
-{\tt 0: {\bf x}=0} &  {\tt 0: $W^0_x$=0}    \\
-{\tt 1: {\bf y}=0} &   {\tt 1: $W^1_y$=0}   \\
-{\tt 2: s=0} &  {\tt 2: $s^2$=0}   \\
-{\tt 3: i=1} &     {\tt 3: $i^3$=1}   \\
-{\tt 4: i<2} &    {\tt 4: $i^3$<3} \\
-{\tt 5: s=s+i} & {\tt 5: $s^5$=$s^2$+$i^3$}   \\
-{\tt 6: i=2} &       {\tt 6: $i^6$=2}  \\
-{\tt 7: i<2} &      {\tt 7: $i^6$<3}  \\
-{\tt 8: {\bf y} = s;} &  {\tt 8: $W^{8}_y$ = $s^5$;}  \\
-{\tt 9: {\bf y} > 2}  &    {\tt 9: $R^{9}_y$ > 2} \\
-{\tt 10: print({\bf x});} &  {\tt 10: print($R^{10}_x$);}  \\
-\end{tabular}
-\caption{Trace}
-\label{fig:t4running2}
-\end{figure}
+%\begin{figure}
+%\centering
+%\begin{tabular}{l|l}
+%\hline
+%\multicolumn{1}{c}{$Trace$} & \multicolumn{1}{c}{$SSA \ form \ of\   Trace$} \\
+%\hline
+%{\tt 0: {\bf x}=0} &  {\tt 0: $W^0_x$=0}    \\
+%{\tt 1: {\bf y}=0} &   {\tt 1: $W^1_y$=0}   \\
+%{\tt 2: s=0} &  {\tt 2: $s^2$=0}   \\
+%{\tt 3: i=1} &     {\tt 3: $i^3$=1}   \\
+%{\tt 4: i<2} &    {\tt 4: $i^3$<3} \\
+%{\tt 5: s=s+i} & {\tt 5: $s^5$=$s^2$+$i^3$}   \\
+%{\tt 6: i=2} &       {\tt 6: $i^6$=2}  \\
+%{\tt 7: i<2} &      {\tt 7: $i^6$<3}  \\
+%{\tt 8: {\bf y} = s;} &  {\tt 8: $W^{8}_y$ = $s^5$;}  \\
+%{\tt 9: {\bf y} > 2}  &    {\tt 9: $R^{9}_y$ > 2} \\
+%{\tt 10: print({\bf x});} &  {\tt 10: print($R^{10}_x$);}  \\
+%\end{tabular}
+%\caption{Trace}
+%\label{fig:t4running2}
+%\end{figure}
 
-Figure~\ref{fig:t4running2} exemplifies a trace and its SSA form, where the trace is generated from the program in Figure~\ref{fig:running2}.
-Each label in  Figure~\ref{fig:t4running2} on the left hand denotes the id of the event. As seen, event $e_5$ uses the variable $s^2$ defined at event $e_2$ and defines the variable $s^5$, which is used at $e_8$. Reads and writes of shared variables are denoted in the special form explained above (e.g.: $W^{8}_y$ and  $R^{9}_y$).
+%Figure~\ref{fig:t4running2} exemplifies a trace and its SSA form, where the trace is generated from the program in Figure~\ref{fig:running2}.
+%Each label in  Figure~\ref{fig:t4running2} on the left hand denotes the id of the event. As seen, event $e_5$ uses the variable $s^2$ defined at event $e_2$ and defines the variable $s^5$, which is used at $e_8$. Reads and writes of shared variables are denoted in the special form explained above (e.g.: $W^{8}_y$ and  $R^{9}_y$).
 
 
 
 
 
 \subsection{Constraint System}~\label{sec:constraints}
-Based on the SSA form of the trace, we build the constraints to compute a new trace with the new schedule and new mapping of variables to values.
-To model the schedule, we introduce the order variable $O_{id}$ for each event $e_{id}$. Given two events $e_i, e_j$ from two different threads, $O_{e_i}<O_{e_j}$ means that $e_i$ is scheduled before $e_j$. We omit the synchronization constraints intentionally, as they are well explained in all existing predictive analysis techniques~\cite{yannis, pldi14}.
-
-
+Based on the SSA form of the original trace $\tau$, we build the constraints to compute a new trace $\tau'$ with the new schedule $O'$ and new value mapping $\theta'$.
+Consider the example in Figure~\ref{fig:running2}, in the original trace $\tau$, the event $e_8$ reads the value of 2 from $e_3$, therefore, $e_{11}$ must happen after $e_2$. Existing approaches enforce the same value dependence between $e_3$ and $e_8$, leading to the miss of the race between $e_2$ and $e_{11}$.
+Our analysis can derive a new trace $\tau'$ to find the race by relaxing the dependence. In $\tau'$, $e_8$ reads from a different event $e_1$, producing the new value mapping, $\theta'(y^8)=3$. Accordingly, at the event $e_9$, the value mapping for $x^9$ is also updated as 13 ($\theta'(y^8)$=3, $\theta'(z^7)=10$), enabling the true branch at line 10. Finally, the events $e_2$ and $e_{11}$ are scheduled to run concurrently.  The relaxation needs to respect a set of constraints, which we explain in the following. We omit the synchronization constraints intentionally, as they are well explained in all existing predictive analysis techniques~\cite{yannis, pldi14}.
 
 
 %Having explained how the trace is encoded, we now describe in detail how constraints are derived from the trace, such that any permutation considered by the analysis is guaranteed to represent a feasible execution schedule.
@@ -113,62 +117,66 @@ To model the schedule, we introduce the order variable $O_{id}$ for each event $
 
 We first identify all candidate pairs of events that access the same location from different threads (and at least one is a write). We then check each pair  separately.   The checking is achieved by encoding all necessary constraints and invoking a constraint solver.  The first constraint asserts the feasibility of the concurrent execution of the racy events:
 $$
-O_{i} = O_{j}
+O'(e_i) = O'(e_{j})
 $$
+In Figure~\ref{fig:running2}, the race condition for the race pair, ($e_2$, $e_{11}$), is $O'(e_2)=O'(e_{11})$
 
 
+{\bf Intra-thread Constraints\ } Given the candidate race pair, $e_i$ and $e_j$, suppose $e_i$ is after $e_j$ in the original trace $\tau$. The predictive analysis reschedules the events in the prefix of $e_i$, i.e., prior to $e_i$, so that $e_i$ and $e_j$ can run concurrently. We refer to the prefix as $prefix(\tau, e_i)$. Throughout this section, we only consider the events in the prefix. 
 
-{\bf Intra-thread Constraints\ } Given the candidate race pair, $e_i$ and $e_j$, suppose $e_i$ is after $e_j$ in the original trace $\tau$. The predictive analysis reschedules the events in the prefix of $e_i$, i.e., prior to $e_i$, so that $e_i$ and $e_j$ can run concurrently. The predictive analysis by design requires that each thread should follow the same event sequence prior to $e$ as in the original run.  The preservation of the event sequence for each thread requires the following intra-thread constraints:
+The predictive analysis by design requires that each thread should follow the same event sequence prior to $e$ as in the original run.  The preservation of the event sequence for each thread requires the following intra-thread constraints:
 
 \begin{itemize}
 \item {\bf Control Flow Constraints\ } The branches in the predicted run should take the same decisions as in the original trace so that each thread reproduces the same set of events.  Specifically, we only need to reason about the branches prior to $e_i$.
 
-More formally,  we require that 
+Without loss of generality, we assume the branch event $e_k$ is in the form of $if(x<y)$. Then  we require that 
 $$
-\bigwedge_{e_k \in \tau\downarrow_{\leq i} \wedge  type^{e_k}=branch.\ }  inst^{e_k} 	\equiv \lsyn inst \rsyn^{e_k}
+\bigwedge_{e_k \in prefix(\tau,e_i) \wedge  inst^{e_k}=if(x<y).\ }  \theta'(x)<\theta'(y) 	\equiv \theta(x)<\theta(y)
 $$ 
-where  the branch event $e_k$ is used as a boolean expression. For example, given the branch {\tt if(x<y)\dots}, the constraint is in the form of $(x<y)\equiv {\bf true}$ assuming the branch evaluates to {\bf true} in the original trace. The constraint specifies that the boolean expression in the predicted trace should be evaluated to the same boolean value as in the original trace. Importantly, Unlike existing analyses \cite{yannis,pldi14}, we do not pose the requirement that the values flowing into branching statements remain the same, but adopt the relaxed requirement that the evaluation of branching expressions remains the same. For example, suppose  the branch event $x<y$ takes the value $1<2$ in the original trace. Existing analyses require the same values for the variables $x$ and $y$ in the predicted run, while we allow  the variables flowing into the branch event to assume other values, such as $3<4$, as long as the branch expression retains the same truth value. 
+The constraint specifies that the branch condition should be evaluated as the same boolean value in the predicted run $\tau'$ as in the original trace $\tau$.
+ Importantly, Unlike existing analyses \cite{yannis,pldi14}, we do not pose the requirement that the values flowing into branching statements remain the same, but adopt the relaxed requirement that the evaluation of branching expressions remains the same. Consider the example in Figure~\ref{fig:running2}, given the branch if($x^9$>11) at $e_10$, the original mapping is $\theta(x^9)=12$. Existing analyses require the same value mapping for $x^9$  in the predicted run, while we allow  a different value mapping, e.g., $\theta'(x^9)=13$, which retains the same truth value for the branch expression.
 \item {\bf Intra-thread Order Constraints\ } The events in the sequence should follow the same order as in the original trace. More formally, we require that
 $$
 \begin{array}{rl}
-\forall e_m, e_n \in \tau\downarrow_{\leq i}, s.t., & t^{e_m} = t^{e_n}. \\
-& m < n\  \Rightarrow O_{m} < O_{n}
+\forall e_m, e_n \in prefix(\tau,e_i), s.t., & t^{e_m} = t^{e_n}. \\
+ O(e_m) < O(e_n)\  & \Rightarrow O'(e_{m}) < O'(e_{n}) 
 \end{array}
 $$ 
-This constraint specifies that two events from the same thread should follow the same order as reflected by the ids of the events. Note that $m$ in $e_m$ denotes its id. Again, we only consider the events in the prefix of $e_i$.
-\item {\bf Intra-thread Data Flow Constraints\ } The mapping of local variables should not contradict the data flow semantics of each instruction.   More formally, we require that
+This constraint specifies that two events from the same thread should follow the same order as reflected by the ids of the events.
+\item {\bf Intra-thread Value Constraints\ } The value mapping of the variables should not contradict the value constraints imposed by each instruction.   Without loss of generality, suppose the instruction is a local assignment in the form of $x=y+z$, then we require that
 $$
-\bigwedge_{e_k \in \tau\downarrow_{\leq i} \wedge type(e_k)=assign|heapr|heapw}\
-	inst^{e_k}
+\bigwedge_{e_k \in prefix(\tau,e_i) \wedge inst^{e_k}=x=y+z}\
+	\theta'(x)=\theta'(y)+\theta'(z)
 $$
-where $inst^{e_k}$, such as $x=y+z$ or $R^{id}_{x}=y$, captures the constraint over the values of the variables imposed by the instruction. For example, $x=y+z$ is not satisfied if the solver maps the three variables to $3, 4, 5$ respectively. Again we consider only the events in the prefix of  $e_i$. Specially, for the instruction involving object creation, $x=new (...)$, we encode the object as a unique integer that denotes its heap address, calculated by $System.identityHashcode(x)$ at runtime.
+Remember that every variable may obtain a different value in the new trace $\tau'$ because it may read from some shared variable affected by the rescheduling.
+The constraint specifies that, the variables should be re-assigned to some values that are consistent with the instruction. Consider the example in Figure~\ref{fig:running2}, given the event $x^9=y^8+z^7$ at line 9, if the mappings $\theta'(y^8)$ and $\theta'(z^7)$ change to 3 and 10 respectively, the mapping $\theta'(x^9)$ should change to 13 consistently. In the above, we use the local assignment event for demonstration, in general, the intra-thread value constraints should also be specified for the {\sf  heapr/heapw} events.
 \end{itemize}
 
 
 
 %Rescheduling through Relaxation of Flow Dependencies
-{\bf Inter-thread Data Flow Constraints for Relaxation\ } We now move to the first novel feature of \tool, which is its ability to explore execution schedules that depart from the value flow exhibited in the original trace. More precisely, \tool\ is able to relax value flow dependencies in the original trace:  a read access may read a
-different value from other write events, as long as the read value enforces feasibility.
+{\bf Inter-thread Value Constraints for Relaxation\ } We now move to the first novel feature of \tool, which is its ability to explore execution schedules that depart from the value flow exhibited in the original trace. More precisely, \tool\ is able to relax value flow dependencies in the original trace:  a read access may read a
+different value from other write events, as long as the read value enforces feasibility of the following execution.
  This is strictly beyond the coverage potential of existing predictive analyses, which restrict trace transformations to ones where any read access must read the same  value (often from the same write event) as in the original trace. 
 
 To ensure feasibility under relaxation of flow dependencies, we need to secure the flow between the read/write with the execution schedule. 
-For example, in Figure \ref{fig:running} for the read access to ${\tt y}$ at $e_4$ to obtain the value assigned to ${\tt y}$ at $e_1$, we need a schedule where 
-$e_4$ happens after $e_1$ and other writes such as $e_3$ do not interleave them. ($e_3$ can only happen after $e_4$ in this case.)
+For example, in Figure \ref{fig:running2}, for the read at $e_8$ to read from the write t $e_1$, we need a schedule where 
+$e_8$ happens after $e_1$ and other writes such as $e_3$ do not interleave them.
 
 
 % $R_{\tt y}^4={\tt y}^1 \wedge O_1 < O_4 < O_3$ specifies that in a schedule , the $R_{\tt y}^4={\tt y}^1$.
 
-%TODO l and ell
+
 In general, the constraint formula, given read $R^{m}_{\ell}$ of location $\ell$ at the event $e_m$ with set ${\cal W}$ of matching write events (i.e., events including write access to $\ell$), takes the following form:
 $$
 \begin{array}{rll}
-\bigvee_{e_n \in {\cal W}} &  & (R^{m}_{\ell} = W^{n}_{\ell}) \\
-&		\bigwedge 	&  O_n < O_m \\
-&		\bigwedge_{e_p \in {\cal W} \setminus \{ e_n \}} & (O_p < O_n \vee O_m < O_p)
+\bigvee_{e_n \in {\cal W}} &  & (\theta'(R^{m}_{\ell}) = \theta'(W^{n}_{\ell})) \\
+&		\bigwedge 	&  O'(e_n) < O'(e_m) \\
+&		\bigwedge_{e_p \in {\cal W} \setminus \{ e_n \}} & (O'(e_p) < O'(e_n) \vee O'(e_m) < O'(e_p))
 \end{array}
 $$
-This disjunctive formula iterates over all matching write events, and demands for each that (i) it occurs prior to the read event ($O_n < O_m$) and (ii) all other write events either occur before ($O_p < O_n$) it or after the read event
-($O_m < O_p$).
+This disjunctive formula iterates over all matching write events, and demands for each that (i) it occurs prior to the read event $O'(e_n) < O'(e_m)$ and (ii) all other write events either occur before $O'(e_p) < O'(e_n)$ it or after the read event
+$O'(e_m) < O'(e_p)$.
 
 An important concern that arises due to relaxation of flow dependencies is that heap accesses may change their meaning, i.e., they involve different base objects and no longer match with each other. As an illustration, we refer to Figure \ref{fig:heapAccess}. While the read at the event $e_7$ appears to match the write at $e_5$, this is conditioned on the read at $e_6$ being linked to the assignment at $e_4$. Suppose  the event $e_6$ reads from $e_3$ due to the relaxation. Then $e_7$ and $e_5$ no longer share the same base object (or the same location). Even worse, we do not know which events $e_7$ matches, because the base object is no longer known.
 
@@ -191,7 +199,7 @@ An important concern that arises due to relaxation of flow dependencies is that 
 	\caption{\label{fig:heapAccess} A trace.}
 \end{figure}
 
-To address this challenge, we enhance the constraint system with the requirement that heap objects that are dereferenced in field access statements before the racy events retain their original address in the predicted trace.
+{\bf Invariant Base Object Constraints\ } To address this challenge, we enhance the constraint system with the requirement that heap objects that are dereferenced in field access statements before the racy events retain their original address in the predicted trace.
 This achieves two guarantees: First, matching heap access events in the original trace are guaranteed to also match in the predicted trace. Second, candidate races in the original trace remain viable in the predicted trace as they still refer to same location. Third, sharing between threads of heap locations remains unchanged  because
 each location is accessed by the same number of threads given that the base object is the same. 
 
@@ -206,13 +214,17 @@ each location is accessed by the same number of threads given that the base obje
 
 Formally, we require that
 $$
-\bigwedge_{ e_k \ has\  x.f \wedge e_i \in \tau\downarrow_{\leq i} }\
-	x \equiv  \lsyn x \rsyn^{e_k}
+\bigwedge_{ e_k \ has\  x.f \wedge e_i \in prefix(\tau,e_i) }\
+	\theta'(x) \equiv  \theta(x)
 $$
 %where ${\sf env}$ is the state mapping from local variables to their value and $\sigma(t,\tau'')$ 
 %(resp. $\sigma(t',\tau'')$) is the state arising at trace $t$ (resp. $t'$) immediately before event $\tau''$.
+
+
 This constraint fixes that all heap dereferences  prior to the racy event retain their original base object as in the original trace $\tau$. 
-In general, we need to specify such heap constraints when we hardcode the local heap accesses as local variables (Section~\ref{sec:ssa}) to ensure that the hardcoded data flow remains valid  after the relaxation. However,  most local heap accesses in the form of $x.f$ never read from any shared locations according to the static analysis, and therefore, cannot be affected by the relaxation. As an optimization, we do not specify the heap constraints for such local heap accesses.
+The array accesses are handled similarly to the field accesses, but we need to additionally require the index variable to be the same as in the original trace.
+In addition, for local heap accesses, in case that the base variable reads a local object from a shared reference variable, the base variable may change due to the rescheduling. We also fix the base variable as a constant, in order to ensure the validity of the SSA encoding of the local heap accesses and preserve the def/use chains among them. The constraint is specified during the SSA encoding.
+
 
 
 

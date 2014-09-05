@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  4 SEP 2014 17:56
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  5 SEP 2014 04:45
 entering extended mode
  %&-line parsing enabled.
 **paper
@@ -351,32 +351,67 @@ File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 ) [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
-]) (./overview.tex [2]
-LaTeX Font Info:    Try loading font information for OT1+phv on input line 182.
+]) (./overview.tex
+Underfull \hbox (badness 2903) in paragraph at lines 43--45
+\OT1/ptm/m/n/10 also be rep-re-sented more com-pre-hen-sively as, $\OML/cmm/m/i
+t/10 ^^\ \OT1/cmr/m/n/10 =\OML/cmm/m/it/10 <
+ []
 
 
-(/usr/share/texmf-texlive/tex/latex/psnfss/ot1phv.fd
+LaTeX Warning: Citation `yannis' on page 2 undefined on input line 98.
+
+
+LaTeX Warning: Citation `pecan' on page 2 undefined on input line 98.
+
+
+Underfull \hbox (badness 1629) in paragraph at lines 98--99
+[]\OT1/ptm/m/n/10 Given the trace, $\OML/cmm/m/it/10 ^^\ \OT1/cmr/m/n/10 =\OML/
+cmm/m/it/10 < \OT1/cmr/m/n/10 ^^@\OML/cmm/m/it/10 ; \OMS/cmsy/m/n/10 f\OML/cmm/
+m/it/10 ^^\[]; ^^\[]; [] ^^\[]\OMS/cmsy/m/n/10 g\OML/cmm/m/it/10 ; O; ^^R >$\OT
+1/ptm/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 1946) in paragraph at lines 98--99
+\OT1/ptm/m/n/10 the pre-dic-tive anal-y-sis com-putes a new trace, $\OML/cmm/m/
+it/10 ^^\[] \OT1/cmr/m/n/10 =\OML/cmm/m/it/10 <
+ []
+
+[2]
+LaTeX Font Info:    Try loading font information for OT1+phv on input line 193.
+
+ (/usr/share/texmf-texlive/tex/latex/psnfss/ot1phv.fd
 File: ot1phv.fd 2001/06/04 scalable font definitions for OT1/phv.
 )
 
-LaTeX Warning: Citation `yannis' on page 3 undefined on input line 184.
+LaTeX Warning: Citation `yannis' on page 3 undefined on input line 195.
 
 
-LaTeX Warning: Citation `jeff' on page 3 undefined on input line 184.
+LaTeX Warning: Citation `jeff' on page 3 undefined on input line 195.
 
 ) (./relax1.tex [3]
 
-LaTeX Warning: Citation `yannis' on page 4 undefined on input line 105.
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-
-LaTeX Warning: Citation `yannis' on page 4 undefined on input line 130.
+LaTeX Warning: Citation `yannis' on page 4 undefined on input line 111.
 
 [4]
-Overfull \hbox (9.20114pt too wide) in paragraph at lines 179--191
+Overfull \hbox (14.51147pt too wide) detected at line 135
+[] \OML/cmm/m/it/10 ^^R[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x\OT1/cmr/m/n/10 ) \
+OML/cmm/m/it/10 < ^^R[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 y\OT1/cmr/m/n/10 ) \OM
+S/cmsy/m/n/10 ^^Q \OML/cmm/m/it/10 ^^R\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x\OT1/c
+mr/m/n/10 ) \OML/cmm/m/it/10 < ^^R\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 y\OT1/cmr/m
+/n/10 )
+ []
+
+
+LaTeX Warning: Citation `yannis' on page 5 undefined on input line 137.
+
+
+Overfull \hbox (21.60861pt too wide) detected at line 177
+[]
+ []
+
+
+Overfull \hbox (9.20114pt too wide) in paragraph at lines 187--199
  [][] 
  []
 
@@ -402,49 +437,49 @@ LaTeX Warning: Citation `said' on page 7 undefined on input line 22.
 
 pdfTeX warning: pdflatex (file ./figs/Visio-discuss.pdf): PDF inclusion: found 
 PDF version <1.5>, but at most version <1.4> allowed
-<figs/Visio-discuss.pdf, id=42, 207.53696pt x 257.45685pt>
+<figs/Visio-discuss.pdf, id=40, 207.53696pt x 257.45685pt>
 File: figs/Visio-discuss.pdf Graphic file (type pdf)
 
 <use figs/Visio-discuss.pdf>) (./related.tex
 
-LaTeX Warning: Citation `XXX' on page 7 undefined on input line 7.
+LaTeX Warning: Citation `XXX' on page 7 undefined on input line 9.
 
 
-LaTeX Warning: Citation `YYY' on page 7 undefined on input line 7.
+LaTeX Warning: Citation `YYY' on page 7 undefined on input line 9.
 
 
-LaTeX Warning: Citation `XXX' on page 7 undefined on input line 7.
+LaTeX Warning: Citation `XXX' on page 7 undefined on input line 9.
 
 
-LaTeX Warning: Citation `Huang' on page 7 undefined on input line 7.
+LaTeX Warning: Citation `Huang' on page 7 undefined on input line 9.
 
 
-LaTeX Warning: Citation `XXX' on page 7 undefined on input line 13.
+LaTeX Warning: Citation `XXX' on page 7 undefined on input line 15.
 
 
-LaTeX Warning: Citation `XXX' on page 7 undefined on input line 19.
-
-
-LaTeX Warning: Citation `XXX' on page 7 undefined on input line 22.
-
-
-LaTeX Warning: Citation `XXX' on page 7 undefined on input line 22.
-
-
-LaTeX Warning: Citation `XXX' on page 7 undefined on input line 24.
+LaTeX Warning: Citation `XXX' on page 7 undefined on input line 21.
 
 [7 <./figs/Visio-discuss.pdf>]
 
+LaTeX Warning: Citation `XXX' on page 8 undefined on input line 24.
+
+
+LaTeX Warning: Citation `XXX' on page 8 undefined on input line 24.
+
+
 LaTeX Warning: Citation `XXX' on page 8 undefined on input line 26.
 
-) (./eval.tex
 
-LaTeX Warning: Reference `' on page 8 undefined on input line 42.
+LaTeX Warning: Citation `XXX' on page 8 undefined on input line 28.
+
+) (./eval.tex [8]
+
+LaTeX Warning: Reference `' on page 9 undefined on input line 42.
 
 
-LaTeX Warning: Reference `' on page 8 undefined on input line 42.
+LaTeX Warning: Reference `' on page 9 undefined on input line 42.
 
-[8]
+
 Overfull \hbox (7.60513pt too wide) in paragraph at lines 69--90
 []  
  []
@@ -453,14 +488,14 @@ Overfull \hbox (7.60513pt too wide) in paragraph at lines 69--90
 
 pdfTeX warning: pdflatex (file ./cases/Visio-bbuffer.pdf): PDF inclusion: found
  PDF version <1.5>, but at most version <1.4> allowed
-<cases/Visio-bbuffer.pdf, id=81, 337.69041pt x 192.4279pt>
+<cases/Visio-bbuffer.pdf, id=80, 337.69041pt x 192.4279pt>
 File: cases/Visio-bbuffer.pdf Graphic file (type pdf)
 
 <use cases/Visio-bbuffer.pdf> [9 <./cases/Visio-bbuffer.pdf>]
 
 pdfTeX warning: pdflatex (file ./cases/Visio-msort.pdf): PDF inclusion: found P
 DF version <1.5>, but at most version <1.4> allowed
-<cases/Visio-msort.pdf, id=131, 363.15907pt x 444.27982pt>
+<cases/Visio-msort.pdf, id=130, 363.15907pt x 444.27982pt>
 File: cases/Visio-msort.pdf Graphic file (type pdf)
 
 <use cases/Visio-msort.pdf>
@@ -489,12 +524,12 @@ LaTeX Warning: There were undefined references.
  ) 
 Here is how much of TeX's memory you used:
  4863 strings out of 493848
- 68725 string characters out of 1152823
- 177554 words of memory out of 3000000
+ 68716 string characters out of 1152823
+ 178554 words of memory out of 3000000
  8045 multiletter control sequences out of 15000+50000
  53127 words of font info for 109 fonts, out of 3000000 for 9000
  717 hyphenation exceptions out of 8191
- 27i,10n,40p,1222b,290s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 27i,10n,40p,1264b,290s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
 ve/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texmf-texlive/fonts/ty
 pe1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-texlive/fonts/type1/public/
@@ -508,15 +543,15 @@ ts/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy10.
 pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/sh
 are/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texmf-te
 xlive/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-texlive/fonts/
-type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texmf-texlive/fonts/type1/publi
-c/amsfonts/cm/cmtt8.pfb></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8
-a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share
-/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts
-/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/ut
-mr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (11 pages, 405309 bytes).
+type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texmf-texlive/fonts/type1/urw/co
+urier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helvetic/uhvr8a.pfb>
+</usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-te
+xlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/u
+rw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb
+>
+Output written on paper.pdf (11 pages, 398941 bytes).
 PDF statistics:
- 289 PDF objects out of 1000 (max. 8388607)
+ 285 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  16 words of extra memory for PDF output out of 10000 (max. 10000000)
 
