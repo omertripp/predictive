@@ -1,14 +1,12 @@
 \section{Related Work}
 
-%TODO be careful about the word "maximal". Ours is not, Jeff's is not, Said's is not. They restrict same value dependences, we relax them.
-
 In this section, we survey related research on race detection with special emphasis on predictive trace analysis (PTA).
 
 \subsection{Race Detection Techniques: Broad Survey} 
 
-Initial attempts to address the challenge of race detection focused on built-in synchronization primitives \cite{XXX,YYY}. These include locks as well as the wait/notify and start/join scheduling controls. Notable among these efforts is \emph{lockset} analysis, which considers only locks \cite{XXX}. Because the derived constraints are partial, permitting certain infeasible event reorderings, lockset analysis cannot guarantee soundness \cite{Huang}. 
+Initial attempts to address the challenge of race detection focused on built-in synchronization primitives \cite{eraserPaper,Agarwal,vonPraun:2001,Choi:2002}. These include locks as well as the wait/notify and start/join scheduling controls. Notable among these efforts is \emph{lockset} analysis, which considers only locks \cite{eraserPaper}. Because the derived constraints are partial, permitting certain infeasible event reorderings, lockset analysis cannot guarantee soundness \cite{Naik:2006}. 
 
-A different tradeoff is struck by the \emph{happens-before (HB)} approach \cite{Lamport}. In this style of analysis, all synchronization primitives are accounted for, though reordering constraints are conservative. As an example, HB inhibits reordering of two synchronized blocks governed by the same lock. 
+A different tradeoff is struck by the \emph{happens-before (HB)} approach \cite{Christiaens:2001,Dinning:1990,Mellor-Crummey:1991}, which is inspired by and based on Lamport's HB relation \cite{Lamport}. In this style of analysis, all synchronization primitives are accounted for, though reordering constraints are conservative . As an example, HB inhibits reordering of two synchronized blocks governed by the same lock. 
 
 %PTA is an instance  of the HB approach, whose starting point is a concrete execution trace.
 
@@ -18,13 +16,13 @@ Recently there have been successful attempts to relax HB constraints. Among thes
 
 Given concurrent execution trace $t$, a \emph{maximal and sound causal model} based on $t$ defines the set of all traces that a program that is able to generate $t$ can generate (maximality), and only those traces (soundness). PTA is founded on the notion of sound causality, as it considers feasible reorderings of the input trace that prove a candidate data race as such. 
 
-The first to propose PTA are Smagardakis et al. \cite{XXX}. In their original work, both synchronization constraints and inter-thread dependencies are preserved, where inter-thread dependencies are respected by 
+The first to propose PTA are Smagardakis et al. \cite{Smaragdakis:2012}. In their original work, both synchronization constraints and inter-thread dependencies are preserved, where inter-thread dependencies are respected by 
 only allowing reorderings that leave the dependence structure exhibited by the original trace in tact. This ensures that the values of shared memory locations remain the same, which secures the soundness argument, though maximality is not guaranteed.
 
-Said et al. \cite{XXX} describe a PTA that is also sound albeit not maximal. Similarly to our analysis, Said et al. perform symbolic analysis of the input trace, and then utilize an SMT solver to search for interleaved schedules that establish the presence of data races. Soundsness is guaranteed by their ability to precisely encode the semantics of sequential consistency. ExceptionNULL \cite{XXX} is another example of a sound PTA without maximality guarantees, where the goal is to detect null dereferences rather than data races. 
+Said et al. \cite{Said:2011} describe a PTA that is also sound albeit not maximal. Similarly to our analysis, Said et al. perform symbolic analysis of the input trace, and then utilize an SMT solver to search for interleaved schedules that establish the presence of data races. Soundsness is guaranteed by their ability to precisely encode the semantics of sequential consistency. ExceptionNULL \cite{Farzan:2012} is another example of a sound PTA without maximality guarantees, where the goal is to detect null dereferences rather than data races. 
 
-Serbanuta et al. \cite{XXX} have recently shown that it is possible to build a model that is not only sound but also maximal: Any extension of the model with a new trace renders the model unsound. This provides a foundation for different forms of PTA, including data races, but also atomicity, serializability and other properties. 
+Serbanuta et al. \cite{SerbanutaCR12} have recently shown that it is possible to build a model that is not only sound but also maximal: Any extension of the model with a new trace renders the model unsound. The theoretical framework created by Serbanuta et al. provides a foundation for different forms of PTA, including data races, but also atomicity, serializability and other properties. 
 
-Inspired by this result and closer to \tool\ is the PTA technique of Huang et al. \cite{XXX}, which is both sound and maximal. This technique, too, makes use of an SMT solver based on symbolic encoding of the input trace. As part of the encoding, control-flow information is taken into account to enable reorderings that do not violate control dependencies. Still, the two relaxations that \tool\ features, which enable (i) value- rather than dependence-based reasoning about data flow and (ii) consideration of unexplored branches, are strictly outside the scope of Huang et al.'s technique. In Section \ref{sec:eval}, we demonstrate via direct comparison with Huang et al. the dramatic improvement in coverage thanks to these relaxation methods, which we prove to handle in a sound and maximal manner.
+Inspired by this result and closer to \tool\ is the PTA technique of Huang et al. \cite{HuangMR14}, which --- like our technique --- is sound and also maximal, but only under the assumption that local assignments are not modeled. Huang et al.s technique, too, makes use of an SMT solver based on symbolic encoding of the input trace. As part of the encoding, control-flow information is taken into account to enable reorderings that do not violate control dependencies. Still, the two relaxations that \tool\ features, which enable (i) value- rather than dependence-based reasoning about data flow and (ii) consideration of unexplored branches, are strictly outside the scope of Huang et al.'s technique. In Section \ref{sec:eval}, we demonstrate via direct comparison with Huang et al. the dramatic improvement in coverage thanks to these relaxation methods, which we prove to handle in a sound manner.
 
 
