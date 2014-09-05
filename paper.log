@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  5 SEP 2014 17:45
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  5 SEP 2014 18:13
 entering extended mode
  %&-line parsing enabled.
 **paper
@@ -382,23 +382,72 @@ Overfull \hbox (9.20114pt too wide) in paragraph at lines 184--196
  []
 
 [5]) (./relax2.tex
-Underfull \hbox (badness 10000) in paragraph at lines 45--46
-[]\OT1/ptm/m/n/10 refer to the branch struc-ture as, $\OML/cmm/m/it/10 B \OT1/c
-mr/m/n/10 =\OML/cmm/m/it/10 <
- []
+
+LaTeX Warning: Reference `[' on page 6 undefined on input line 6.
+
+! Too many }'s.
+l.6 ...ynamic solution in Section~\ref[sec:relax1}
+                                                  .
+You've closed more groups than you opened.
+Such booboos are generally harmless, so keep going.
 
 [6]
-Overfull \hbox (5.49956pt too wide) detected at line 66
+Overfull \hbox (5.49956pt too wide) detected at line 60
 \OML/cmm/m/it/10 cons\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 n\OT1/cmr/m/n/10 ) = []
  []
 
+! Extra alignment tab has been changed to \cr.
+<recently read> \endtemplate 
+                             
+l.67 &
+      (\theta'(x^5)<10 \rightarrow \theta'(W^7_{S})=0) \wedge (\theta'(x^5)\...
+You have given more \span or & marks than there were
+in the preamble to the \halign or \valign now in progress.
+So I'll assume that you meant to type \cr instead.
 
-Overfull \hbox (36.38353pt too wide) detected at line 79
+! Extra alignment tab has been changed to \cr.
+<recently read> \endtemplate 
+                             
+l.68 &
+      \wedge  (\theta'(x^5)\geq 10 \rightarrow
+You have given more \span or & marks than there were
+in the preamble to the \halign or \valign now in progress.
+So I'll assume that you meant to type \cr instead.
+
+! Extra alignment tab has been changed to \cr.
+<recently read> \endtemplate 
+                             
+l.69 &
+       \ \ \ \ \  \ \ (\theta'(x^5)<\theta'(z^9) \rightarrow \theta'(W^{11}_...
+You have given more \span or & marks than there were
+in the preamble to the \halign or \valign now in progress.
+So I'll assume that you meant to type \cr instead.
+
+! Extra alignment tab has been changed to \cr.
+<recently read> \endtemplate 
+                             
+l.70 &
+       \ \ \ \ \  \ \ \wedge \theta'(x^5)\geq \theta'(z^9) \rightarrow \thet...
+You have given more \span or & marks than there were
+in the preamble to the \halign or \valign now in progress.
+So I'll assume that you meant to type \cr instead.
+
+! Extra alignment tab has been changed to \cr.
+<recently read> \endtemplate 
+                             
+l.71 &
+      )\\
+You have given more \span or & marks than there were
+in the preamble to the \halign or \valign now in progress.
+So I'll assume that you meant to type \cr instead.
+
+
+Overfull \hbox (36.38353pt too wide) detected at line 73
 []
  []
 
 
-Overfull \hbox (14.99385pt too wide) detected at line 92
+Overfull \hbox (14.99385pt too wide) detected at line 85
 \OML/cmm/m/it/10 cons\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 n\OT1/cmr/m/n/10 ) = []
  []
 
@@ -406,18 +455,17 @@ Overfull \hbox (14.99385pt too wide) detected at line 92
 
 LaTeX Warning: Citation `chao' on page 7 undefined on input line 12.
 
+
+LaTeX Warning: Citation `jeff' on page 7 undefined on input line 22.
+
+
+LaTeX Warning: Citation `said' on page 7 undefined on input line 22.
+
 [7]
-
-LaTeX Warning: Citation `jeff' on page 8 undefined on input line 22.
-
-
-LaTeX Warning: Citation `said' on page 8 undefined on input line 22.
-
-
 
 pdfTeX warning: pdflatex (file ./figs/Visio-discuss.pdf): PDF inclusion: found 
 PDF version <1.5>, but at most version <1.4> allowed
-<figs/Visio-discuss.pdf, id=44, 207.53696pt x 257.45685pt>
+<figs/Visio-discuss.pdf, id=45, 207.53696pt x 257.45685pt>
 File: figs/Visio-discuss.pdf Graphic file (type pdf)
 
 <use figs/Visio-discuss.pdf>) (./eval.tex
@@ -458,16 +506,17 @@ Overfull \hbox (2.20961pt too wide) in paragraph at lines 179--180
  [][] 
  []
 
-[10 <./cases/Visio-bbuffer.pdf>]) (./related.tex
+) (./related.tex
 
-LaTeX Warning: Citation `eraserPaper' on page 11 undefined on input line 7.
-
-
-LaTeX Warning: Citation `Agarwal' on page 11 undefined on input line 7.
+LaTeX Warning: Citation `eraserPaper' on page 10 undefined on input line 7.
 
 
-LaTeX Warning: Citation `eraserPaper' on page 11 undefined on input line 7.
+LaTeX Warning: Citation `Agarwal' on page 10 undefined on input line 7.
 
+
+LaTeX Warning: Citation `eraserPaper' on page 10 undefined on input line 7.
+
+[10 <./cases/Visio-bbuffer.pdf>]
 
 LaTeX Warning: Citation `Christiaens:2001' on page 11 undefined on input line 9
 .
@@ -498,12 +547,12 @@ LaTeX Warning: There were undefined references.
  ) 
 Here is how much of TeX's memory you used:
  4870 strings out of 493848
- 68872 string characters out of 1152823
- 176565 words of memory out of 3000000
+ 68865 string characters out of 1152823
+ 177565 words of memory out of 3000000
  8052 multiletter control sequences out of 15000+50000
  53127 words of font info for 109 fonts, out of 3000000 for 9000
  717 hyphenation exceptions out of 8191
- 27i,10n,40p,1264b,297s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 27i,10n,40p,1595b,297s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
 ve/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texmf-texlive/fonts/ty
 pe1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-texlive/fonts/type1/public/
@@ -523,7 +572,7 @@ urier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helvetic/uhvr8a.pfb>
 xlive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/u
 rw/times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb
 >
-Output written on paper.pdf (12 pages, 408813 bytes).
+Output written on paper.pdf (12 pages, 407538 bytes).
 PDF statistics:
  288 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
