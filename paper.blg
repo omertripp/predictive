@@ -7,50 +7,46 @@ I was expecting a `,' or a `}'---line 215 of file paper.bib
  :   year = {1987}
 (Error may have been on previous line)
 I'm skipping whatever remains of this entry
-Warning--I didn't find a database entry for "pecan"
-Warning--I didn't find a database entry for "jeff"
-Warning--I didn't find a database entry for "said"
-Warning--I didn't find a database entry for "HuangMR14"
 Warning--empty year in Lamport
-You've used 20 entries,
+You've used 21 entries,
             2118 wiz_defined-function locations,
-            605 strings with 6694 characters,
-and the built_in function-call counts, 6072 in all, are:
-= -- 501
-> -- 367
+            604 strings with 6855 characters,
+and the built_in function-call counts, 6437 in all, are:
+= -- 530
+> -- 395
 < -- 0
-+ -- 145
-- -- 124
-* -- 362
-:= -- 1043
-add.period$ -- 60
-call.type$ -- 20
-change.case$ -- 122
++ -- 156
+- -- 134
+* -- 388
+:= -- 1106
+add.period$ -- 63
+call.type$ -- 21
+change.case$ -- 130
 chr.to.int$ -- 0
-cite$ -- 21
-duplicate$ -- 272
-empty$ -- 539
-format.name$ -- 124
-if$ -- 1263
+cite$ -- 22
+duplicate$ -- 286
+empty$ -- 567
+format.name$ -- 134
+if$ -- 1337
 int.to.chr$ -- 0
-int.to.str$ -- 20
-missing$ -- 20
-newline$ -- 103
-num.names$ -- 40
-pop$ -- 194
+int.to.str$ -- 21
+missing$ -- 21
+newline$ -- 108
+num.names$ -- 42
+pop$ -- 206
 preamble$ -- 1
-purify$ -- 102
+purify$ -- 109
 quote$ -- 0
-skip$ -- 145
+skip$ -- 152
 stack$ -- 0
-substring$ -- 101
-swap$ -- 38
+substring$ -- 106
+swap$ -- 40
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 80
+type$ -- 84
 warning$ -- 1
-while$ -- 40
-width$ -- 22
-write$ -- 202
+while$ -- 42
+width$ -- 23
+write$ -- 212
 (There was 1 error message)

@@ -1,7 +1,7 @@
 \section{Evaluation}~\label{sec:eval}
 Our evaluation focuses on the effectiveness  and scalability.
 To measure the effectiveness, we compare with the predictive analysis, 
-{\sf RV}~\cite{}. We chose RV for two main reasons: (1) {\sf RV} is the 
+{\sf RV}~\cite{pldi14}. We chose RV for two main reasons: (1) {\sf RV} is the 
 only open source predictive analysis, (2) {\sf RV} represents the 
 state-of-the-art, which is theoretically proven to have higher detection 
 capability than other approaches. 
@@ -23,14 +23,14 @@ subtraces or ``time windows'' (in our experiments, $N=1,000$). The values
 of local and shared variables are then passed at the end of a 
 given window as the inputs to the next window. For lack of space, we 
 omit the details, and instead refer the reader to 
-Huang et al. \cite{HuangMR14}, who apply a similar optimization.
+Huang et al. \cite{pldi14}, who apply a similar optimization.
 
 
 {\bf Evaluation Method} We conducted our experiments on a set of 16 
 applications, which were also used to evaluate {\sf RV}. Specifically, 
 the set includes large applications such as {\sf Jigsaw}, 
 {\sf Xalan} and {\sf Lusearch}. To handle large applications that make 
-use of reflection, we applied the {\sf Tamiflex} tool~\cite{}, which 
+use of reflection, we applied the {\sf Tamiflex} tool~\cite{tamiflex}, which 
 replaces reflective calls with the concrete method invocations recorded 
 in the observed run.
 % for the purpose of effective static analysis.  
@@ -38,7 +38,7 @@ We omit the benchmark {\sf eclipse} because the current version
 of {\sf Tamiflex}  leads to abnormal execution after the instrumentation, 
 which throws an exception when the main service is started. 
 By applying \tool\  to the abnormal execution, we identify only 3 races, 
-similarly to the report of RV~\cite{}.
+similarly to the report of RV~\cite{pldi14}.
 In addition, the {\sf montecarlo} benchmark requires an external input 
 that we downloaded from the internet and simplified. For the large 
 applications, we utilized the most lightweight available configuration.
@@ -134,9 +134,9 @@ branches, i.e., one before each shared field access, which ensures
 the use of the same base objects.
 We get rid of such artificial branches and instead, rely on the small 
 amount of base read events to ensure the use of the same base 
-objects (Section~\ref{}). Our strategy reduces the number of branches 
+objects (Section~\ref{sec:relax1} and Section~\ref{sec:relax2}). Our strategy reduces the number of branches 
 greatly and amplifies the effectiveness of the optimization. We also 
-carried out case studies (Section~\ref{}) to better illustrate the scenarios.
+carried out case studies (Section~\ref{sec:cases}) to better illustrate the scenarios.
 
  
 
@@ -214,16 +214,16 @@ lusearch & 10 & \multicolumn{1}{l|}{2.3K} & \multicolumn{1}{l|}{0.5K} & 715 & 22
 
 
 
-\subsection{Case studies}
+\subsection{Case studies}~\label{sec:cases}
 We manually inspected the reported races over small applications to gain better understanding about our approach. 
 
 {\bf Relaxing Values\ } Figure~\ref{fig:relax1} demonstrates the relaxation of inter-thread dependence enabled by our approach. 
 The code is from the benchmark {\sf bbuffer}, where the line numbers are
-marked. Huang et al.~\cite{} detect the race between lines 291 and 400, 
+marked. Huang et al.~\cite{pldi14} detect the race between lines 291 and 400, 
 but fail to detect the race between lines 294 and 400. The reason is 
 that in the observed run, the execution follows the order 400, 291 and 294. 
 For the event at line 294, its preceding branch at line 291 reads 
-from line 400. Therefore, Huang et al.~\cite{}
+from line 400. Therefore, Huang et al.~\cite{pldi14}
 require the predicted run to preserve the dependence between line 291 and 
 line 400, so that line 291 reads exactly the same value and the branching 
 expression evaluates to the same truth value. The dependence enforces 
@@ -260,7 +260,7 @@ Thread 2, there are three threads alive and only two more
 entries are available. Suppose that in the observed run Thread 2 
 consumes both thread entries and starts the child Thread 3 
 and Thread 4 (not shown), updating {\tt alive} to 5. Then Thread 1 
-cannot execute the branch at lines 4-5. Huang et al.~\cite{} require the predicted run to preserve the dependence denoted by the dotted line since this dependence affects the branch condition at line 2. As a result, the predicted run follows the same branch decision and cannot reason about the code at lines 4-5. Our analysis does not suffer from this limitation. Instead, it allows the predicted run to reason about the un-explored code. Specifically, it does not need to preserve the dependence from line 11 to line 1, and it allows line 1 (Thread 1) to read from line 9 (Thread 2). As a result, the branch condition guarding the unexplored branch is evaluated to be true, enabling the unexplored path in the constraint solver. Finally, the solver identifies the race between line 5 (Thread 1) and line 1 (Thread 3). Note that the two lines are synchronized on different locks~\footnote{We abbreviate the {\tt synchronized} keyword as {\tt sync}.
+cannot execute the branch at lines 4-5. Huang et al.~\cite{pldi14} require the predicted run to preserve the dependence denoted by the dotted line since this dependence affects the branch condition at line 2. As a result, the predicted run follows the same branch decision and cannot reason about the code at lines 4-5. Our analysis does not suffer from this limitation. Instead, it allows the predicted run to reason about the un-explored code. Specifically, it does not need to preserve the dependence from line 11 to line 1, and it allows line 1 (Thread 1) to read from line 9 (Thread 2). As a result, the branch condition guarding the unexplored branch is evaluated to be true, enabling the unexplored path in the constraint solver. Finally, the solver identifies the race between line 5 (Thread 1) and line 1 (Thread 3). Note that the two lines are synchronized on different locks~\footnote{We abbreviate the {\tt synchronized} keyword as {\tt sync}.
 }. 
 
  

@@ -1,5 +1,11 @@
 \begin{thebibliography}{10}
 
+\bibitem{tamiflex}
+E.~Bodden, A.~Sewe, J.~Sinschek, H.~Oueslati, and M.~Mezini.
+\newblock Taming reflection: Aiding static analysis in the presence of
+  reflection and custom class loaders.
+\newblock In {\em ICSE}, 2011.
+
 \bibitem{Choi:2002}
 J.-D. Choi, K.~Lee, A.~Loginov, R.~O'Callahan, V.~Sarkar, and M.~Sridharan.
 \newblock Efficient and precise datarace detection for multithreaded

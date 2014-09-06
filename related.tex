@@ -47,7 +47,7 @@ dependence structure exhibited by the original trace intact. This ensures
 that the values of shared memory locations remain the same, which secures 
 the soundness argument.
 
-Said et al. \cite{Said:2011} and Huang et al. \cite{HuangMR14} proposed
+Said et al. \cite{Said:2011} and Huang et al. \cite{pldi14} proposed
 PTAs that are also sound. Said et al. perform symbolic analysis of the 
 input trace, and then utilize an SMT solver to search for schedules that 
 establish the presence of data races. Soundness is guaranteed by their 
@@ -70,14 +70,14 @@ in coverage thanks to these relaxation methods.
 %in a sound manner.
 
 \subsection{Maximality Claim}
-Serbanuta et al. \cite{maximal} and Huang et al.~\cite{HuangMR14} both 
+Serbanuta et al. \cite{maximal} and Huang et al.~\cite{pldi14} both 
 claim maximality of the detection capability, but under different assumptions. 
 Assuming branch events are not modeled in the trace, \cite{maximal} guarantees maximality. Given few 
 information in the trace, it conservatively requires the shared read to 
 obtain the same value in the predicted run to ensure soundness. However, if 
 branch events are modeled, the technique does not guarantee maximality.  
 Assuming the branch events are modeled but local assignments are not recorded, 
-\cite{HuangMR14} guarantees maximality. 
+\cite{pldi14} guarantees maximality. 
 Compared to \cite{maximal}, it allows some events to read different 
 values if they do not affect the following branch decisions. However, 
 it requires the events that affect the branch decisions to read exactly 
