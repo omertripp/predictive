@@ -78,13 +78,6 @@ M.~Said, C.~Wang, Z.~Yang, and K.~Sakallah.
   Formal Methods}, NFM'11, pages 313--327, Berlin, Heidelberg, 2011.
   Springer-Verlag.
 
-\bibitem{SerbanutaCR12}
-T.~Serbanuta, F.~Chen, and G.~Rosu.
-\newblock Maximal causal models for sequentially consistent systems.
-\newblock In {\em Runtime Verification, Third International Conference, {RV}
-  2012, Istanbul, Turkey, September 25-28, 2012, Revised Selected Papers},
-  pages 136--150, 2012.
-
 \bibitem{maximal}
 T.~F. Serbanuta, F.~Chen, and G.~Rosu.
 \newblock Maximal causal models for sequentially consistent systems.
