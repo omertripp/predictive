@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  6 SEP 2014 02:54
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  6 SEP 2014 03:24
 entering extended mode
  %&-line parsing enabled.
 **paper
@@ -338,7 +338,7 @@ LaTeX Font Info:    Try loading font information for OT1+phv on input line 255.
 File: ot1phv.fd 2001/06/04 scalable font definitions for OT1/phv.
 )) (./relax1.tex
 [3]
-Overfull \hbox (14.51147pt too wide) detected at line 211
+Overfull \hbox (14.51147pt too wide) detected at line 210
 [] \OML/cmm/m/it/10 ^^R[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x\OT1/cmr/m/n/10 ) \
 OML/cmm/m/it/10 < ^^R[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 y\OT1/cmr/m/n/10 ) \OM
 S/cmsy/m/n/10 ^^Q \OML/cmm/m/it/10 ^^R\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x\OT1/c
@@ -346,12 +346,20 @@ mr/m/n/10 ) \OML/cmm/m/it/10 < ^^R\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 y\OT1/cmr/m
 /n/10 )
  []
 
+! Missing $ inserted.
+<inserted text> 
+                $
+l.221 if($x^9$$>$11$) at $e_
+                            {10}$, the original mapping is $\theta(x^9)=12$....
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
 [4]
 
-LaTeX Font Warning: Command \small invalid in math mode on input line 284.
+LaTeX Font Warning: Command \small invalid in math mode on input line 283.
 
 
-Overfull \hbox (5.17958pt too wide) detected at line 291
+Overfull \hbox (5.17958pt too wide) detected at line 290
 []
  []
 
@@ -405,13 +413,13 @@ File: figs/Visio-msort.pdf Graphic file (type pdf)
 <use figs/Visio-msort.pdf>) (./related.tex [9 <./figs/Visio-bbuffer.pdf> <./fig
 s/Visio-msort.pdf>]
 
-LaTeX Warning: Citation `HuangMR14' on page 10 undefined on input line 21.
+LaTeX Warning: Citation `HuangMR14' on page 10 undefined on input line 50.
 
 
-LaTeX Warning: Citation `HuangMR14' on page 10 undefined on input line 28.
+LaTeX Warning: Citation `HuangMR14' on page 10 undefined on input line 73.
 
 
-LaTeX Warning: Citation `HuangMR14' on page 10 undefined on input line 30.
+LaTeX Warning: Citation `HuangMR14' on page 10 undefined on input line 80.
 
 [10]) (./conclusion.tex) (./paper.bbl)
 
@@ -425,7 +433,9 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[11] (./paper.aux)
+[11
+
+] (./paper.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -462,7 +472,7 @@ ier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helvetic/uhvr8a.pfb></
 usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texl
 ive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw
 /times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (11 pages, 443066 bytes).
+Output written on paper.pdf (11 pages, 442508 bytes).
 PDF statistics:
  207 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

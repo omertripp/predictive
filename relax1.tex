@@ -24,15 +24,14 @@ mapping is explained in the following.
 First of all, we rewrite the trace into SSA form, such that every variable is
 defined exactly once in the trace. This requirement is a prerequisite for 
 the computation of the mapping, in which each variable is mapped to exactly 
-one value. Another side effect is that the def/use chains become explicit 
-in SSA form, which simplifies the following analysis steps.
+one value. 
 
 \tool\ handles local assignments and heap accesses differently.
 \begin{itemize}
 \item {\bf Local Assignment\ } The SSA form for local assignments 
 resembles the static SSA form in compiler optimizations, 
 except that loops and recursions are fully resolved in the trace, 
-obviating the need for {\sf Phi} nodes\footnote{While \tool in fact uses
+obviating the need for {\sf Phi} nodes\footnote{While \tool\  in fact uses
 Phi nodes in the second relaxation, for simplicity during discussion, we 
 do not assume Phi nodes in this stage.} . More concretely, we replace the 
 variable $v$ defined in an event, as well as the following uses of the 
@@ -201,7 +200,7 @@ the following intra-thread constraints:
 should take the same decisions as in the original trace so that each thread 
 reproduces the same sequence of events\footnote{We allow path differences in
 the second relaxation. This is to avoid presenting the encoding
-of both relaxations together, which is overly complex.} 
+of both relaxations together, which is overly complex.}.
 %the encodings of both relaxation together, .  
 %Specifically, we only need to reason about the branches prior to $e_i$.
 
@@ -219,7 +218,7 @@ the branch outcome remains the same.
 %the evaluation 
 %of branching expressions remains the same. 
 Consider the example in Figure~\ref{fig:running2}, given the branch 
-if($x^9$$>$11) at $e_{10}$, the original mapping is $\theta(x^9)=12$. We allow  
+if($x^9$$>$11$) at $e_{10}$, the original mapping is $\theta(x^9)=12$. We allow  
 a different value mapping, e.g., $\theta'(x^9)=13$, which retains the 
 same truth value for the branch.
 \item {\bf Intra-thread Order Constraints\ } The events in the sequence 
@@ -231,8 +230,8 @@ $$
  O(e_m) < O(e_n)\  & \Rightarrow O'(e_{m}) < O'(e_{n}) 
 \end{array}
 $$ 
-This constraint specifies that two events from the same thread should 
-follow the same order as reflected by the ids of the events.
+This constraint specifies that two events from the same thread ($t^{e_m}$ denotes the thread of $e_m$) should 
+follow the same order as in the original trace.
 \item {\bf Intra-thread Value Constraints\ } The value mapping of the 
 variables should not contradict the constraints imposed by individual 
 instruction.   Without loss of generality, suppose the instruction is 
@@ -270,7 +269,7 @@ To ensure feasibility under value relaxation
 % of flow dependencies, 
 we need to ensure the flow between read and write with some execution schedule. 
 For example, in Figure \ref{fig:running2}, for the read at $e_8$ to read 
-from the write t $e_1$, we need a schedule where 
+from the write  $e_1$, we need a schedule where 
 $e_8$ happens after $e_1$ and other writes such as $e_3$ do not interleave them.
 
 
@@ -304,7 +303,7 @@ event $e_7$ appears to match the write at $e_5$, this is conditioned
 on the read at $e_6$ being linked to the assignment at $e_4$ (
 object $o_2$ is the object denoted by $z$ according to the source code). 
 Suppose event $e_6$ reads from $e_3$ due to the relaxation. Then $e_7$ and 
-$e_5$ should not share the same base object. 
+$e_5$ should not match with each other as they do not share the same base object. 
 %Even worse, we do not know which events $e_7$ matches, because the base object is no longer known.
 
 
