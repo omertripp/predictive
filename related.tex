@@ -1,35 +1,95 @@
 \section{Related Work}
 
-In this section, we survey related research on race detection with special emphasis on predictive trace analysis (PTA).
+%In this section, we survey related research on race detection with special emphasis on predictive trace analysis (PTA).
 
 \subsection{Race Detection Techniques: Broad Survey} 
 
-Initial attempts to address the challenge of race detection focused on built-in synchronization primitives \cite{eraser,SasturkarAWS05,vonPraun:2001,Choi:2002}. These include locks as well as the wait/notify and start/join scheduling controls. Notable among these efforts is \emph{lockset} analysis, which considers only locks \cite{eraser}. Because the derived constraints are partial, permitting certain infeasible event reorderings, lockset analysis cannot guarantee soundness \cite{Naik:2006}. 
+Initial attempts to address the challenge of race detection focused on 
+built-in synchronization primitives \cite{eraser,SasturkarAWS05,vonPraun:2001,
+Choi:2002}. These include locks as well as the wait/notify and start/join 
+primitives. Notable among these efforts is the \emph{lockset} analysis, 
+which considers only locks \cite{eraser}. Because the derived constraints 
+are partial, permitting certain infeasible event reorderings, lockset 
+analysis cannot guarantee soundness \cite{Naik:2006}. 
 
-A different tradeoff is struck by the \emph{happens-before (HB)} approach \cite{Christiaens,Dinning:1990,Mellor-Crummey:1991}, which is founded on Lamport's HB relation \cite{Lamport}. In this style of analysis, all synchronization primitives are accounted for, though reordering constraints are conservative . As an example, HB inhibits reordering of two synchronized blocks governed by the same lock. 
+A different tradeoff is struck by the \emph{happens-before (HB)} 
+approach \cite{Christiaens,Dinning:1990,Mellor-Crummey:1991}, which is 
+founded on Lamport's HB relation \cite{Lamport}. In HB analysis, all 
+synchronization primitives are accounted for, though reordering constraints 
+are overly conservative. 
+%As an example, HB inhibits reordering of two synchronized 
+%blocks governed by the same lock. 
 
 %PTA is an instance  of the HB approach, whose starting point is a concrete execution trace.
 
-Recently there have been successful attempts to relax HB constraints. Among these are hybrid analysis \cite{hybrid}, which permits both orderings of lock-synchronized blocks, as well as the \emph{Universal Causal Graph (UCG)} representation~\cite{ucg}, which also enables both orderings but only if these are consistent with wait/notify- and start/join-induced constraints.
+Recently there have been successful attempts to relax HB constraints, including
+%Among these are 
+the hybrid analysis \cite{hybrid}, which permits both orderings of 
+lock-synchronized blocks, and the \emph{Universal Causal Graph (UCG)} 
+representation~\cite{ucg}, which also enables both orderings but only 
+if these are consistent with wait/notify- and start/join-induced constraints.
 
 \subsection{Predictive Trace Analysis (PTA)}
 
-Given concurrent execution trace $t$, PTA derives new traces to witness the data races. PTA is founded on the notion of sound causality, as it considers feasible reorderings of the input trace that prove a candidate data race as such. 
+Given a concurrent execution trace $t$, PTA derives new traces to witness 
+the data races. PTA is founded on the notion of sound causality, as it 
+considers feasible reorderings of the input trace that prove a candidate 
+data race as such. 
 
-Wang et al.~\cite{chao} pioneere the symbolic predictive analysis, which our approach also belongs to. However, the approach lacks support of heap encoding, therefore, cannot apply to real-world applications. The first PTA that applies to real-world applications are proposed by Smagardakis et al. \cite{yannis}. In their original work, both synchronization constraints and inter-thread dependencies are preserved, where inter-thread dependencies are respected by only allowing reorderings that leave the dependence structure exhibited by the original trace intact. This ensures that the values of shared memory locations remain the same, which secures the soundness argument.
+Wang et al.~\cite{chao} pioneere the symbolic predictive analysis, 
+which our approach also belongs to. However, the approach lacks support 
+of heap encoding, therefore, cannot be applied to real-world applications. 
+The first PTA that applies to real-world applications is proposed by 
+Smagardakis et al. \cite{yannis}. In their original work, both synchronization 
+constraints and inter-thread dependencies are preserved, where inter-thread 
+dependencies are respected by only allowing reorderings that leave the 
+dependence structure exhibited by the original trace intact. This ensures 
+that the values of shared memory locations remain the same, which secures 
+the soundness argument.
 
-Said et al. \cite{Said:2011} and Huang et al. \cite{HuangMR14} describe PTAs that are also sound. Said et al. perform symbolic analysis of the input trace, and then utilize an SMT solver to search for interleaved schedules that establish the presence of data races. Soundness is guaranteed by their ability to precisely encode the semantics of sequential consistency. 
-Inspired by Said et al., Huang et al. present an improvement, whereby control-flow information is encoded into the constraint system so as to relax flow dependencies as long as control dependencies are preserved.
-ExceptionNULL \cite{Farzan:2012} is another example of a sound PTA, of which the goal is to detect null dereferences rather than data races. 
+Said et al. \cite{Said:2011} and Huang et al. \cite{HuangMR14} proposed
+PTAs that are also sound. Said et al. perform symbolic analysis of the 
+input trace, and then utilize an SMT solver to search for schedules that 
+establish the presence of data races. Soundness is guaranteed by their 
+ability to precisely encode the semantics of sequential consistency. 
+Inspired by Said et al., Huang et al. present an improvement, whereby 
+control-flow information is encoded into the constraint system so as 
+to relax flow dependencies as long as control dependencies are 
+preserved. ExceptionNULL \cite{Farzan:2012} is another example of 
+sound PTA. Its goal is to detect null dereferences rather than data races. 
 
-\tool\ is similar to Said et al. and Huang et al. in that it also makes use of an SMT solver based on symbolic encoding of the input trace. Still, the two relaxations that \tool\ features, which enable (i) value- rather than dependence-based reasoning about data flow and (ii) consideration of unexplored branches, are strictly outside the scope of both of these techniques. In Section \ref{sec:eval}, we demonstrate via direct comparison with Huang et al. the dramatic improvement in coverage thanks to these relaxation methods, which we prove to handle in a sound manner.
+\tool\ is similar to Said et al. and Huang et al. in that it also makes 
+use of an SMT solver based on symbolic encoding of the input 
+trace. Still, the two sound relaxations that \tool\ features, which 
+enable (i) value- rather than dependence-based reasoning about data 
+flow and (ii) consideration of unexplored branches, are strictly beyond
+the scope of both techniques. In Section \ref{sec:eval}, we demonstrate 
+via direct comparison with Huang et al. the substantial improvement 
+in coverage thanks to these relaxation methods.
+%, which we prove to handle 
+%in a sound manner.
 
 \subsection{Maximality Claim}
-Serbanuta et al. \cite{maximal} and Huang et al.~\cite{HuangMR14} both claim maximality of the detection capability, but under different assumptions. 
-Assuming the branch event is not modeled in the trace, Serbanuta et al.'s approach \cite{maximal} guarantees maximality. Given few information in the trace, it conservatively requires the shared read to obtain the same value in the predicted run to ensure soundness. However, if the branch event is modeled, the technique does not guarantee maximality.   
-Assuming the branch events are modeled but local assignments are not recorded in the trace, Huang et al.'s approach~\cite{HuangMR14} guarantees the maximality. Compared to Serbanuta et al.'s technique \cite{maximal}, it allows some events to read different values if they do not affect the following branch decisions. However, it requires the events that affect the branch decisions to read exactly the same values. In practice, these assumptions are too restrictive  because the testers often have full access to the source/bytecode and can collect the local assignments freely.  
+Serbanuta et al. \cite{maximal} and Huang et al.~\cite{HuangMR14} both 
+claim maximality of the detection capability, but under different assumptions. 
+Assuming branch events are not modeled in the trace, \cite{maximal} guarantees maximality. Given few 
+information in the trace, it conservatively requires the shared read to 
+obtain the same value in the predicted run to ensure soundness. However, if 
+branch events are modeled, the technique does not guarantee maximality.  
+Assuming the branch events are modeled but local assignments are not recorded, 
+\cite{HuangMR14} guarantees maximality. 
+Compared to \cite{maximal}, it allows some events to read different 
+values if they do not affect the following branch decisions. However, 
+it requires the events that affect the branch decisions to read exactly 
+the same values. In practice, these assumptions are too restrictive  
+because local assignments can be easily collected in practice.
+%the testers often have full access to the source/bytecode and 
+%can collect local assignments freely.  
 
-Assuming the local assignments are available in the trace, both techniques do not guarantee maximality. As illustrated in our example and discussed in Section~\ref{sec:guarantee}, our analysis allows higher detection capability, i.e., we allow the events to read different values even they flow into the branch events; we allow the exploration of un-executed paths, both of which are not allowed by the above techniques.
+Assuming local assignments are available in the trace, both techniques 
+cannot guarantee maximality. As illustrated in our example and discussed 
+in Section~\ref{sec:guarantee}, our analysis allows higher detection capability
+%, i.e., we allow the events to read different values even they flow into the branch events; we allow the exploration of un-executed paths, both of which are not allowed by the above techniques.
  
 
 
