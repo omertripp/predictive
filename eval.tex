@@ -2,7 +2,7 @@
 Our evaluation focuses on the effectiveness  and scalability of our approach.
 To measure the effectiveness, we compare with the predictive analysis, {\sf RV}~\cite{}. We chose RV for two main reasons: (1) {\sf RV} is the only open source predictive analysis, (2) {\sf RV} represents the state-of-the-art approach, which is theoretically proven to have higher detection capability than other approaches. 
 
-{\bf Prototype Implementation}  In our prototype implementation of \tool, we used the Z3 SMT solver for constraint resolution \cite{DeMoura:2008}. For static analysis, to discover unexecuted branches, we utilize the SOOT compiler framework \cite{Vallee-Rai:1999}.
+{\bf Prototype Implementation}  In our prototype implementation of \tool, we used the Z3 SMT solver for constraint resolution \cite{MouraB08}. For static analysis, to discover unexecuted branches, we utilize the SOOT compiler framework \cite{Vallee-RaiCGHLS99}.
 
 For scalability, as well as to constrain memory footprint, we have applied several engineering optimizations. In specific, (i) events are stored in a database rather than in an in-memory buffer; and (ii) the analysis is split into several segments, between which we restart the VM and resume the last snapshot, such that the different logs are fused together at the end. 
 
