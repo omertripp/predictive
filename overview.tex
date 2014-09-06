@@ -12,7 +12,7 @@ We first introduce some notation used throughout this paper. Intuitively, a
 trace is a sequence of events recorded during the observed run. An 
 event, $e=<t, id, inst>$, is a concrete representation of the runtime 
 execution of a static instruction $inst$, such that (i) $t$ refers to the 
-thread; (ii) $id$ is a unique identifier of the event (unless specified 
+thread; (ii) $id$ is a {\em unique} identifier of the event (unless specified 
 otherwise, we use the index of an event in the trace as its id); 
 and (iii) $inst$ is a static three-address instruction (involving at most three operands).
 
@@ -109,7 +109,7 @@ we rewrite the raw input trace into SSA form, such that each variable is defined
 %reduced their respective code to $\epsilon$ as a \emph{trace}.
 
 
-%TODO this section is inconsistent with others. change it!
+
 \subsection{Constraint System}
 In this section, we are going to informally explain the two relaxations
 we make which allow us to catch the two races missed by existing 
@@ -123,7 +123,7 @@ is used as the event id (subscript).
 \noindent
 {\em I. Value Relaxation\ } Our first relaxation is to allow variables
 to have different values as long as the same thread local path is preserved.
-It does not require data dependences or variable values as in~\cite{...}.
+It does not require data dependences or same variable values as in~\cite{yannis, pldi14, Said:2011}.
 This allows us to catch the racy pair $(e_2, e_5)$.
 %A potential race is between 
 %the pair, $(e_2, e_5)$, as they access the shared variable $x$ from 
@@ -270,7 +270,7 @@ lines {\tt 2} and {\tt 7}. We explore the unexecuted branch statically
 and collect constraints during the exploration. We then form a disjunction  
 of the original constraints and the collected constraints to include more 
 possible  paths. The solver may pick up the unexplored branch to detect 
-a race. Back to our example, event $e_7$ is in the unexplored branch, \tool
+a race. Back to our example, event $e_7$ is in the unexplored branch, \tool\ 
 is able to identify the race between $e_7$ and $e_2$ after encoding 
 the unexplored branch. 
 
@@ -287,8 +287,8 @@ More details are in Section~\ref{sec:relax2}.
 
 \smallskip
 \noindent
-{\em Highlights \ } \tool finds two more pairs of races 
-beyond existing analyses~\cite{yannis, jeff}: $(e_2, e_5)$ and $(e_2, e_7)$.
+{\em Highlights \ } \tool\  finds two more pairs of races 
+beyond existing analyses~\cite{yannis, pldi14}: $(e_2, e_5)$ and $(e_2, e_7)$.
 For the first race, we do not require $e_4$ to read from $e_3$ to 
 retain the original value as in the
 existing approaches. Rather, we allow $e_4$ to read from $e_1$ while 
