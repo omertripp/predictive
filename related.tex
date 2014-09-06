@@ -4,19 +4,19 @@ In this section, we survey related research on race detection with special empha
 
 \subsection{Race Detection Techniques: Broad Survey} 
 
-Initial attempts to address the challenge of race detection focused on built-in synchronization primitives \cite{eraserPaper,Agarwal,vonPraun:2001,Choi:2002}. These include locks as well as the wait/notify and start/join scheduling controls. Notable among these efforts is \emph{lockset} analysis, which considers only locks \cite{eraserPaper}. Because the derived constraints are partial, permitting certain infeasible event reorderings, lockset analysis cannot guarantee soundness \cite{Naik:2006}. 
+Initial attempts to address the challenge of race detection focused on built-in synchronization primitives \cite{eraser,SasturkarAWS05,vonPraun:2001,Choi:2002}. These include locks as well as the wait/notify and start/join scheduling controls. Notable among these efforts is \emph{lockset} analysis, which considers only locks \cite{eraser}. Because the derived constraints are partial, permitting certain infeasible event reorderings, lockset analysis cannot guarantee soundness \cite{Naik:2006}. 
 
-A different tradeoff is struck by the \emph{happens-before (HB)} approach \cite{Christiaens:2001,Dinning:1990,Mellor-Crummey:1991}, which is inspired by and based on Lamport's HB relation \cite{Lamport}. In this style of analysis, all synchronization primitives are accounted for, though reordering constraints are conservative . As an example, HB inhibits reordering of two synchronized blocks governed by the same lock. 
+A different tradeoff is struck by the \emph{happens-before (HB)} approach \cite{Christiaens,Dinning:1990,Mellor-Crummey:1991}, which is founded on Lamport's HB relation \cite{Lamport}. In this style of analysis, all synchronization primitives are accounted for, though reordering constraints are conservative . As an example, HB inhibits reordering of two synchronized blocks governed by the same lock. 
 
 %PTA is an instance  of the HB approach, whose starting point is a concrete execution trace.
 
-Recently there have been successful attempts to relax HB constraints. Among these are hybrid analysis \cite{XXX}, which permits both orderings of lock-synchronized blocks, as well as the \emph{Universal Causal Graph (UCG)} representation~\cite{ucg}, which also enables both orderings but only if these are consistent with wait/notify- and start/join-induced constraints.
+Recently there have been successful attempts to relax HB constraints. Among these are hybrid analysis \cite{hybrid}, which permits both orderings of lock-synchronized blocks, as well as the \emph{Universal Causal Graph (UCG)} representation~\cite{ucg}, which also enables both orderings but only if these are consistent with wait/notify- and start/join-induced constraints.
 
 \subsection{Predictive Trace Analysis}
 
 Given concurrent execution trace $t$, a \emph{maximal and sound causal model} based on $t$ defines the set of all traces that a program that is able to generate $t$ can generate (maximality), and only those traces (soundness). PTA is founded on the notion of sound causality, as it considers feasible reorderings of the input trace that prove a candidate data race as such. 
 
-The first to propose PTA are Smagardakis et al. \cite{Smaragdakis:2012}. In their original work, both synchronization constraints and inter-thread dependencies are preserved, where inter-thread dependencies are respected by 
+The first to propose PTA are Smagardakis et al. \cite{yannis}. In their original work, both synchronization constraints and inter-thread dependencies are preserved, where inter-thread dependencies are respected by 
 only allowing reorderings that leave the dependence structure exhibited by the original trace in tact. This ensures that the values of shared memory locations remain the same, which secures the soundness argument, though maximality is not guaranteed.
 
 Said et al. \cite{Said:2011} describe a PTA that is also sound albeit not maximal. Similarly to our analysis, Said et al. perform symbolic analysis of the input trace, and then utilize an SMT solver to search for interleaved schedules that establish the presence of data races. Soundsness is guaranteed by their ability to precisely encode the semantics of sequential consistency. ExceptionNULL \cite{Farzan:2012} is another example of a sound PTA without maximality guarantees, where the goal is to detect null dereferences rather than data races. 

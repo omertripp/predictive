@@ -8,42 +8,6 @@ For scalability, as well as to constrain memory footprint, we have applied sever
 
 To address the scalability limitations of the constraint solver (Z3 in our case), we again apply a splitting optimization. The full trace is split into $N$ equal-length subtraces or ``time windows'' (in our experiments, $N=1,000$). The values of local and shared variables are then passed at the end of a given window as inputs to the next window. For lack of space, we omit the concrete details of this optimization, and instead refer the reader to Huang et al. \cite{HuangMR14}, who apply a similar optimization.
 
-The trace is typically long and the constraint solver cannot scale to the whole trace. This is a known limitation to solver-based predictive analysis. Instead, we adopt the notion of time window. 
-We divide the trace into $N$ traces of the same length, where $N$ is configurable parameter (1000 in our experiment). To support the time window, we need to store the values of the shared variables and local variables at the end of a window and encode such values as the inputs of the next window. 
-
-We maintain two maps,  $sstore$ and $lstore$, for the shared variables and local variables respectively. Suppose the trace for the last window is $\tau$. The following code illustrates how we maintain the $sstore$, i.e., storing the value written by the last write with each address. Beside, the variable $e.ins.left$ represents the left hand variable inside the instruction $e.ins$.
-
-\begin{algorithmic}[3]
-	\For {$a \in \mathcal{A}$}
-	\State $\tau_a=W(a)$
-	\State $sstore.put(a,\tau_a[|\tau_a|-1].v)$ 
-	\EndFor
-\end{algorithmic}
-
-%TODO define left:
-\begin{algorithmic}[3]
-	\For {$e \in \tau$}
-	\If {$e.isLocalAcc()$}
-	\State $ lstore.put(e.\_def, e.v)$
-	\Else
-	\If{$e.isRead()$}      
-	\State $ lstore.put(e.\_def, e.v)$
-	\EndIf
-	\EndIf 
-	\EndFor
-\end{algorithmic}
-
-
-When constructing the constraints for the next window, we specify the following constraints to encode the input values.
-
-The following formula enhances the thread interfernce constraint to include the case that the read reads from the initial values. 
-
-$$\Phi_{TI}=\Phi_{TI} \wedge  R=sstore.get(e_R.a) \wedge \bigvee_{e\in S} O(e_R)<O(e)$$.
-
-The following formula encodes the input values of local variables. 
-
-$$\Phi_{IN}=\bigvee_{l\in lstore.keys()} l=lstore.get(l)$$.
-
 
 {\bf Evaluation Method} We conducted our experiments on a set of 16 applications, which were also used to evaluate {\sf RV}. Specifically, the set includes large applications such as {\sf Jigsaw}, {\sf Xalan} and {\sf Lusearch}. To handle large applications that make use of reflection, we applied the {\sf Tamiflex} tool~\cite{}, which replaces reflective calls with the concrete method invocations recorded in the observed run for the purpose of effective static analysis.  We omit the benchmark {\sf eclipse} because the current version of {\sf Tamiflex}  leads to abnormal execution after the instrumentation, which throws an exception when the main service is started. By applying our tool to such abnormal execution, we identify only 3 races, similarly to the report of RV~\cite{}.
 In addition, the {\sf montecarlo} benchmark requires an external input that we downloaded from the internet and simplified. For the large applications, we utilized the most lightweight available configuration.
@@ -56,7 +20,8 @@ Our experiments and measurements
 were all conducted on an x86 64 Thinkpad W530 worksta- 
 tion with eight 2.30GHz Intel Core i7-3610QM processors, 
 16GB of RAM and 6M caches. The workstation runs version 12.04 of the Ubuntu Linux distribution, and has the Sun 
-64-Bit 1.6.0\_26 Java virtual machine (JVM) installed.\footnote{We note that Sun JDK 1.7 does not support the transformation of dacapo applications with {\sf tamiflex}.}
+64-Bit 1.6.0\_26 Java virtual machine (JVM) installed.
+%\footnote{We note that Sun JDK 1.7 does not support the transformation of dacapo applications with {\sf tamiflex}.}
 
 
 %Specifically, we use two threads in the monitored run as two threads are sufficient to manifest most of races~\cite{shanlu}. 
@@ -79,7 +44,7 @@ We make interesting observations about the Trace section. The non-local events, 
 references not involved in field accesses (e.g., references involved in nullness checking). Besides, our analysis involves significantly less branch events as compared to the {\sf RV} approach. This difference plays an important role in the detection, which we will explain shortly.
 
 
-The $Races$ section shows the number of races detected by {\sf Recipe-s}, i.e., {\sf Recipe} without exploring un-executed paths; {\sf Recipe}, i.e., the full-fledged version; and {\sf RV}. Comparison between {\sf Recipe-s} and {\sf Recipe} reveals that {\sf Recipe} finds $>$100 more races, which demonstrates the strength of exploring  un-executed paths. Intuitively,  {\sf Recipe-s} predicts based on a single trace, while {\sf Recipe} predicts based on multiple traces containing different execution paths. We also compare between {\sf Recipe} and {\sf RV} version, as shown in the $Difference$ section, where $Diff$ shows the races found by {\sf Recipe} but missed by {\sf RV} while $Diff'$ shows the races found by {\sf RV} but missed by {\sf Recipe}.
+The $Races$ section shows the number of races detected by {\sf Recipe-s}, i.e., {\sf Recipe} without exploring un-executed paths; {\sf Recipe}, i.e., the full-fledged version; and {\sf RV}. Comparison between {\sf Recipe-s} and {\sf Recipe} reveals that {\sf Recipe} finds $>$100 more races, which demonstrates the strength of exploring  un-executed paths. Intuitively,  {\sf Recipe-s} predicts based on a single trace, while {\sf Recipe} predicts based on multiple traces containing different execution paths. We also compare between {\sf Recipe} and {\sf RV} version, as shown in the $Difference$ section, where $Diff$ shows the races found by {\sf Recipe} but missed by {\sf RV} while $Diff'$ shows the races found by {\sf RV} but not {\sf Recipe}.
 
 First of all, {\sf Recipe} finds $>$150 more races than {\sf RV}. There are several reasons for that: (1) {\sf Recipe} can reason about the accesses in the un-executed paths, while {\sf RV} and {\sf Recipe-s} can only reason about the accesses in the executed paths. (2) {\sf Recipe} or {\sf Recipe-s} relax the scheduling even if it breaks the inter-thread read/write dependence structure in the observed run. {\sf Recipe} allows the majority of the shared reads, i.e., the reads of primitive values, to freely read a different value from a different write as long as the value leads to the same branch decisions. {\sf RV}, however, requires them to read the same values as in the observed run. (3) An critical optimization proposed by {\sf RV} is to preserve dependences only for the reads before the preceding branches  of the racy events, rather than all the reads. However, this optimization is underplayed by the fact that {\sf RV} introduces huge amount of artificial branches, i.e., one before each shared field access, which ensures the use of the same base objects.
 We get rid of such artificial branches and instead, rely on the small amount of base read events to ensure the use of the same base objects (Section~\ref{}). Our strategy reduces the number of branches greatly and amplifies the effectiveness of the optimization. We also carried out case studies (Section~\ref{}) to better illustrate the scenarios.
@@ -90,7 +55,7 @@ Another interesting observation is that although {\sf Recipe} should produce all
 
 The last section, Running time, compares the analysis time for both approaches. We find our approach is significantly slower than {\sf RV}, e.g., {\sf RV} often finishes within 200 seconds, while our approach may take more than 1 hour. This is because our approach needs to reason about the computation among variables inside the local access events, while {\sf RV} needs to only reason about the order relations among the events.
 
-{\bf Summary of advantage and weakness\ } In general, our approach is flexible, which allows the relaxation of schedules and paths based on  fine-grained reasoning at the level of data values. As a result, it detects many more races compared to existing approaches. On the other hand, our approach is more heavyweight. An interesting topic for future research is how  to combine our approach with a lightweight approach with soundness guarantees like {\sf RV}. One option is to create a staged analysis, wherein {\sf RV} is first run. \tool\ is then left to run only on racy pairs not confirmed by {\sf RV}.
+To summarize, while our approach is able to relax schedules and paths based on  fine-grained reasoning at the level of data values, it also imposes higher overhead. An interesting topic for future research is how  to combine our approach with a lightweight approach with soundness guarantees like {\sf RV}. One option is staged analysis, wherein {\sf RV} is run. \tool\ is then left to run only on racy pairs not confirmed by {\sf RV}.
 In this way, we can also tackle misses due to practical limitations of the constraint solver.
  
 
@@ -159,7 +124,7 @@ The code is from the benchmark {\sf bbuffer}, where the line number is marked. H
 
 \begin{figure}[htp]
 \centering
-\includegraphics[scale=0.7]{cases/Visio-bbuffer.pdf}
+\includegraphics[scale=0.45]{cases/Visio-bbuffer.pdf}
 \caption{Relaxation of Inter-thread dependence}\label{fig:relax1}
 \end{figure}
 
@@ -176,7 +141,7 @@ Suppose that in the observed run Thread 2 consumes both thread entries and start
 
 \begin{figure}[htp]
 \centering
-\includegraphics[scale=0.7]{cases/Visio-msort.pdf}
+\includegraphics[scale=0.45]{cases/Visio-msort.pdf}
 \caption{Relaxation of Paths}\label{fig:relax2}
 \end{figure}
 

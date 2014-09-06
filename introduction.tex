@@ -73,9 +73,9 @@ path as the original trace.
 
 However, we observe that such restrictions are unnecessary. For example, we can allow line {\tt 4} to receive its
 value from line {\tt 1} as it has the same effect on thread local execution (i.e. the same branch is taken). 
-However, the relaxation would allow us to execute lines {\tt 4} and {\tt 5} before line {\tt 2}, exposing 
+This relaxation would allow us to execute lines {\tt 4} and {\tt 5} before line {\tt 2}, thereby exposing 
 the first missing race. We can also allow the trace to take the else branch such that the second race is also exposed. 
-Note that even though the else branch was not executed originally, its effect can be precisely modeled as the value 
+Note that even though that branch was not executed originally, its effect can be precisely modeled as the value 
 of $x$ is known from the original trace. As such, we can still perform sound analysis.
 
 %that is missed, as it involves the statements in red, is between lines {\tt 2} and {\tt 7}.
