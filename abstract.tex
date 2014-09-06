@@ -1,0 +1,7 @@
+\begin{abstract}
+Predictive analysis has recently emerged as a promising paradigm for sound detection of multithreading bugs (i.e., without false alarms). The idea is to start from an instrumented execution trace, and transform it based on the concrete information it provides (e.g., concrete values and memory accesses) while preserving feasibility (e.g., by reodering trace events iff flow dependencies are preserved), such that bugs are exposed.
+
+Predictive analysis has been applied successfully to the problem of data-race detection, though state-of-the-art techniques are restrictive in the transformations they allow so as to guarantee feasibility and consequently also soundness. In particular, existing techniques (i) do not permit flow dependencies to be violated (except in very specific cases), and (ii) are unable to analyze execution paths beyond that of the input trace.
+
+In this paper, we present \sysname, a predictive race detector that is able to relax both of these restrictions while guaranteeing soundness, as we prove formally. Thanks to its ability to explore unexecuted branches as well as event orderings that violate flow dependencies, \sysname\ is able to detect x$2.5$ more data races on a representative set of large-scale benchmarks compared to the state of the art in predictive race detection.
+\end{abstract}

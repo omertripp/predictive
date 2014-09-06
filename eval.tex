@@ -55,8 +55,7 @@ Another interesting observation is that although {\sf Recipe} should produce all
 
 The last section, Running time, compares the analysis time for both approaches. We find our approach is significantly slower than {\sf RV}, e.g., {\sf RV} often finishes within 200 seconds, while our approach may take more than 1 hour. This is because our approach needs to reason about the computation among variables inside the local access events, while {\sf RV} needs to only reason about the order relations among the events.
 
-To summarize, while our approach is able to relax schedules and paths based on  fine-grained reasoning at the level of data values, it also imposes higher overhead. An interesting topic for future research is how  to combine our approach with a lightweight approach with soundness guarantees like {\sf RV}. One option is staged analysis, wherein {\sf RV} is run. \tool\ is then left to run only on racy pairs not confirmed by {\sf RV}.
-In this way, we can also tackle misses due to practical limitations of the constraint solver.
+
  
 
 

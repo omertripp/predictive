@@ -1,0 +1,11 @@
+\section{Conclusion and Future Work}
+
+In this paper, we investigated the problem of sound data-race detection (i.e., without false alarms) via predictive analysis
+%The idea underlying predictive analysis is to start from a concrete --- and thus feasible --- execution trace, and apply transformations to the trace that are guaranteed to preserve feasibility while enjoying the concrete information encoded into the trace (such as concrete values, method resolutions, etc). 
+%
+Two main limitations of the state of the art in predictive race detection, which we address as the main contributions of this paper, are (i) inability to guarantee feasibility while relaxing flow dependencies and (ii) inability to explore execution paths beyond the one in the input trace. 
+
+We have implemented \sysname, which we prove formally to be able to lift both of these limitations while guaranteeing soundness. We further demonstrate experimentally that thanks to its ability to explore more trace transformations, \sysname\ is able to detect x2.5 more races compared to the state of the art, and that both of the relaxation techniques \sysname\ features are important in achieving this result.
+
+An interesting topic for future research is how  to combine our approach with a lightweight approach with soundness guarantees like {\sf RV}. One option is staged analysis, wherein {\sf RV} is run first. \tool\ is then left to run only on racy pairs not confirmed by {\sf RV}.
+In this way, we can also tackle misses due to practical limitations of the constraint solver.
