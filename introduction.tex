@@ -17,26 +17,26 @@ Program analyses can be largely classified to static and dynamic analyses. Stati
 They are usually complete and do not require concrete program inputs to drive the analyses. However, they have difficulty in
 scaling to large and complex programs when the analyses are path-sensitive, due to the sheer number of paths and the 
 complexity of the paths. Path-insensitive analyses often do not have sufficient precision on the other hand. 
-Static analyses also have difficulty in modeling complex aliasing behavior. In contrast, dynamic analysese focus 
+Static analyses also have difficulty in modeling complex aliasing behavior. In contrast, dynamic analyses focus 
 on analyzing a few executions, usually just one. They are sound and easily scale to long and complex executions. But they 
 can only reason about properties that manifest themselves in the execution(s). 
 
-Recently, a novel kind of analysis called predictive analysis~\cite{...} was proposed. It has the capabilities of 
+Recently, a novel kind of analysis called predictive analysis~\cite{yannis,pldi14,Said:2011} was proposed. It has the capabilities of 
 achieving soundness as dynamic analyses and reasoning about properties that did not occur during execution 
 just like in static analysis. The basic idea is to leverage dynamic analysis to provide the information that 
 is difficult to acquire through static analysis, such as a complex execution path that covers important functionalities 
 and aliasing information. Note that during execution, we know precisely which write access reaches any given read 
-access. While such information is encoded in a trace, predictive analysis reaons about mutation of the trace to 
+access. While such information is encoded in a trace, predictive analysis reasons about mutation of the trace to 
 expose problems or study properties that may not manifest during execution. It was used in sound data race detection. 
 In particular, it collects a trace of threaded execution that contains rich runtime information such as concrete values, 
-execution path, and memory accsses. It then leverages constraint solving to reason about if races can occur with
+execution path, and memory accesses. It then leverages constraint solving to reason about if races can occur with
 a different thread schedule, {\em while enforcing the critical runtime information (e.g. values, thread
-local paths, and memory accesses) remains the same during schedule pertubation}. The rationale is that 
+local paths, and memory accesses) remains the same during schedule perturbation}. The rationale is that 
 it becomes as difficult as static analysis if we allow these critical runtime information change. 
-Preditive analysis has been shown to be very effective. It can detect real data races from complex programs.
+Predictive analysis has been shown to be very effective. It can detect real data races from complex programs.
 And more importantly, it guarantees the results are sound (i.e. no false positives).
 
-Despite its effectiveness, we observe that existing predictive analyes are too restrictive. They 
+Despite its effectiveness, we observe that existing predictive analyses are too restrictive. They 
 require too much runtime information to remain unchanged during analysis such that coverage is unnecessarily
 limited. 
 
@@ -89,7 +89,7 @@ is to {\em explore the neighborhood of the original execution as much as possibl
 enlarged search space, our results show that a race detector based on our relaxed predictive analysis 
 can detect XXX times more races than existing predictive analysis, while guaranteeing soundness. 
 
-Our contrituions are summarized as follows.
+Our contributions are summarized as follows.
 \begin{itemize}
 \item We propose to relax existing predictive analysis and identify a bound of relaxation (i.e. what can
 be relaxed).

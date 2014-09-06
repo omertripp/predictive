@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  5 SEP 2014 23:50
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  6 SEP 2014 00:45
 entering extended mode
  %&-line parsing enabled.
 **paper
@@ -430,7 +430,7 @@ DF version <1.5>, but at most version <1.4> allowed
 File: cases/Visio-msort.pdf Graphic file (type pdf)
 
 <use cases/Visio-msort.pdf> [9 <./cases/Visio-bbuffer.pdf>]) (./related.tex
-[10 <./cases/Visio-msort.pdf>]) (./conclusion.tex) (./paper.bbl)
+[10 <./cases/Visio-msort.pdf>]) (./conclusion.tex) (./paper.bbl [11])
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -442,7 +442,9 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[11] (./paper.aux)
+[12
+
+] (./paper.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -475,9 +477,9 @@ are/texmf-texlive/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texmf-texlive
 /fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/tim
 es/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb></usr
 /share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (11 pages, 418273 bytes).
+Output written on paper.pdf (12 pages, 419355 bytes).
 PDF statistics:
- 293 PDF objects out of 1000 (max. 8388607)
+ 296 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  16 words of extra memory for PDF output out of 10000 (max. 10000000)
 
