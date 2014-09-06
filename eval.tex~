@@ -7,7 +7,7 @@ state-of-the-art, which is theoretically proven to have higher detection
 capability than other approaches. 
 
 {\bf Prototype Implementation}  We use the Z3 SMT solver for constraint 
-resolution \cite{MouraB08}. For static analysis, to discover unexecuted 
+resolution \cite{MouraB08}. For static analysis, for static discovery of unexecuted 
 branches, we utilize the SOOT compiler framework \cite{Vallee-RaiCGHLS99}.
 
 For scalability, as well as to constrain memory footprint, we have 
@@ -44,11 +44,11 @@ similarly to the report of RV~\cite{pldi14}.
 In addition, the {\sf montecarlo} benchmark requires an external input 
 that we downloaded from the internet and simplified. For the large 
 applications, we utilized the most lightweight available configuration.
-To further control the cost of our experiments, we monitored each execution for at most 10 minutes.
+
 
 
 As the detection capability  depends on the observed run, for fair 
-comparison we monitor the execution once by recording all necessary 
+comparison we monitor the execution once (for a period of 10 minutes) by recording all necessary 
 information required by both approaches, and then apply both techniques 
 to the monitored run. Besides, our reported data for RV may be different 
 from the original report for two reasons: (1) the different observed runs 
@@ -272,7 +272,7 @@ easily using the eclipse IDE breakpoints.
 \centering
 \includegraphics[scale=0.45]{figs/Visio-bbuffer.pdf}
 \caption{Relaxation of Inter-thread dependence}\label{fig:relax1}
-\vspace{-2em}
+\vspace{-1em}
 \end{figure}
 
 {\bf Relaxing the Paths\ } Figure~\ref{fig:relax2} demonstrates how our 
