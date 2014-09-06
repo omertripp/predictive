@@ -2,67 +2,68 @@ This is BibTeX, Version 0.99c (TeX Live 2009/Debian)
 The top-level auxiliary file: paper.aux
 The style file: abbrv.bst
 Database file #1: paper.bib
-I was expecting a `,' or a `}'---line 310 of file paper.bib
+I was expecting a `,' or a `}'---line 349 of file paper.bib
  :   
  :   year = {1987}
 (Error may have been on previous line)
 I'm skipping whatever remains of this entry
+A bad cross reference---entry "MouraB08"
+refers to entry "DBLP:conf/tacas/2008", which doesn't exist
+A bad cross reference---entry "Vallee-RaiCGHLS99"
+refers to entry "DBLP:conf/cascon/1999", which doesn't exist
 A bad cross reference---entry "HuangMR14"
 refers to entry "DBLP:conf/pldi/2014", which doesn't exist
+A bad cross reference---entry "SasturkarAWS05"
+refers to entry "DBLP:conf/ppopp/2005", which doesn't exist
 Warning--I didn't find a database entry for "..."
 Warning--I didn't find a database entry for "pecan"
 Warning--I didn't find a database entry for "jeff"
 Warning--I didn't find a database entry for "chao"
 Warning--I didn't find a database entry for "said"
-Warning--I didn't find a database entry for "DeMoura:2008"
-Warning--I didn't find a database entry for "Vallee-Rai:1999"
-Warning--I didn't find a database entry for "eraserPaper"
-Warning--I didn't find a database entry for "Agarwal"
-Warning--I didn't find a database entry for "Christiaens:2001"
-Warning--I didn't find a database entry for "XXX"
-Warning--I didn't find a database entry for "Smaragdakis:2012"
-Warning--I didn't find a database entry for "SerbanutaCR12"
+Warning--I didn't find a database entry for "DBLP:conf/cascon/1999"
+Warning--I didn't find a database entry for "DBLP:conf/tacas/2008"
 Warning--I didn't find a database entry for "DBLP:conf/pldi/2014"
+Warning--I didn't find a database entry for "DBLP:conf/ppopp/2005"
 Warning--empty year in Lamport
-You've used 14 entries,
+You've used 20 entries,
             2118 wiz_defined-function locations,
-            614 strings with 6891 characters,
-and the built_in function-call counts, 5658 in all, are:
-= -- 584
-> -- 239
-< -- 9
-+ -- 95
-- -- 80
-* -- 351
-:= -- 878
-add.period$ -- 50
-call.type$ -- 14
-change.case$ -- 82
+            648 strings with 8604 characters,
+and the built_in function-call counts, 8461 in all, are:
+= -- 873
+> -- 362
+< -- 15
++ -- 143
+- -- 122
+* -- 529
+:= -- 1293
+add.period$ -- 71
+call.type$ -- 20
+change.case$ -- 121
 chr.to.int$ -- 0
-cite$ -- 15
-duplicate$ -- 259
-empty$ -- 455
-format.name$ -- 80
-if$ -- 1266
+cite$ -- 21
+duplicate$ -- 387
+empty$ -- 676
+format.name$ -- 122
+if$ -- 1903
 int.to.chr$ -- 0
-int.to.str$ -- 14
-missing$ -- 14
-newline$ -- 73
-num.names$ -- 28
-pop$ -- 100
+int.to.str$ -- 20
+missing$ -- 20
+newline$ -- 103
+num.names$ -- 40
+pop$ -- 149
 preamble$ -- 1
-purify$ -- 68
+purify$ -- 101
 quote$ -- 0
-skip$ -- 192
+skip$ -- 296
 stack$ -- 0
-substring$ -- 313
-swap$ -- 89
-text.length$ -- 9
+substring$ -- 483
+swap$ -- 142
+text.length$ -- 15
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 56
+type$ -- 80
 warning$ -- 1
-while$ -- 53
-width$ -- 16
-write$ -- 174
-(There were 2 error messages)
+while$ -- 81
+width$ -- 22
+write$ -- 249
+(There were 5 error messages)

@@ -1,7 +1,33 @@
+%TODO
+% 4 improve technique, eval. 
+% 5 related work, proofread...
+
 \documentclass[conference]{IEEEtran}
 
 \usepackage{graphicx}
-\usepackage{color}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{algpseudocode}
+\usepackage{ amssymb}
+\usepackage{url}
+
+\usepackage{amsthm, amsmath, amssymb}
+%\usepackage{amsthm}
+% conflict with the following commands
+%\newdef{definition}{Definition}
+\newtheorem{definition}{Definition}
+\newtheorem{mydiscussion}{Discussion}
+\newtheorem{myproof}{Proof Sketch}
+\newtheorem{mytheorem}{Theorem}
+\newtheorem{myproperty}{Property}
+\newtheorem{myrule}{Rule}
+
+\newcommand{\sysname}{{\sc Recipe}}
+\newcommand{\tool}{{\sc Recipe}}
+\newcommand{\lsyn}{\lbrack\!\lbrack}
+\newcommand{\rsyn}{\rbrack\!\rbrack}
+
+
+\setcounter{secnumdepth}{3}
 
 
 \ifCLASSINFOpdf
@@ -44,7 +70,7 @@
 %
 % paper title
 % can use linebreaks \\ within to get better formatting as desired
-\title{Recipe: Relaxed Sound Predictive Analysis}
+\title{\tool: Relaxed Sound Predictive Analysis}
 
 
 % author names and affiliations
@@ -132,8 +158,12 @@ The abstract goes here.
 
 \input{introduction}
 \input{overview}
-\input{tech}
-
+\input{relax1}
+\input{relax2}
+\input{guarantee}
+%\input{tech}
+\input{eval}
+\input{related}
 
 % An example of a floating figure using the graphicx package.
 % Note that \label must occur AFTER (or within) \caption.
@@ -274,4 +304,3 @@ The authors would like to thank...
 \end{document}
 
 
->>>>>>> 47c0ed781e58f50875c6003165317720ad84879f

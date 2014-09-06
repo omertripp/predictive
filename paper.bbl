@@ -8,6 +8,23 @@ J.-D. Choi, K.~Lee, A.~Loginov, R.~O'Callahan, V.~Sarkar, and M.~Sridharan.
   Language Design and Implementation}, PLDI '02, pages 258--269, New York, NY,
   USA, 2002. ACM.
 
+\bibitem{Christiaens}
+M.~Christiaens and K.~De~Bosschere.
+\newblock Trade, a topological approach to on-the-fly race detection in java
+  programs.
+\newblock In {\em Proceedings of the 2001 Symposium on JavaTM Virtual Machine
+  Research and Technology Symposium - Volume 1}, JVM'01, pages 15--15,
+  Berkeley, CA, USA, 2001. USENIX Association.
+
+\bibitem{MouraB08}
+L.~M. de~Moura and N.~Bj{\o}rner.
+\newblock {Z3:} an efficient {SMT} solver.
+\newblock In {\em Tools and Algorithms for the Construction and Analysis of
+  Systems, 14th International Conference, {TACAS} 2008, Held as Part of the
+  Joint European Conferences on Theory and Practice of Software, {ETAPS} 2008,
+  Budapest, Hungary, March 29-April 6, 2008. Proceedings}, pages 337--340,
+  2008.
+
 \bibitem{Dinning:1990}
 A.~Dinning and E.~Schonberg.
 \newblock An empirical comparison of monitoring algorithms for access anomaly
@@ -71,12 +88,32 @@ M.~Naik, A.~Aiken, and J.~Whaley.
   Language Design and Implementation}, PLDI '06, pages 308--319, New York, NY,
   USA, 2006. ACM.
 
+\bibitem{hybrid}
+R.~O'Callahan and J.-D. Choi.
+\newblock Hybrid dynamic data race detection.
+\newblock In {\em Proceedings of the Ninth ACM SIGPLAN Symposium on Principles
+  and Practice of Parallel Programming}, PPoPP '03, pages 167--178, New York,
+  NY, USA, 2003. ACM.
+
 \bibitem{Said:2011}
 M.~Said, C.~Wang, Z.~Yang, and K.~Sakallah.
 \newblock Generating data race witnesses by an smt-based analysis.
 \newblock In {\em Proceedings of the Third International Conference on NASA
   Formal Methods}, NFM'11, pages 313--327, Berlin, Heidelberg, 2011.
   Springer-Verlag.
+
+\bibitem{SasturkarAWS05}
+A.~Sasturkar, R.~Agarwal, L.~Wang, and S.~D. Stoller.
+\newblock Automated type-based analysis of data races and atomicity.
+\newblock In {\em Proceedings of the {ACM} {SIGPLAN} Symposium on Principles
+  and Practice of Parallel Programming, {PPOPP} 2005, June 15-17, 2005,
+  Chicago, IL, {USA}}, pages 83--94, 2005.
+
+\bibitem{eraser}
+S.~Savage, M.~Burrows, G.~Nelson, P.~Sobalvarro, and T.~Anderson.
+\newblock Eraser: A dynamic data race detector for multi-threaded programs.
+\newblock In {\em Proceedings of the Sixteenth ACM Symposium on Operating
+  Systems Principles}, SOSP '97, pages 27--37, New York, NY, USA, 1997. ACM.
 
 \bibitem{maximal}
 T.~F. Serbanuta, F.~Chen, and G.~Rosu.
@@ -87,6 +124,14 @@ T.~F. Serbanuta, F.~Chen, and G.~Rosu.
 Y.~Smaragdakis, J.~Evans, C.~Sadowski, J.~Yi, and C.~Flanagan.
 \newblock Sound predictive race detection in polynomial time.
 \newblock In {\em POPL}, 2012.
+
+\bibitem{Vallee-RaiCGHLS99}
+R.~Vall{\'{e}}e{-}Rai, P.~Co, E.~Gagnon, L.~J. Hendren, P.~Lam, and
+  V.~Sundaresan.
+\newblock Soot - a java bytecode optimization framework.
+\newblock In {\em Proceedings of the 1999 conference of the Centre for Advanced
+  Studies on Collaborative Research, November 8-11, 1999, Mississauga, Ontario,
+  Canada}, page~13, 1999.
 
 \bibitem{vonPraun:2001}
 C.~von Praun and T.~R. Gross.
