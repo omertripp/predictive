@@ -169,16 +169,17 @@ Notice, importantly, that the formula associates the value constraints with the 
  As an example, 
 $\theta'(R_{\tt y}^4)=\theta'(W_{\tt y}^1) \wedge O'(e_1) < O'(e_4) < O'(e_3)$ means that, in the predicted run, the read $e_4$ reads from the write $e_1$, under the condition that $e_4$ happens after $e_1$ and no other  writes (such as $e_3$) interleave them.
 
+The formuals from the different encoding steps are conjoined and sent to the off-the-shelf solver such as {\sf z3}.  The race under analysis is real if the solver returns a solution, which includes the scheduling order and the values for the variables. 
+
 
 
 {\bf Unexplored Branches\ } Beyond the encoding steps so far, which focus on the given trace, we can often encode constraints along unexplored branches. In our running example, this is essential to discover the race between lines {\tt 2} and {\tt 7}. We explore the unexecuted branch statically and collect constraints during the exploration. We then form a disjunction  of the original constraints and the collected constraints to include more possible  paths. The solver may pick up the unexplored branch to detect a race whenever it is necessary. Back to our example, the event $e_7$ is in the unexplored branch, our solver is able to identify the race between $e_7$ and $e_2$ after encoding the unexplored branch. 
 
-For the racy events, $e_2$ and $e_7$, we first specify the race condition constraint  $\theta'(R^4_y)\leq 2\rightarrow O'_{e_2}=O'(e_7)$. Note that the race condition constraint associates the race with the branch condition that enables each event.  Also we encode other necessary constraints such as the intra-thread order constraints, $O'(e_4)<O'(e_5)\wedge O'(e_4)<O'(e_7)$. The inter-thread 
+For the racy events, $e_2$ and $e_7$, we first specify the race condition constraint  $\theta'(R^4_y)\leq 2\rightarrow O'_{e_2}=O'(e_7)$. Note that the race condition constraint associates the race with the branch condition that enables each event.  Also we need to encode (1) the intra-thread constraints, such as the  order constraints $O'(e_4)<O'(e_5)\wedge O'(e_4)<O'(e_7)$, and (2) the inter-thread constraints, which remain the same as before. With these constraints, the solver confirms the race pair, ($e_2$, $e_7$). More details are explained in Section~\ref{sec:relax2}.
 
 
 
 
-{\bf Constraint Solving\ } The formuals from the different encoding steps are conjoined and sent to an off-the-shelf solver such as {\sf z3}.  The race under analysis is guaranteed to be real if the solver returns a solution, which includes the scheduling order and the values for the variables. 
 
 {\bf Highlights \ } In this example, our analysis finds two more pairs of races beyond existing analyses~\cite{yannis, jeff}: $(e_2, e_5)$ and $(e_2, e_7)$.
 For the first race, we do not require $e_4$ to read from $e_3$ to retain the original value, as in approaches. Rather, we allow $e_4$ to read from $e_1$ while still preserving the feasibility of the branch. This relaxation allows the events after $e_4$ to run concurrently with the events before $e_3$, leading to the detection of the first race.  For the second race, we cover unexecuted branches and ask the solver to compute a feasible schedule that exercises them. The neighboring branches are likely to contain racy events if the executed branches contain racy events.
