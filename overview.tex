@@ -121,12 +121,14 @@ is used as the event id (subscript).
 
 \smallskip
 \noindent
-{\em I. Value Relaxation\ }
+{\em I. Value Relaxation\ } Our first relaxation is to allow variables
+to have different values as long as the same thread local path is preserved.
+It does not require data dependences or variable values as in~\cite{...}.
 This allows us to catch the racy pair $(e_2, e_5)$.
 %A potential race is between 
 %the pair, $(e_2, e_5)$, as they access the shared variable $x$ from 
 %different threads and one is a write. 
-Given the trace, $\tau=<\Gamma , \{\tau_{t_1}, \tau_{t_2}, \dots \tau_{t_n} \},
+Given a trace, $\tau=<\Gamma , \{\tau_{t_1}, \tau_{t_2}, \dots \tau_{t_n} \},
  O, \theta>$, our analysis computes a new trace,  
 $\tau'=<\Gamma , \{\tau_{t_1}, \tau_{t_2}, \dots \tau_{t_n} \}, O', \theta'>$.
  $\tau'$ preserves the same event sequence for each thread, i.e., $T_1$ still 
@@ -260,8 +262,9 @@ and the values for the variables.
 {\em II. Path Relaxation\ } 
 %Next, we show how we catch the second missing race
 %($e_2$, $e_7$) with another relaxation. 
-Besides the first relaxation, which focuses on the given trace, our
-technique also encodes constraints along unexplored branches. In our 
+Besides the first relaxation, which focuses on the given trace, the second
+relaxation is to even reason about unexecuted branches as long as they
+can be precisely modeled. In our 
 running example, this is essential to discovering the race between 
 lines {\tt 2} and {\tt 7}. We explore the unexecuted branch statically 
 and collect constraints during the exploration. We then form a disjunction  
@@ -284,17 +287,18 @@ More details are in Section~\ref{sec:relax2}.
 
 \smallskip
 \noindent
-{\em Highlights \ } In this example, \tool finds two more pairs of races 
+{\em Highlights \ } \tool finds two more pairs of races 
 beyond existing analyses~\cite{yannis, jeff}: $(e_2, e_5)$ and $(e_2, e_7)$.
 For the first race, we do not require $e_4$ to read from $e_3$ to 
-retain the original value (i.e. the true branch outcome), as in the
+retain the original value as in the
 existing approaches. Rather, we allow $e_4$ to read from $e_1$ while 
-still preserving the feasibility of the path. This relaxation allows 
+still preserving the thread local path. This relaxation allows 
 the events after $e_4$ to run concurrently with the events before 
 $e_3$, leading to the detection of the first race.  For the second race, 
 we cover unexecuted branches and query the solver to compute a feasible 
-schedule that exercises them. The neighboring branches are likely to 
-contain racy events if the executed branches contain racy events.
+schedule that exercises them. 
+%The neighboring branches are likely to 
+%contain racy events if the executed branches contain racy events.
 
  
 %In particular, the solution discloses a feasible trace that gives rise to the race at hand. The trace is identified uniquely via the order enforced in the solution over the variables $O_i$, which represent scheduling order. 
