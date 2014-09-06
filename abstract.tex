@@ -1,7 +1,24 @@
 \begin{abstract}
-Predictive analysis has recently emerged as a promising paradigm for sound detection of multithreading bugs (i.e., without false alarms). The idea is to start from an instrumented execution trace, and transform it based on the concrete information it provides (e.g., concrete values and memory accesses) while preserving feasibility (e.g., by reodering trace events iff flow dependencies are preserved), such that bugs are exposed.
-
-Predictive analysis has been applied successfully to the problem of data-race detection, though state-of-the-art techniques are restrictive in the transformations they allow so as to guarantee feasibility and consequently also soundness. In particular, existing techniques (i) do not permit flow dependencies to be violated (except in very specific cases), and (ii) are unable to analyze execution paths beyond that of the input trace.
-
-In this paper, we present \sysname, a predictive race detector that is able to relax both of these restrictions while guaranteeing soundness, as we prove formally. Thanks to its ability to explore unexecuted branches as well as event orderings that violate flow dependencies, \sysname\ is able to detect x$2.5$ more data races on a representative set of large-scale benchmarks compared to the state of the art in predictive race detection.
+Predictive analysis has recently emerged as a promising technique for 
+sound detection of multithreading bugs (i.e., without false alarms). 
+The idea is to start from an instrumented execution trace, and transform 
+it based on the concrete information it provides, such as concrete values 
+and memory accesses, to expose bugs, while preserving feasibility. For
+example, it may reoder trace events to simulate different thread schedules, 
+as long as flow dependencies are preserved.
+Predictive analysis has been successfully applied to data-race detection, 
+although the state-of-the-art techniques are overly restrictive in the 
+transformations they allow such that their analysis coverage is 
+unnecessarily limited. 
+%so as to guarantee feasibility 
+%and consequently also soundness. In particular, existing techniques (i) do not permit flow dependencies to be violated (except in very specific cases), and (ii) are unable to analyze execution paths beyond that of the input trace.
+In this paper, we present \sysname, a predictive race detector that has two
+important relaxations: value and path relaxations without affecting the
+soundness guarantee. The former allows 
+variables to have different values and the latter allows exploring 
+unexecuted paths that are neighbors to the traced path.
+% both of these restrictions while guaranteeing soundness, as we prove formally. Thanks to its ability to explore unexecuted branches as well as event orderings that violate flow dependencies, 
+Our results show that \sysname\ is able to detect x$2.5$ more data races on a 
+representative set of large-scale benchmarks compared to the state-of-the-art.
+%in predictive race detection.
 \end{abstract}
