@@ -81,7 +81,7 @@ of $x$ is known from the original trace. As such, we can still perform sound ana
 
 %that is missed, as it involves the statements in red, is between lines {\tt 2} and {\tt 7}.
 Therefore in this paper, we propose \sysname, a relaxed predictive analysis. We identify the critical runtime
-informantion that needs to be preserved during trace perturbation and relax the remaining information. 
+information that needs to be preserved during trace perturbation and relax the remaining information. 
 In particular, we preserve all the addresses de-referenced (e.g. heap and array accesses) in the original execution,
 and some of the branch outcomes such that part of the thread local paths stay intact. The criterion is that
 we forbid \sysname\ to explore an unexecuted branch if the effect of the branch cannot be precisely modeled
@@ -96,7 +96,7 @@ Our contributions are summarized as follows.
 be relaxed).
 \item We develop a constraint encoding scheme that encodes the necessary information (i.e. the
 part that must be preserved) and the relaxed information (i.e., the part that may be mutated) uniformly as part of a single logical representation.
-\item We develop a propotype \sysname. Our results on 16 benchmarks show \sysname is significantly more effective than existing predictive analyses. We also conducted case studies to confirm the effectiveness.
+\item We develop a prototype \sysname. Our results on 16 benchmarks show \sysname is significantly more effective than existing predictive analyses. We also conducted case studies to confirm the effectiveness.
 \end{itemize}
 
 
