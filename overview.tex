@@ -36,6 +36,7 @@ branches).
 %This standard form of simplification preserves all the data-race-related information contained in the original trace. 
 
 \begin{table}
+{ 
 	\begin{center}
 		\begin{tabular}{rcl}
 			\multicolumn{1}{l}{{\tt s} $::=$} & & \\
@@ -47,8 +48,9 @@ branches).
 			{\tt fork(t)}\ $|$\ {\tt join(t)}$|$ {\tt begin(t)}\ $|$\ {\tt end(t)} &  & {\bf (thread)}
 		\end{tabular}
 	\end{center}
+	}
 	\caption{\label{Ta:syntax}Instruction Types}
-\vspace{-0.15in}
+\vspace{-3em}
 \end{table}
 
 
@@ -219,10 +221,12 @@ We obtain the  formula: $O'(e_1) < O'(e_2) < O'(e_3) \wedge O'(e_4) < O'(e_5)$.
 constraints imposed by each instruction.
  For our running example, we obtain:
 $$
+{\small 
 \begin{array}{l}
 	\theta'(W_{\tt x}^0) = 0 \wedge \theta'(W_{\tt y}^0) = 0 \wedge \theta'(W_{\tt y}^1) = 3 \\ 
 	\wedge	\theta'(W_{\tt x}^2) = 1 \wedge \theta'(W_{\tt y}^3) = 5
 	\end{array}
+}
 $$
 As an example, $\theta'(W_{\tt y}^3)= 5$ denotes that the predicted run still assigns the value 5 to the variable {\tt y}  at event $e_3$.
 \end{itemize}
@@ -235,6 +239,7 @@ As an example, $\theta'(W_{\tt y}^3)= 5$ denotes that the predicted run still as
 
 {\bf Inter-thread Value Constraints\ } These constraints capture what writes the read events read from and under what scheduling condition the value flow occurs.  The resulting formula for our example is
 $$
+{\small 
 \begin{array}{lcl}
 	& & (\theta'(R_{\tt y}^4)=\theta'(W_{\tt y}^0) \wedge O'(e_4) < O'(e_1) ) \\
 & \bigvee &
@@ -242,6 +247,7 @@ $$
 & \bigvee &
 	(\theta'(R_{\tt y}^4)=\theta'(W_{\tt y}^3) \wedge O'(e_3) < O'(e_4))
 \end{array}
+}
 $$    
 Notice, importantly, that the formula associates the value constraints 
 with the scheduling order constraints. 

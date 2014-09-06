@@ -17,6 +17,8 @@ analysis is split into several segments, between which we restart
 the VM and resume the last snapshot, such that the different logs 
 are fused together at the end. 
 
+%Besides, we terminate the monitoring run with a shutdown hook if it is beyond 30 minutes.
+
 To improve the scalability in constraint solving, we again apply 
 a splitting optimization. The full trace is split into $N$ equal-length 
 subtraces or ``time windows'' (in our experiments, $N=1,000$). The values 
@@ -42,6 +44,7 @@ similarly to the report of RV~\cite{pldi14}.
 In addition, the {\sf montecarlo} benchmark requires an external input 
 that we downloaded from the internet and simplified. For the large 
 applications, we utilized the most lightweight available configuration.
+To further control the cost of our experiments, we monitored each execution for at most 10 minutes.
 
 
 As the detection capability  depends on the observed run, for fair 
@@ -115,7 +118,7 @@ as shown in the $Difference$ section, where $Diff$ shows the races found
 by {\sf Recipe} but missed by {\sf RV} while $Diff'$ shows the races 
 found by {\sf RV} but not {\sf Recipe}.
 
-First of all, {\sf Recipe} finds $>$150 more races than {\sf RV}. There 
+First of all, {\sf Recipe} finds $>$250 more races than {\sf RV}. There 
 are several reasons for that: (1) {\sf Recipe} can reason about the 
 accesses in the un-executed paths, while {\sf RV} and {\sf Recipe-s} can 
 only reason about the accesses in the executed paths. (2) {\sf Recipe} 
@@ -125,7 +128,7 @@ changes variable values in the observed run. {\sf Recipe} allows the
 majority of the shared reads, i.e., the reads of primitive values, 
 to freely read a different value from a different write 
 as long as the value leads to the same branch decisions. {\sf RV}, however, 
-requires them to read the same values as in the observed run. (3) An 
+requires them to read the same values as in the observed run. (3) A
 critical optimization proposed by {\sf RV} is to preserve dependences 
 only for the reads before the preceding branches of the racy events, 
 rather than all the reads. However, this optimization is underplayed 
@@ -145,10 +148,10 @@ produce all races found by {\sf RV} in theory, {\sf Recipe} may miss
 races found by {\sf RV} in practice (Column $Diff'$), i.e., {\sf Recipe} 
 is not strictly more effective than {\sf RV} in practice. The reason  is 
 the limitations of the underlying constraint solver: (1) the solver cannot 
-compute constraints with very complex arithmatic operations, and (2) the 
+compute constraints with very complex arithmetic operations, and (2) the 
 solver does not support some program constants such as the scientific 
-notation $3E-10$. In our empirical evaluation, we encounted only one 
-benchmark, account, where these issues manifested.
+notation $3E-10$. In our empirical evaluation, we encountered only one 
+benchmark, {\sf account}, where these issues affect our detection capability.
 
 The last section, Running time, compares the analysis time for both 
 approaches. We find our approach is significantly slower than {\sf RV}, 
@@ -171,36 +174,62 @@ the order relations among the events.
 
 
 
-%TODO Reorder the columns: RV ReceipeS Recipe
-
-
 \begin{table*}[htbp]
 \caption{Relaxed Analysis}
-\begin{flushleft}
 \begin{tabular}{|l|r|r|r|r|l|r|r|r|r|r|r|r|r|r|}
 \hline
  & \multicolumn{ 7}{c|}{Trace} & \multicolumn{ 3}{c|}{Races} & \multicolumn{ 2}{c|}{Difference} & \multicolumn{ 2}{c|}{Running time (sec)} \\ \hline
-Benchmarks & \multicolumn{1}{l|}{Th} & \multicolumn{1}{l|}{Reads} & \multicolumn{1}{l|}{Writes} & \multicolumn{1}{l|}{Base} & Br & \multicolumn{1}{l|}{sync} & \multicolumn{1}{l|}{Total} & \multicolumn{1}{l|}{Recipe-s} & \multicolumn{1}{l|}{Recipe} & \multicolumn{1}{l|}{RV} & \multicolumn{1}{l|}{Diff} & \multicolumn{1}{l|}{Diff'} & \multicolumn{1}{l|}{Recipe} & \multicolumn{1}{l|}{RV} \\ \hline
-critical & 3 & 13 & 7 & 5 & 2/13 & 6 & 78 & 8 & 8 & 8 & \multicolumn{1}{c|}{0} & 0 & 8 & \multicolumn{1}{c|}{2} \\ \hline
+Benchmarks & \multicolumn{1}{l|}{Th} & \multicolumn{1}{l|}{Reads} & \multicolumn{1}{l|}{Writes} & \multicolumn{1}{l|}{Base} & Br & \multicolumn{1}{l|}{sync} & \multicolumn{1}{l|}{Total} & \multicolumn{1}{l|}{RV} & \multicolumn{1}{l|}{Recipe-s} & \multicolumn{1}{l|}{Recipe} & \multicolumn{1}{l|}{Diff} & \multicolumn{1}{l|}{Diff'} & \multicolumn{1}{l|}{Recipe} & \multicolumn{1}{l|}{RV} \\ \hline
+critical & 3 & 13 & 7 & 5 & 2/13 & 6 & 78 & 8 & 8 & 8 & 0 & 0 & 8 & 2 \\ \hline
 airline & 11 & 45 & 15 & 4 & 32/82 & 30 & 317 & 9 & 9 & 9 & 0 & 0 & 490 & 4 \\ \hline
-account & 3 & 46 & 21 & 10 & 3/47 & 6 & 227 & 2 & 5 & 5 & 3 & 3 & 41 & 4 \\ \hline
+account & 3 & 46 & 21 & 10 & 3/47 & 6 & 227 & 5 & 2 & 5 & 3 & 3 & 41 & 4 \\ \hline
 pingpong & 4 & 7 & 7 & 3 & 0/15 & 6 & 111 & 1 & 1 & 1 & 0 & 0 & 19 & 1 \\ \hline
-bbuffer & 4 & 640 & 118 & 10 & 634/1.1K & 217 & 3.3K & 13 & 25 & 9 & 21 & 5 & 62 & 5 \\ \hline
+bbuffer & 4 & 640 & 118 & 10 & 634/1.1K & 217 & 3.3K & 9 & 13 & 25 & 21 & 5 & 62 & 5 \\ \hline
 bubblesort & 26 & 1.3k & 966 & 121 & 155/2.8K & 322 & 8.4K & 7 & 7 & 7 & 0 & 0 & 3295 & 3 \\ \hline
-bufwriter & 5 & 165 & 52 & 75 & 16/130 & 44 & 525 & 4 & 10 & 2 & 8 & 0 & 63 & 9 \\ \hline
-mergesort & 5 & 38 & 33 & 5 & 15/472 & 28 & 1.7K & 3 & 10 & 3 & 10 & 0 & 37 & 5 \\ \hline
-raytracer & 2 & 31 & 5 & 12 & 314/8,2K & 676 & 94.5K & 4 & 6 & 4 & 2 & 0 & 47 & 2 \\ \hline
-montecarlo & 2 & 5 & 86 & 2 & 1.9K/38.2K & 21.1K & 1.9M & 1 & 4 & 1 & 3 & 0 & 1 & 17 \\ \hline
-moldyn & 2 & 605 & 61 & 104 & 19.6K/52.6K & 62 & 203.4K & 6 & 14 & 2 & 12 & 0 & 2842 & 1 \\ \hline
-ftpserver & 28 & 684 & 299 & 71 & 4.4K/233.3K & 78.2K & 3.9M & 99 & 152 & 57 & 108 & 13 & 811 & 153 \\ \hline
-jigsaw & 12 & 525 & 702 & 211 & 63.2K/467.9K & 86.7K & 5.5M & 17 & 23 & 8 & 15 & 0 & 33 & 7 \\ \hline
-sunflow & 9 & \multicolumn{1}{l|}{2.1K} & \multicolumn{1}{l|}{1.3K} & 473 & 201.3K/827.0K & 50K & \multicolumn{1}{l|}{7.1M} & 38 & 78 & 20 & 69 & 11 & 4520 & 22 \\ \hline
-xalan & 9 & \multicolumn{1}{l|}{1.4K} & \multicolumn{1}{l|}{0.9K} & 209 & 15.7K/103.2K & \multicolumn{1}{l|}{190.1K} & \multicolumn{1}{l|}{6.6M} & 2 & 6 & 2 & 4 & 0 & 5317 & 10 \\ \hline
-lusearch & 10 & \multicolumn{1}{l|}{2.3K} & \multicolumn{1}{l|}{0.5K} & 715 & 22.2K/164K & \multicolumn{1}{l|}{93.2K} & \multicolumn{1}{l|}{9.1M} & 27 & 49 & 14 & 38 & 5 & 5430 & 8 \\ \hline
+bufwriter & 5 & 165 & 52 & 75 & 16/130 & 44 & 525 & 2 & 4 & 10 & 8 & 0 & 63 & 9 \\ \hline
+mergesort & 5 & 38 & 33 & 5 & 15/472 & 28 & 1.7K & 3 & 3 & 10 & 7 & 0 & 37 & 5 \\ \hline
+raytracer & 2 & 31 & 5 & 12 & 314/8,2K & 676 & 94.5K & 4 & 4 & 6 & 2 & 0 & 47 & 2 \\ \hline
+montecarlo & 2 & 5 & 86 & 2 & 1.9K/38.2K & 21.1K & 1.9M & 1 & 1 & 4 & 3 & 0 & 1 & 17 \\ \hline
+moldyn & 2 & 605 & 61 & 104 & 19.6K/52.6K & 62 & 203.4K & 2 & 6 & 14 & 12 & 0 & 2842 & 1 \\ \hline
+ftpserver & 28 & 684 & 299 & 71 & 4.4K/233.3K & 78.2K & 3.9M & 57 & 99 & 152 & 108 & 13 & 811 & 153 \\ \hline
+jigsaw & 12 & 525 & 702 & 211 & 63.2K/467.9K & 86.7K & 5.5M & 8 & 17 & 23 & 15 & 0 & 33 & 7 \\ \hline
+sunflow & 9 & 2.1K & 1.3K & 473 & 201.3K/827.0K & 50K & 7.1M & 20 & 38 & 78 & 69 & 11 & 4520 & 22 \\ \hline
+xalan & 9 & 1.4K & 0.9K & 209 & 15.7K/103.2K & 190.1K & 6.6M & 2 & 2 & 6 & 4 & 0 & 5317 & 10 \\ \hline
+lusearch & 10 & 2.3K & 0.5K & 715 & 22.2K/164K & 93.2K & 9.1M & 14 & 27 & 49 & 38 & 3 & 5430 & 8 \\ \hline
 \end{tabular}
-\end{flushleft}
 \label{tab:main}
+\vspace{-2em}
 \end{table*}
+
+
+
+%\begin{table*}[htbp]
+%\caption{Relaxed Analysis}
+%\begin{flushleft}
+%\begin{tabular}{|l|r|r|r|r|l|r|r|r|r|r|r|r|r|r|}
+%\hline
+% & \multicolumn{ 7}{c|}{Trace} & \multicolumn{ 3}{c|}{Races} & \multicolumn{ 2}{c|}{Difference} & \multicolumn{ 2}{c|}{Running time (sec)} \\ \hline
+%Benchmarks & \multicolumn{1}{l|}{Th} & \multicolumn{1}{l|}{Reads} & \multicolumn{1}{l|}{Writes} & \multicolumn{1}{l|}{Base} & Br & \multicolumn{1}{l|}{sync} & \multicolumn{1}{l|}{Total} & \multicolumn{1}{l|}{Recipe-s} & \multicolumn{1}{l|}{Recipe} & \multicolumn{1}{l|}{RV} & \multicolumn{1}{l|}{Diff} & \multicolumn{1}{l|}{Diff'} & \multicolumn{1}{l|}{Recipe} & \multicolumn{1}{l|}{RV} \\ \hline
+%critical & 3 & 13 & 7 & 5 & 2/13 & 6 & 78 & 8 & 8 & 8 & \multicolumn{1}{c|}{0} & 0 & 8 & \multicolumn{1}{c|}{2} \\ \hline
+%airline & 11 & 45 & 15 & 4 & 32/82 & 30 & 317 & 9 & 9 & 9 & 0 & 0 & 490 & 4 \\ \hline
+%account & 3 & 46 & 21 & 10 & 3/47 & 6 & 227 & 2 & 5 & 5 & 3 & 3 & 41 & 4 \\ \hline
+%pingpong & 4 & 7 & 7 & 3 & 0/15 & 6 & 111 & 1 & 1 & 1 & 0 & 0 & 19 & 1 \\ \hline
+%bbuffer & 4 & 640 & 118 & 10 & 634/1.1K & 217 & 3.3K & 13 & 25 & 9 & 21 & 5 & 62 & 5 \\ \hline
+%bubblesort & 26 & 1.3K & 966 & 121 & 155/2.8K & 322 & 8.4K & 7 & 7 & 7 & 0 & 0 & 3295 & 3 \\ \hline
+%bufwriter & 5 & 165 & 52 & 75 & 16/130 & 44 & 525 & 4 & 10 & 2 & 8 & 0 & 63 & 9 \\ \hline
+%mergesort & 5 & 38 & 33 & 5 & 15/472 & 28 & 1.7K & 3 & 10 & 3 & 10 & 0 & 37 & 5 \\ \hline
+%raytracer & 2 & 31 & 5 & 12 & 314/8,2K & 676 & 94.5K & 4 & 6 & 4 & 2 & 0 & 47 & 2 \\ \hline
+%montecarlo & 2 & 5 & 86 & 2 & 1.9K/38.2K & 21.1K & 1.9M & 1 & 4 & 1 & 3 & 0 & 1 & 17 \\ \hline
+%moldyn & 2 & 605 & 61 & 104 & 19.6K/52.6K & 62 & 203.4K & 6 & 14 & 2 & 12 & 0 & 2842 & 1 \\ \hline
+%ftpserver & 28 & 684 & 299 & 71 & 4.4K/233.3K & 78.2K & 3.9M & 99 & 152 & 57 & 108 & 13 & 811 & 153 \\ \hline
+%jigsaw & 12 & 525 & 702 & 211 & 63.2K/467.9K & 86.7K & 5.5M & 17 & 23 & 8 & 15 & 0 & 33 & 7 \\ \hline
+%sunflow & 9 & \multicolumn{1}{l|}{2.1K} & \multicolumn{1}{l|}{1.3K} & 473 & 201.3K/827.0K & 50K & \multicolumn{1}{l|}{7.1M} & 38 & 78 & 20 & 69 & 11 & 4520 & 22 \\ \hline
+%xalan & 9 & \multicolumn{1}{l|}{1.4K} & \multicolumn{1}{l|}{0.9K} & 209 & 15.7K/103.2K & \multicolumn{1}{l|}{190.1K} & \multicolumn{1}{l|}{6.6M} & 2 & 6 & 2 & 4 & 0 & 5317 & 10 \\ \hline
+%lusearch & 10 & \multicolumn{1}{l|}{2.3K} & \multicolumn{1}{l|}{0.5K} & 715 & 22.2K/164K & \multicolumn{1}{l|}{93.2K} & \multicolumn{1}{l|}{9.1M} & 27 & 49 & 14 & 38 & 5 & 5430 & 8 \\ \hline
+%\end{tabular}
+%\end{flushleft}
+%\label{tab:main}
+%\end{table*}
 
 
 
@@ -243,13 +272,14 @@ easily using the eclipse IDE breakpoints.
 \centering
 \includegraphics[scale=0.45]{figs/Visio-bbuffer.pdf}
 \caption{Relaxation of Inter-thread dependence}\label{fig:relax1}
+\vspace{-2em}
 \end{figure}
 
 {\bf Relaxing the Paths\ } Figure~\ref{fig:relax2} demonstrates how our 
 approach relaxes the scheduling to account for  unexecuted paths in 
 {\tt mergesort}. 
 All threads invoke the method {\sf Sorting}, which recursively starts 
-two child threads if there are two more available entries in the 
+two children threads if there are two more available entries in the 
 thread pool (lines 8-11), or starts one child thread if there is only 
 one available entry (lines 4-5).  The availability is computed through 
 the static method {\sf available} with the constant {\tt total}, which is equal to 5. The shared variable {\tt alive} denotes the used entries.
@@ -270,13 +300,14 @@ cannot execute the branch at lines 4-5. Huang et al.~\cite{pldi14} require the p
 \centering
 \includegraphics[scale=0.45]{figs/Visio-msort.pdf}
 \caption{Relaxation of Paths}\label{fig:relax2}
+\vspace{-2em}
 \end{figure}
 
 
 \section{Threats to Validity}
 A Java method can consist of up to 65535 bytecode instructions. Therefore,
  we count the number of bytecode instructions inside each method. If the 
-resulting number exceeds 65525, we avoid instrumenting the method. 
+resulting number exceeds 65535, we avoid instrumenting the method. 
 The consequence is that we will potentially miss races inside a method for 
 which we skipped instrumentation. In this case, we specify the variables 
 read from the method to be equal to their concrete values in the constraints. 

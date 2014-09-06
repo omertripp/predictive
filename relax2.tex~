@@ -1,4 +1,4 @@
-\section{Exploration of Unexecuted Branches}~\label{sec:relax2}
+\section{Path Relaxation}~\label{sec:relax2}
 We now switch to the second feature of \tool, which is to reason about 
 neighboring executions involving unexecuted branches.
 %in the original trace $\tau$.
@@ -128,6 +128,7 @@ the end as they are never used later.
 \end{tabular}
 \caption{SSA form of both true and false branches. }
 \label{fig:pathssa}
+\vspace{-2em}
 \end{figure}
 
 
@@ -164,21 +165,23 @@ the false branch, the branch event $e_b$ is  $if(x_b<y_b)$, the event $e_m$
 in $IF(e_b)$ is in the form of $x_m=y_m+z_m$ and the 
 event $e_n$ in $ELSE(e_b)$ is in the form of $x_n=y_n+z_n$. Then, we have,
 $$
+{\small 
 \begin{array}{l}
 \bigwedge\limits_{e_m \in IF(e_b)} (\theta'(x_b) < \theta'(y_b) \rightarrow  \theta'(x_m)=\theta'(y_m)+\theta'(z_m)) \\ 
 \quad \quad  \bigwedge  \\
 \bigwedge\limits_{e_n \in ELSE(e_b)} (\neg(\theta'(x_b)  < \theta'(y_b)) \rightarrow  \theta'(x_n)=\theta'(y_n)+\theta'(z_n)) \\ 
 \end{array}
+}
 $$
-
-
-Consider our example, the corresponding value constraint is, 
+In our example, the corresponding value constraint is, 
 $$
+{\small 
 \begin{array}{l}
 \theta'(R^4_y)>2 \rightarrow \theta'(z^5)=1+\theta'(R^5_x) \\ 
 \wedge  \\
 \theta'(R^4_y)\leq 2 \rightarrow  \theta'(w^7)=2+\theta'(R^{7}_{x})\\
 \end{array}
+}
 $$
 
 This is also how we encode Phi operations.
@@ -196,15 +199,15 @@ are similarly extended. Details are elided.
 
 
 {\bf Intra-thread Order Constraints\ } The intra-thread order constraint captures the program order imposed by the branch structure and the instruction sequence. Suppose $IF(e_b)$=$e_{i_1}e_{i_2}\dots e_{i_m}$, $ELSE(e_b)=e_{j_1}e_{j_2}\dots e_{j_n}$, the first event after the branch structure is $e_{end}$. Then we have, 
-
 $$
+{\small
 \begin{array}{l}
 O'(e_b)<O'(e_{i_1})<O'(e_{i_2})<\dots <O'(e_{i_m})<O'(e_{end})\\
 \wedge\\
 O'(e_b)<O'(e_{j_1})<O'(e_{j_2})<\dots <O'(e_{j_n})<O'(e_{end})
 \end{array}
+}
 $$
-
 The order constraints capture the program order, which are unconditionally valid. That is also why we do not specify the order constraints under specific branch conditions. 
 
 %identical to those in Section~\ref{sec:relax1}. Interesting, we do not need to specify the value constraints under the specific branch condition. The underlying reason is that, the shared read  $R$ in the instruction $x=R$ is isolated (meaning the value cannot be propagated downstream) if the instruction is disabled in the intra-thread value constraints due to the infeasible branch condition. 

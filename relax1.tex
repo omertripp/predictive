@@ -117,6 +117,7 @@ which we ensure through additional constraints (Section~\ref{sec:relax1}).
 \end{tabular}
 \caption{Running Example (shared variables are in bold font, the line number is used as the event id). }
 \label{fig:running2}
+\vspace{-2em}
 }
 \end{figure}
 
@@ -165,7 +166,7 @@ for $x^9$ is also updated as 13 ($\theta'(y^8)$=3, $\theta'(z^7)=10$),
 enabling the same true branch at line 10. Finally, the 
 events $e_2$ and $e_{11}$ are scheduled to run concurrently.  The 
 relaxation needs to respect a set of constraints, which we explain in 
-the following. We omit the synchronization constraints as they are well 
+the following. We omit synchronization constraints as they are well 
 explained in~\cite{yannis, pldi14}.
 
 
@@ -206,7 +207,9 @@ of both relaxations together, which is overly complex.}.
 
 Without loss of generality, we assume the branch event $e_k$ is in the form of $if(x<y)$. Then  we require that 
 $$
+{\small
 \bigwedge_{e_k \in prefix(\tau,e_i) \wedge  inst^{e_k}=if(x<y).\ }  \theta'(x)<\theta'(y) 	\equiv \theta(x)<\theta(y)
+}
 $$ 
 The constraint specifies that the branch condition should be evaluated as 
 the same boolean value in the predicted run $\tau'$ as in the original 
@@ -225,10 +228,12 @@ same truth value for the branch.
 should follow the same order as in the original trace. More formally, 
 we require that
 $$
+{\small 
 \begin{array}{rl}
 \forall e_m, e_n \in prefix(\tau,e_i), s.t., & t^{e_m} = t^{e_n}. \\
  O(e_m) < O(e_n)\  & \Rightarrow O'(e_{m}) < O'(e_{n}) 
 \end{array}
+}
 $$ 
 This constraint specifies that two events from the same thread ($t^{e_m}$ denotes the thread of $e_m$) should 
 follow the same order as in the original trace.
@@ -237,8 +242,10 @@ variables should not contradict the constraints imposed by individual
 instruction.   Without loss of generality, suppose the instruction is 
 a local assignment in the form of $x=y+z$, then we require that
 $$
+{\small 
 \bigwedge_{e_k \in prefix(\tau,e_i) \wedge inst^{e_k}=x=y+z}\
 	\theta'(x)=\theta'(y)+\theta'(z)
+}
 $$
 Recall that every variable may obtain a different value in the new 
 trace $\tau'$ because it may read from some shared variable affected by 
@@ -326,7 +333,7 @@ $e_5$ should not match with each other as they do not share the same base object
 	\caption{\label{fig:heapAccess} A trace. The source code of line 7 is
 ``{\tt w=z.f}''.}
 }
-\vspace{-0.15in}
+\vspace{-2em}
 \end{figure}
 
 {\bf Invariant Base Object Constraints\ } To address this challenge, 
@@ -353,8 +360,10 @@ refer to same location.
 
 Formally, we require that
 $$
+{\small 
 \bigwedge_{ e_k \ has\  x.f \wedge e_i \in prefix(\tau,e_i) }\
 	\theta'(x) \equiv  \theta(x)
+	}
 $$
 %where ${\sf env}$ is the state mapping from local variables to their value and $\sigma(t,\tau'')$ 
 %(resp. $\sigma(t',\tau'')$) is the state arising at trace $t$ (resp. $t'$) immediately before event $\tau''$.
