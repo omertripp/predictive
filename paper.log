@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  6 SEP 2014 02:42
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  6 SEP 2014 02:54
 entering extended mode
  %&-line parsing enabled.
 **paper
@@ -304,14 +304,7 @@ LaTeX Font Info:    ... okay on input line 69.
 \everyMPtoPDFconversion=\toks30
 )
 \c@lstlisting=\count131
-
-
-LaTeX Warning: No \author given.
-
-
-LaTeX Warning: No \author given.
-
-(./abstract.tex
+ (./abstract.tex
 LaTeX Font Info:    Try loading font information for U+msa on input line 21.
  (/usr/share/texmf-texlive/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2009/06/22 v3.00 AMS symbols A
@@ -372,7 +365,7 @@ Underfull \hbox (badness 2495) in paragraph at lines 202--203
 \OT1/ptm/m/n/10 branch struc-ture and the in-struc-tion se-quence. Sup-pose
  []
 
-) (./guarantee.tex [6]
+[6]) (./guarantee.tex
 
 LaTeX Warning: Citation `jeff' on page 7 undefined on input line 43.
 
@@ -438,11 +431,11 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 4869 strings out of 493848
- 68707 string characters out of 1152823
- 175611 words of memory out of 3000000
+ 4870 strings out of 493848
+ 68713 string characters out of 1152823
+ 176611 words of memory out of 3000000
  8039 multiletter control sequences out of 15000+50000
- 56704 words of font info for 120 fonts, out of 3000000 for 9000
+ 57782 words of font info for 121 fonts, out of 3000000 for 9000
  717 hyphenation exceptions out of 8191
  27i,10n,40p,984b,297s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texli
@@ -469,7 +462,7 @@ ier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helvetic/uhvr8a.pfb></
 usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texl
 ive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw
 /times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (11 pages, 442404 bytes).
+Output written on paper.pdf (11 pages, 443066 bytes).
 PDF statistics:
  207 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

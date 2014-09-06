@@ -72,6 +72,27 @@
 % can use linebreaks \\ within to get better formatting as desired
 \title{\tool: Relaxed Sound Predictive Analysis}
 
+\author{\IEEEauthorblockN{Peng Liu} \\
+\IEEEauthorblockA{Purdue University\\
+\{peng74 \}@cs.purdue.edu }
+\and
+\IEEEauthorblockN{Xiangyu Zhang\ \ \ } \\
+\IEEEauthorblockA{Purdue University \\
+ xyzhang@cs.purdue.edu}
+ \and 
+ \IEEEauthorblockN{Omer Tripp\ \ \ } \\
+\IEEEauthorblockA{IBM Research, NY \\
+ otripp@us.ibm.com}
+ \and 
+ \IEEEauthorblockN{Yunhui Zheng\ \ \ } \\
+\IEEEauthorblockA{Purdue University \\
+ zheng16@cs.purdue.edu}
+
+
+} 
+
+
+
 
 % author names and affiliations
 % use a multiple column layout for up to three different
@@ -127,11 +148,8 @@
 % make the title area
 \maketitle
 
+\input{abstract}
 
-\begin{abstract}
-%\boldmath
-The abstract goes here.
-\end{abstract}
 % IEEEtran.cls defaults to using nonbold math in the Abstract.
 % This preserves the distinction between vectors and scalars. However,
 % if the conference you are submitting to favors bold math in the abstract,
@@ -159,7 +177,7 @@ The abstract goes here.
 \input{introduction}
 \input{overview}
 \input{relax1}
-%\input{relax2}
+\input{relax2}
 \input{guarantee}
 %\input{tech}
 \input{eval}
@@ -248,10 +266,7 @@ The abstract goes here.
 % command of the stfloats package.
 
 
-
-\section{Conclusion}
-The conclusion goes here.
-
+\input{conclusion}
 
 
 
