@@ -40,7 +40,7 @@ The SSA form for the branch at line 4 is as follows.
 
 {\bf Constraints\ } During the traversal, we also record the shared access events.  For the set of accesses $S_1$ of the location $\ell$, we also find the accesses $S_2$ of it from other threads. We assert the feasibility of each race pair $\in S_1 \times S_2$ by specifying constraints and checking them.
 
-{\bf Race Condition Constraint\ }  The first type of constraint is the race condition constraint, e.g., $O'_{e_2}=O'(e_7)$ specifies that the event at line 2 may form a race with the event at line 7, which is actually not executed in the original trace.
+{\bf Race Condition Constraint\ }  The first type of constraint is the race condition constraint, e.g., $O'_{e_2}=O'(e_7)$ specifies that the event at line 2 may form a race with the event at line 7, which is actually not executed in the original trace. Importantly, we need to specify the race condition under the specific branch condition, e.g., $\theta'(R^4_y)\leq 2\rightarrow O'_{e_2}=O'(e_7)$. The underlying reason is, the race is valid, or $e_7$ can be executed,  only under the branch condition $\theta'(R^4_y)\leq 2$. 
 
 {\bf Intra-thread Control Flow Constraint \ } Different from the strategy in Section~\ref{sec:relax1}, we do not assert the branch the predicted run will take. Instead, we assert that both branches are possible, which is always $true$. The solver automatically reasons about which branch should be taken and encodes it in the solution. Note that only one of the two branches can be taken because the conditions for the branches contradict.
 

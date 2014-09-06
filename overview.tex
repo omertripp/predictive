@@ -188,7 +188,12 @@ $\theta'(R_{\tt y}^4)=\theta'(W_{\tt y}^1) \wedge O'(e_1) < O'(e_4) < O'(e_3)$ m
 
 
 
-{\bf Unexplored Branches\ } Beyond the encoding steps so far, which focus on the given trace, we can often encode constraints along unexplored branches. In our running example, this is essential to discover the race between lines {\tt 2} and {\tt 7}. We conduct the symbolic execution to exercise the unexplored branches, which returns a set of traces representing possible executions of the unexplored branch. Each trace is combined with the original trace to find races involving the accesses in the unexplored path. For the racy events, $e_2$ and $e_7$, we first specify the race condition constraint  $O'(e_2)=O'(e_7)$. In addition, we negate the path condition, thereby obtaining $\theta'(R_{\tt y}^4) > 2 \equiv {\bf false}$ in place of $\theta'(R_{\tt y}^4) > 2 \equiv {\bf true}$. We also model the other necessary constraints such as the intra-thread order constraint $O'(e_4) < O'(e_7)$, similar to the above analysis.
+{\bf Unexplored Branches\ } Beyond the encoding steps so far, which focus on the given trace, we can often encode constraints along unexplored branches. In our running example, this is essential to discover the race between lines {\tt 2} and {\tt 7}. We explore the unexecuted branch statically and collect constraints during the exploration. We then form a disjunction  of the original constraints and the collected constraints to include more possible  paths. The solver may pick up the unexplored branch to detect a race whenever it is necessary. Back to our example, the event $e_7$ is in the unexplored branch, our solver is able to identify the race between $e_7$ and $e_2$ after encoding the unexplored branch. 
+
+For the racy events, $e_2$ and $e_7$, we first specify the race condition constraint  $\theta'(R^4_y)\leq 2\rightarrow O'_{e_2}=O'(e_7)$. Note that the race condition constraint associates the race with the branch condition that enables each event.  Also we encode other necessary constraints such as the intra-thread order constraints, $O'(e_4)<O'(e_5)\wedge O'(e_4)<O'(e_7)$. The inter-thread 
+
+
+
 
 {\bf Constraint Solving\ } The formuals from the different encoding steps are conjoined and sent to the off-the-shelf solver such as {\sf z3}.  The race under analysis is real if the solver returns a solution, which includes the scheduling order and the values for the variables. 
 
