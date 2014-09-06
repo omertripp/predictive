@@ -16,21 +16,21 @@ unexecuted branch should be included in the constraint system. These are
 essentially the bound of our path relaxation.
 (1) If there is a loop inside the unexecuted branch, the loop bound needs to
 be resolved to a constant from the trace (otherwise we do not know how many
-times we need to unroll). (2) The branch
+times we need to unroll). (2) The unexecuted branch
 is ignored if it contains recursive function(s). (3) Every base reference 
-variable in the branch needs to be fully resolved to a concrete object,
+variable in the unexecuted branch needs to be fully resolved to a concrete object,
 as required by our earlier analysis (Section~\ref{sec:relax1}). This can be 
 done by backward traversal of the trace:
-if the base reference depends on some shared read in the explored 
+if the base reference depends on some shared read in the unexplored 
 branch, of which the value is uncertain, it cannot be 
 resolved to an object; if the base reference depends on multiple definitions 
 from different paths, it cannot be resolved to an object.
 Otherwise, it can be resolved.
-(4) The indices of array read accesses in the branch 
-need to be resolved to constant values from the trace (with the preceding unexecuted branch extensions). This is to
+(4) The indices of array read accesses in the unexecuted branch 
+need to be resolved to constant values from the trace. This is to
 prevent reading an array element that was not defined. 
-(5) The branch is ignored if it uses collections. 
-(6) For method calls, we require the  caller object can be fully resolved from
+(5) The unexecuted branch is ignored if it uses collections. 
+(6) For method calls in the unexecuted branch, we require the  caller object can be fully resolved from
 the trace.
  
 %We start with a branch event $e_b$ in the trace, without loss of generality, 
@@ -57,7 +57,7 @@ the trace.
 %the unexplored branches and adopt the purely dynamic solution in Section~\ref{sec:relax1}. 
 Next, we will explain how to encode an unexecuted branch in details, 
 using the example in Figure~\ref{fig:running} for demonstration.
-We assume one of the branches of event $e_b$ needs to be extended in
+Given a branch event $e_b$, we assume one of its branches is unexecuted and needs to be (statically) extended in
 the following discussion.
 
 {\bf Events \ } We traverse the control flow graph of the unexplored branch 
@@ -93,8 +93,6 @@ In addition,
 we encode conditional statements inside the extended branch using
 Phi node, e.g., $y=Phi(y_1, C_1, y_2, C_2, \dots y_i, C_i)$, 
 meaning that $y$ is equal to $y_i$ in the condition $C_i$.
-Note that we do not require paths inside the extended branch be fully
-resolved. 
 Phi nodes are also used to integrate the definitions in the extended
 branch with the executed branch.
 
@@ -164,9 +162,7 @@ Suppose $IF(e_b)$ denotes the event sequence that corresponds to the
 true branch, $ELSE(e_b)$ denotes the event sequence that corresponds to 
 the false branch, the branch event $e_b$ is  $if(x_b<y_b)$, the event $e_m$ 
 in $IF(e_b)$ is in the form of $x_m=y_m+z_m$ and the 
-event $e_n$ in $ELSE(e_b)$ is in the form of $x_n=y_n+z_n$.
-
-More formally, we have, 
+event $e_n$ in $ELSE(e_b)$ is in the form of $x_n=y_n+z_n$. Then, we have,
 $$
 \begin{array}{l}
 \bigwedge\limits_{e_m \in IF(e_b)} (\theta'(x_b) < \theta'(y_b) \rightarrow  \theta'(x_m)=\theta'(y_m)+\theta'(z_m)) \\ 
@@ -205,7 +201,7 @@ $$
 \begin{array}{l}
 O'(e_b)<O'(e_{i_1})<O'(e_{i_2})<\dots <O'(e_{i_m})<O'(e_{end})\\
 \wedge\\
-O'(e_b)<O'(e_{j_1})<O'(e_{j_2})<\dots <O'(e_{j_m})<O'(e_{end})
+O'(e_b)<O'(e_{j_1})<O'(e_{j_2})<\dots <O'(e_{j_n})<O'(e_{end})
 \end{array}
 $$
 

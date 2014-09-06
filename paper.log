@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  6 SEP 2014 03:24
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.19)  6 SEP 2014 04:23
 entering extended mode
  %&-line parsing enabled.
 **paper
@@ -364,12 +364,12 @@ Overfull \hbox (5.17958pt too wide) detected at line 290
  []
 
 ) (./relax2.tex [5]
-Overfull \hbox (13.78241pt too wide) detected at line 176
+Overfull \hbox (13.78241pt too wide) detected at line 172
 []
  []
 
 
-Underfull \hbox (badness 2495) in paragraph at lines 202--203
+Underfull \hbox (badness 2495) in paragraph at lines 198--199
 \OT1/ptm/m/n/10 branch struc-ture and the in-struc-tion se-quence. Sup-pose
  []
 
@@ -443,7 +443,7 @@ LaTeX Warning: There were undefined references.
 Here is how much of TeX's memory you used:
  4870 strings out of 493848
  68713 string characters out of 1152823
- 176611 words of memory out of 3000000
+ 175611 words of memory out of 3000000
  8039 multiletter control sequences out of 15000+50000
  57782 words of font info for 121 fonts, out of 3000000 for 9000
  717 hyphenation exceptions out of 8191
@@ -472,7 +472,7 @@ ier/ucrr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helvetic/uhvr8a.pfb></
 usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-texl
 ive/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-texlive/fonts/type1/urw
 /times/utmr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (11 pages, 442508 bytes).
+Output written on paper.pdf (11 pages, 442590 bytes).
 PDF statistics:
  207 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
