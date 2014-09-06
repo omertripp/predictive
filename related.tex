@@ -16,9 +16,7 @@ Recently there have been successful attempts to relax HB constraints. Among thes
 
 Given concurrent execution trace $t$, PTA derives new traces to witness the data races. PTA is founded on the notion of sound causality, as it considers feasible reorderings of the input trace that prove a candidate data race as such. 
 
-
-
-The first to propose PTA are Smagardakis et al. \cite{yannis}. In their original work, both synchronization constraints and inter-thread dependencies are preserved, where inter-thread dependencies are respected by only allowing reorderings that leave the dependence structure exhibited by the original trace in tact. This ensures that the values of shared memory locations remain the same, which secures the soundness argument.
+Wang et al.~\cite{chao} pioneere the symbolic predictive analysis, which our approach also belongs to. However, the approach lacks support of heap encoding, therefore, cannot apply to real-world applications. The first PTA that applies to real-world applications are proposed by Smagardakis et al. \cite{yannis}. In their original work, both synchronization constraints and inter-thread dependencies are preserved, where inter-thread dependencies are respected by only allowing reorderings that leave the dependence structure exhibited by the original trace intact. This ensures that the values of shared memory locations remain the same, which secures the soundness argument.
 
 Said et al. \cite{Said:2011} and Huang et al. \cite{HuangMR14} describe PTAs that are also sound. Said et al. perform symbolic analysis of the input trace, and then utilize an SMT solver to search for interleaved schedules that establish the presence of data races. Soundness is guaranteed by their ability to precisely encode the semantics of sequential consistency. 
 Inspired by Said et al., Huang et al. present an improvement, whereby control-flow information is encoded into the constraint system so as to relax flow dependencies as long as control dependencies are preserved.

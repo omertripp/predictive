@@ -2,68 +2,55 @@ This is BibTeX, Version 0.99c (TeX Live 2009/Debian)
 The top-level auxiliary file: paper.aux
 The style file: abbrv.bst
 Database file #1: paper.bib
-I was expecting a `,' or a `}'---line 349 of file paper.bib
+I was expecting a `,' or a `}'---line 215 of file paper.bib
  :   
  :   year = {1987}
 (Error may have been on previous line)
 I'm skipping whatever remains of this entry
-A bad cross reference---entry "MouraB08"
-refers to entry "DBLP:conf/tacas/2008", which doesn't exist
-A bad cross reference---entry "Vallee-RaiCGHLS99"
-refers to entry "DBLP:conf/cascon/1999", which doesn't exist
-A bad cross reference---entry "HuangMR14"
-refers to entry "DBLP:conf/pldi/2014", which doesn't exist
-A bad cross reference---entry "SasturkarAWS05"
-refers to entry "DBLP:conf/ppopp/2005", which doesn't exist
-Warning--I didn't find a database entry for "..."
 Warning--I didn't find a database entry for "pecan"
 Warning--I didn't find a database entry for "jeff"
-Warning--I didn't find a database entry for "chao"
 Warning--I didn't find a database entry for "said"
-Warning--I didn't find a database entry for "DBLP:conf/cascon/1999"
-Warning--I didn't find a database entry for "DBLP:conf/tacas/2008"
-Warning--I didn't find a database entry for "DBLP:conf/pldi/2014"
-Warning--I didn't find a database entry for "DBLP:conf/ppopp/2005"
+Warning--I didn't find a database entry for "HuangMR14"
 Warning--empty year in Lamport
 You've used 20 entries,
             2118 wiz_defined-function locations,
-            648 strings with 8604 characters,
-and the built_in function-call counts, 8461 in all, are:
-= -- 873
-> -- 362
-< -- 15
-+ -- 143
-- -- 122
-* -- 529
-:= -- 1293
-add.period$ -- 71
+            605 strings with 6694 characters,
+and the built_in function-call counts, 6072 in all, are:
+= -- 501
+> -- 367
+< -- 0
++ -- 145
+- -- 124
+* -- 362
+:= -- 1043
+add.period$ -- 60
 call.type$ -- 20
-change.case$ -- 121
+change.case$ -- 122
 chr.to.int$ -- 0
 cite$ -- 21
-duplicate$ -- 387
-empty$ -- 676
-format.name$ -- 122
-if$ -- 1903
+duplicate$ -- 272
+empty$ -- 539
+format.name$ -- 124
+if$ -- 1263
 int.to.chr$ -- 0
 int.to.str$ -- 20
 missing$ -- 20
 newline$ -- 103
 num.names$ -- 40
-pop$ -- 149
+pop$ -- 194
 preamble$ -- 1
-purify$ -- 101
+purify$ -- 102
 quote$ -- 0
-skip$ -- 296
+skip$ -- 145
 stack$ -- 0
-substring$ -- 483
-swap$ -- 142
-text.length$ -- 15
+substring$ -- 101
+swap$ -- 38
+text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 80
 warning$ -- 1
-while$ -- 81
+while$ -- 40
 width$ -- 22
-write$ -- 249
-(There were 5 error messages)
+write$ -- 202
+(There was 1 error message)
