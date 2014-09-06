@@ -1,5 +1,7 @@
 \relax 
-\citation{...}
+\citation{yannis}
+\citation{pldi14}
+\citation{Said:2011}
 \@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}}
 \newlabel{Se:introduction}{{I}{1}}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Example illustrating ordering constraints beyond synchronization primitives}}{1}}
@@ -23,14 +25,14 @@
 \citation{pldi14}
 \citation{yannis}
 \citation{pldi14}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Running Example (shared variables are in bold font, the line number is used as the event id). }}{4}}
-\newlabel{fig:running2}{{2}{4}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {III-B}}Constraint System}{4}}
 \newlabel{sec:constraints}{{\unhbox \voidb@x \hbox {III-B}}{4}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces  A trace.}}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Running Example (shared variables are in bold font, the line number is used as the event id). }}{4}}
+\newlabel{fig:running2}{{2}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces  A trace. The source code of line 7 is ``{\tt  w=z.f}''.}}{5}}
 \newlabel{fig:heapAccess}{{3}{5}}
-\@writefile{toc}{\contentsline {section}{\numberline {IV}Exploration of Unexecuted Branches}{6}}
-\newlabel{sec:relax2}{{IV}{6}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Exploration of Unexecuted Branches}{5}}
+\newlabel{sec:relax2}{{IV}{5}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces SSA form of both true and false branches. }}{6}}
 \newlabel{fig:pathssa}{{4}{6}}
 \citation{scmodel}
@@ -39,26 +41,29 @@
 \citation{yannis}
 \citation{jeff}
 \citation{said}
+\citation{MouraB08}
+\citation{Vallee-RaiCGHLS99}
+\citation{HuangMR14}
 \@writefile{toc}{\contentsline {section}{\numberline {V}Theoretical Guarantees}{7}}
 \newlabel{sec:guarantee}{{V}{7}}
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Illustration of Detection Capability.}}{7}}
 \newlabel{fig:discuss}{{5}{7}}
 \@writefile{toc}{\contentsline {section}{\numberline {VI}Evaluation}{7}}
 \newlabel{sec:eval}{{VI}{7}}
-\citation{MouraB08}
-\citation{Vallee-RaiCGHLS99}
-\citation{HuangMR14}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-A}}Effectiveness}{8}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-B}}Case studies}{9}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Relaxation of Inter-thread dependence}}{9}}
-\newlabel{fig:relax1}{{6}{9}}
-\@writefile{toc}{\contentsline {section}{\numberline {VII}Threats to Validity}{9}}
 \citation{eraser}
 \citation{SasturkarAWS05}
 \citation{vonPraun:2001}
 \citation{Choi:2002}
 \citation{eraser}
 \citation{Naik:2006}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-B}}Case studies}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Relaxation of Inter-thread dependence}}{9}}
+\newlabel{fig:relax1}{{6}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Relaxation of Paths}}{9}}
+\newlabel{fig:relax2}{{7}{9}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Threats to Validity}{9}}
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Related Work}{9}}
 \citation{Christiaens}
 \citation{Dinning:1990}
 \citation{Mellor-Crummey:1991}
@@ -69,18 +74,16 @@
 \citation{Said:2011}
 \citation{HuangMR14}
 \citation{Farzan:2012}
+\citation{maximal}
+\citation{HuangMR14}
+\citation{maximal}
+\citation{HuangMR14}
+\citation{maximal}
 \@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Relaxed Analysis}}{10}}
 \newlabel{tab:main}{{II}{10}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Relaxation of Paths}}{10}}
-\newlabel{fig:relax2}{{7}{10}}
-\@writefile{toc}{\contentsline {section}{\numberline {VIII}Related Work}{10}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VIII-A}}Race Detection Techniques: Broad Survey}{10}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VIII-B}}Predictive Trace Analysis (PTA)}{10}}
-\citation{maximal}
-\citation{HuangMR14}
-\citation{maximal}
-\citation{HuangMR14}
-\citation{maximal}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VIII-C}}Maximality Claim}{10}}
 \bibstyle{abbrv}
 \bibdata{paper}
 \bibcite{Choi:2002}{1}
@@ -102,7 +105,6 @@
 \bibcite{maximal}{17}
 \bibcite{yannis}{18}
 \bibcite{Vallee-RaiCGHLS99}{19}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VIII-C}}Maximality Claim}{11}}
+\bibcite{vonPraun:2001}{20}
 \@writefile{toc}{\contentsline {section}{\numberline {IX}Conclusion and Future Work}{11}}
 \@writefile{toc}{\contentsline {section}{References}{11}}
-\bibcite{vonPraun:2001}{20}
