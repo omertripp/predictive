@@ -12,17 +12,26 @@ A different tradeoff is struck by the \emph{happens-before (HB)} approach \cite{
 
 Recently there have been successful attempts to relax HB constraints. Among these are hybrid analysis \cite{hybrid}, which permits both orderings of lock-synchronized blocks, as well as the \emph{Universal Causal Graph (UCG)} representation~\cite{ucg}, which also enables both orderings but only if these are consistent with wait/notify- and start/join-induced constraints.
 
-\subsection{Predictive Trace Analysis}
+\subsection{Predictive Trace Analysis (PTA)}
 
-Given concurrent execution trace $t$, a \emph{maximal and sound causal model} based on $t$ defines the set of all traces that a program that is able to generate $t$ can generate (maximality), and only those traces (soundness). PTA is founded on the notion of sound causality, as it considers feasible reorderings of the input trace that prove a candidate data race as such. 
+Given concurrent execution trace $t$, PTA derives new traces to witness the data races. PTA is founded on the notion of sound causality, as it considers feasible reorderings of the input trace that prove a candidate data race as such. 
 
-The first to propose PTA are Smagardakis et al. \cite{yannis}. In their original work, both synchronization constraints and inter-thread dependencies are preserved, where inter-thread dependencies are respected by 
-only allowing reorderings that leave the dependence structure exhibited by the original trace in tact. This ensures that the values of shared memory locations remain the same, which secures the soundness argument, though maximality is not guaranteed.
 
-Said et al. \cite{Said:2011} describe a PTA that is also sound albeit not maximal. Similarly to our analysis, Said et al. perform symbolic analysis of the input trace, and then utilize an SMT solver to search for interleaved schedules that establish the presence of data races. Soundsness is guaranteed by their ability to precisely encode the semantics of sequential consistency. ExceptionNULL \cite{Farzan:2012} is another example of a sound PTA without maximality guarantees, where the goal is to detect null dereferences rather than data races. 
 
-Serbanuta et al. \cite{SerbanutaCR12} have recently shown that it is possible to build a model that is not only sound but also maximal: Any extension of the model with a new trace renders the model unsound. The theoretical framework created by Serbanuta et al. provides a foundation for different forms of PTA, including data races, but also atomicity, serializability and other properties. 
+The first to propose PTA are Smagardakis et al. \cite{yannis}. In their original work, both synchronization constraints and inter-thread dependencies are preserved, where inter-thread dependencies are respected by only allowing reorderings that leave the dependence structure exhibited by the original trace in tact. This ensures that the values of shared memory locations remain the same, which secures the soundness argument.
 
-Inspired by this result and closer to \tool\ is the PTA technique of Huang et al. \cite{HuangMR14}, which --- like our technique --- is sound and also maximal, but only under the assumption that local assignments are not modeled. Huang et al.s technique, too, makes use of an SMT solver based on symbolic encoding of the input trace. As part of the encoding, control-flow information is taken into account to enable reorderings that do not violate control dependencies. Still, the two relaxations that \tool\ features, which enable (i) value- rather than dependence-based reasoning about data flow and (ii) consideration of unexplored branches, are strictly outside the scope of Huang et al.'s technique. In Section \ref{sec:eval}, we demonstrate via direct comparison with Huang et al. the dramatic improvement in coverage thanks to these relaxation methods, which we prove to handle in a sound manner.
+Said et al. \cite{Said:2011} and Huang et al. \cite{HuangMR14} describe PTAs that are also sound. Said et al. perform symbolic analysis of the input trace, and then utilize an SMT solver to search for interleaved schedules that establish the presence of data races. Soundness is guaranteed by their ability to precisely encode the semantics of sequential consistency. 
+Inspired by Said et al., Huang et al. present an improvement, whereby control-flow information is encoded into the constraint system so as to relax flow dependencies as long as control dependencies are preserved.
+ExceptionNULL \cite{Farzan:2012} is another example of a sound PTA, of which the goal is to detect null dereferences rather than data races. 
+
+\tool\ is similar to Said et al. and Huang et al. in that it also makes use of an SMT solver based on symbolic encoding of the input trace. Still, the two relaxations that \tool\ features, which enable (i) value- rather than dependence-based reasoning about data flow and (ii) consideration of unexplored branches, are strictly outside the scope of both of these techniques. In Section \ref{sec:eval}, we demonstrate via direct comparison with Huang et al. the dramatic improvement in coverage thanks to these relaxation methods, which we prove to handle in a sound manner.
+
+\subsection{Maximality Claim}
+Serbanuta et al. \cite{maximal} and Huang et al.~\cite{HuangMR14} both claim maximality of the detection capability, but under different assumptions. 
+Assuming the branch event is not modeled in the trace, Serbanuta et al.'s approach \cite{maximal} guarantees maximality. Given few information in the trace, it conservatively requires the shared read to obtain the same value in the predicted run to ensure soundness. However, if the branch event is modeled, the technique does not guarantee maximality.   
+Assuming the branch events are modeled but local assignments are not recorded in the trace, Huang et al.'s approach~\cite{HuangMR14} guarantees the maximality. Compared to Serbanuta et al.'s technique \cite{maximal}, it allows some events to read different values if they do not affect the following branch decisions. However, it requires the events that affect the branch decisions to read exactly the same values. In practice, these assumptions are too restrictive  because the testers often have full access to the source/bytecode and can collect the local assignments freely.  
+
+Assuming the local assignments are available in the trace, both techniques do not guarantee maximality. As illustrated in our example and discussed in Section~\ref{sec:guarantee}, our analysis allows higher detection capability, i.e., we allow the events to read different values even they flow into the branch events; we allow the exploration of un-executed paths, both of which are not allowed by the above techniques.
+ 
 
 

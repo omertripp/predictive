@@ -166,7 +166,15 @@ the false branch, the branch event $e_b$ is  $if(x_b<y_b)$, the event $e_m$
 in $IF(e_b)$ is in the form of $x_m=y_m+z_m$ and the 
 event $e_n$ in $ELSE(e_b)$ is in the form of $x_n=y_n+z_n$.
 
-{\bf [XZ: missing piece]}
+More formally, we have, 
+$$
+\begin{array}{l}
+\bigwedge\limits_{e_m \in IF(e_b)} (\theta'(x_b) < \theta'(y_b) \rightarrow  \theta'(x_m)=\theta'(y_m)+\theta'(z_m)) \\ 
+\quad \quad  \bigwedge  \\
+\bigwedge\limits_{e_n \in ELSE(e_b)} (\neg(\theta'(x_b)  < \theta'(y_b)) \rightarrow  \theta'(x_n)=\theta'(y_n)+\theta'(z_n)) \\ 
+\end{array}
+$$
+
 
 Consider our example, the corresponding value constraint is, 
 $$

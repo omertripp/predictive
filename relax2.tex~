@@ -1,42 +1,134 @@
 \section{Exploration of Unexecuted Branches}~\label{sec:relax2}
-We now switch to the second feature of \tool, which is its ability to reason about neighboring branches that are not executed in the original trace $\tau$.
-At the high level, we replace the constraints that model the executed branch to the constraints that conservatively model the possible executions in both branches.
-We leverage the static analysis to  realize this relaxation. We explain the details below.
+We now switch to the second feature of \tool, which is to reason about 
+neighboring executions involving unexecuted branches.
+%in the original trace $\tau$.
+At the high level, we enhance the constraints to model the unexecuted branches.
+However to ensure soundness, we cannot encode the unexecuted branches as
+normal static analyses do because they usually perform approximations such as bounded
+loop unrolling and heap abstraction. The basic idea is to {\em only encode the
+unexecuted branches when they can be precisely modeled based on our trace 
+$\tau$.} 
+%replace the constraints that model the executed branch to the constraints that conservatively model the possible executions in both branches.
+%We leverage the static analysis to  realize this relaxation. 
 
-As the static analysis has some known challenges, we make several simplifying assumptions: (1) the branch structure does not contain loops or recursions; (2) every base reference variables can be fully resolved to a concrete object, as required by our analysis (Section~\ref{sec:relax1}).
-% If the base reference variable is defined out of the branch and is not updated inside the unexplored branch, it is resolved to the object referenced by the variable at the beginning of the branch, which is computed from the trace. If the base reference variable is updated inside the unexplored branch to some shared access, the base reference variables cannot be fully resolved statically. However, if it is updated to an object created inside the unexplored branch, we can still model the object and treats the variable as fully resolved.
- (3) we assume there are no array accesses in the branch structure, because the array accesses often use the index expressions that cannot be fully resolved statically. Similarly, we assume there are no use of collections. If any of the above assumptions is violated, we  avoid exploring the unexplored branches and adopt the purely dynamic solution in Section~\ref[sec:relax1}. 
- %TODO inline
+In particular, we have the following criteria in determining if an 
+unexecuted branch should be included in the constraint system. These are 
+essentially the bound of our path relaxation.
+(1) If there is a loop inside the unexecuted branch, the loop bound needs to
+be resolved to a constant from the trace (otherwise we do not know how many
+times we need to unroll). (2) The branch
+is ignored if it contains recursive function(s). (3) Every base reference 
+variable in the branch needs to be fully resolved to a concrete object,
+as required by our earlier analysis (Section~\ref{sec:relax1}). This can be 
+done by backward traversal of the trace:
+if the base reference depends on some shared read in the explored 
+branch, of which the value is uncertain, it cannot be 
+resolved to an object; if the base reference depends on multiple definitions 
+from different paths, it cannot be resolved to an object.
+Otherwise, it can be resolved.
+(4) The indices of array read accesses in the branch 
+need to be resolved to constant values from the trace (with the preceding unexecuted branch extensions). This is to
+prevent reading an array element that was not defined. 
+(5) The branch is ignored if it uses collections. 
+(6) For method calls, we require the  caller object can be fully resolved from
+the trace.
  
- For presentation, we refer to the branch structure as, $B=<header, B_{if}, B_{else}>$, which includes the header instruction and two branches. Without loss of generality, we assume the original trace takes the branch $B_{if}$. Our running example is shown in Figure~\ref{fig:path}. 
+%We start with a branch event $e_b$ in the trace, without loss of generality, 
+%suppose its true branch is taken, we need to explore the false branch 
+%(thread-locally with the same thread as $e_b$) and add constraints to model it.
+% As the static analysis has some known challenges, we make several 
+%simplifying assumptions: 
+%(1) the unexplored branch should not contain 
+%loops or recursions because the loop bound may depend on some shared variable 
+%which is statically unknown; (2) every base reference variable should be 
+%fully resolved to a concrete object, as required by our analysis 
+%(Section~\ref{sec:relax1}). We apply dataflow analysis (reaching definitions) 
+%to judge: If the base reference depends on some shared read in the explored 
+%branch, of which the value is statically unknown, it cannot be statically 
+%resolved to an object; If the base reference depends on multiple definitions 
+%from different paths, it cannot be statically resolved to an object. 
+%Otherwise, it can be resolved. (3) We assume the unexplored branch does not 
+%contain array access because the array accesses often use the index 
+%expressions that are statically unknown. Similarly, as the collections 
+%often use array for implementation, we assume they are also absent. (4) We 
+%inline the method calls (for two levels) in the unexplored branch, similar 
+%to the base object, we assume the caller object can be fully resolved 
+%statically.  If any of the above assumptions is violated, we  avoid exploring 
+%the unexplored branches and adopt the purely dynamic solution in Section~\ref{sec:relax1}. 
+Next, we will explain how to encode an unexecuted branch in details, 
+using the example in Figure~\ref{fig:running} for demonstration.
+We assume one of the branches of event $e_b$ needs to be extended in
+the following discussion.
 
-{\bf Events \ }. We traverse the control flow graph of the branch $B$ and produce an event, $<t, id, inst>$, to represent the possible execution of each instruction $inst$. Here, $t$ is the same as that of the root branch event as the exploration is conducted thread-locally, $id$ is a unique value different from existing ids. Specifically,  we maintain an increasing counter to assign the id following the traversal order. For this example, we simply use the line number as the event id.
-As we assume no loops and recursions, we establish the one-to-one mapping between each instruction $inst$ and the event $e_{inst}$.  We may use the two terms interchangeably.
+{\bf Events \ } We traverse the control flow graph of the unexplored branch 
+and generate an event,  $<t, id, inst>$, to represent 
+%the execution 
+%of 
+each instruction $inst$. The id can be any unique value.
+%, where the uniqueness is the requirement. 
+We simply use the line number as the event id in our example. As loops are
+unrolled,
+% the unexplored branch does not contain loop/recursion, 
+we establish the one-to-one mapping between each instruction $inst$ and 
+the event $e_{inst}$.
 
 
-{\bf SSA Form\ }  We apply SSA transformation to the code of the branch structure and then update the instruction stored in the corresponding event. Our SSA transformation is similar to the standard SSA transformation but needs minor adaptations. 
+{\bf SSA Form\ }  Similar to in Section~\ref{sec:relax1}, we need the SSA 
+form of the instruction in each event. To achieve this, we apply SSA 
+transformation to the code of unexecuted branch and combine its SSA form 
+with the existing SSA form of the corresponding executed branch to produce the final 
+SSA form. The SSA transformation is standard, but special considerations
+are needed.
+%issues need to be considered.
 \begin{itemize}
-\item {\bf Local primitive variables\ }  For the variable $z$ defined in an instruction $inst$ inside the branch, our SSA transformation replaces it as $z^{id}$, where $id$ comes from the event $e_{inst}$. Some local variables are defined out of the branch structure, e.g., the variable $x$ is defined at line 5 in Figure~\ref{fig:path}. We look up the SSA encoding history up to the branch event to find the symbol that replaces the variable most recently and use the symbol instead. For example, the variable $x$ is replaced to $x^5$ at the event $e_5$ according to the history, we simple replace the uses of $x$ as $x^5$. In addition, the SSA transformation may introduce Phi node in the form of $y=Phi(y_1, C_1, y_2, C_2, \dots y_i, C_i)$, meaning that $y$ is equal to $y_i$ in the condition $C_i$.
-\item {\bf Local Heap Accesses\ } Given the heap access of $x.f$, remember that the base variable $x$ is fully resolved to a concrete object $o$, we replace it as a local variable $l_{o.f}$ before the SSA transformation and treat it as a local primitive variable during the SSA transformation. 
-\item {\bf Shared Heap Accesses\ } The SSA transformation does not encode the shared heap accesses. Similar to Section~\ref{sec:relax1}, we introduce the special symbols to denote the shared read/write.
+\item {\bf Local primitive variables\ }  
+For local reads inside the extended branch whose definitions are
+%Some local variable is defined 
+before the branch event $e_b$, we reuse their SSA forms which 
+%of which the SSA form 
+are already in the trace $\tau$.
+%, we reuse the SSA form.  
+In addition, 
+%the SSA transformation 
+we encode conditional statements inside the extended branch using
+Phi node, e.g., $y=Phi(y_1, C_1, y_2, C_2, \dots y_i, C_i)$, 
+meaning that $y$ is equal to $y_i$ in the condition $C_i$.
+Note that we do not require paths inside the extended branch be fully
+resolved. 
+Phi nodes are also used to integrate the definitions in the extended
+branch with the executed branch.
+
+%both the original executed branch and 
+%the extended branch 
+%The combination of SSA forms of both branches may require further 
+%Phi node when both branches define a variable. We insert the Phi node 
+%to the trace and replace the following use accordingly.
+\item {\bf Local Heap Accesses\ } Given a heap access  $x.f$, 
+recall that the base variable $x$ is fully resolved to a concrete object
+ $o$, we replace it as a local variable $l_{o.f}$ before the SSA 
+transformation and treat it as a local primitive variable during the 
+SSA transformation.
+ 
+\item {\bf Shared Heap Accesses\ } The standard SSA transformation 
+does not encode the shared heap accesses. Similar to 
+Section~\ref{sec:relax1}, we introduce special symbols to 
+denote shared read/write.
 \end{itemize}
 
-The SSA form for the branch at line 6 is as follows, where the base variable $w$ at line 13 is replaced to an object $o2$ and the local heap access $w.f$ is encoded as a local primitive variable.
+The SSA form for extending line 4 in Figure~\ref{fig:running}  is shown 
+in Figure \ref{fig:pathssa}. We omit the Phi nodes for $z$ and $w$ at 
+the end as they are never used later. 
 
 
 \begin{figure}
 \centering
 \begin{tabular}{l}
- {\tt 6: if($x^5$<10)}  \\ %{\tt if($x^5$<10)}\\
-{\tt 7: $W^7_{S}$=0;}   \\%{\tt $W^7_{S}$=0;}\\
- {{\tt 8:  else}}   \\ %{\color{Gray}{\tt if($x^5\geq$10)}}\\
- {{\tt 9: \ \ $z^9$=$R^{9}_{o1.f}$;}}  \\ %{\color{Gray}{\tt $z^{9}$=$R^{9}_{o1.f}$;}}\\
- {{\tt 10: \ if($x^5$<$z^9$)}}  \\%{\color{Gray}{\tt if($x^5<z^{9}$)}}\\
- {{\tt 11: \ \ $W^{11}_{S}$=0;}} \\%{\color{Gray}{\tt $W^{11}_{S}$=0;}}\\ 
- {{\tt 12: \ else }}  \\%{\color{Gray}{\tt if($x^5\geq z^{10}$)}}\\
- {{\tt 13: \ \ $W^{13}_{S}$=$l^{id}_{o2.f}$; }}   \\%{\color{Gray}{\tt $W^{13}_{S}$=$l^{id}_{o2.f}$;}}\\
+ {\tt 4: if($R^4_y$>2)}  \\ %{\tt if($x^5$<10)}\\
+{\tt 5: \ \ $z^5$=1+$R^5_x$;}   \\%{\tt $W^7_{S}$=0;}\\
+ {{\tt 6:  else}}   \\ %{\color{Gray}{\tt if($x^5\geq$10)}}\\
+ {{\tt 7: \ \ $w^7$=$2+R^{7}_{x}$;}}  \\ %{\color{Gray}{\tt $z^{9}$=$R^{9}_{o1.f}$;}}\\
 \end{tabular}
-\caption{Running Example (shared variables are in bold font). }
+\caption{SSA form of both true and false branches. }
 \label{fig:pathssa}
 \end{figure}
 
@@ -45,82 +137,107 @@ The SSA form for the branch at line 6 is as follows, where the base variable $w$
 
 
 
-{\bf Constraints\ } During the traversal, we also record the shared access events.  For the set of accesses $S_1$ of the location $\ell$, we also find the accesses $S_2$ of it from other threads. We assert the feasibility of each race pair $\in S_1 \times S_2$ by specifying constraints and checking them.
+{\bf Constraints\ } During traversal, we also record the shared access 
+events.  For the set of accesses $S_1$ of the location $\ell$, we also 
+find its accesses $S_2$ from other threads. We assert the feasibility 
+of each race pair $\in S_1 \times S_2$ by specifying constraints and 
+checking them.
 
-{\bf Race Condition Constraint\ }  The first constraint is the race condition constraint, e.g., $O'_{4}=O'(e_11)$ specifies that the event at line 4 may form a race with the event at line 11, which is not executed in the original trace.
+{\bf Race Condition Constraint\ }  The first type of constraint is the 
+race condition constraint, e.g., $O'(e_2)=O'(e_7)$ specifies that the event 
+at line 2 may form a race with the event at line 7, which is actually not 
+executed in the original trace. Importantly, we need to specify the race 
+condition under the specific branch condition, e.g., 
+$\theta'(R^4_y)\leq 2\rightarrow O'(e_2)=O'(e_7)$. The underlying reason is, 
+the race is valid, or $e_7$ can be executed,  only under the branch condition $\theta'(R^4_y)\leq 2$. 
 
-{\bf Intra-thread Control Flow Constraint \ } Different from the strategy in Section~\ref{sec:relax1}, we do not assert the branch the predicted run will take. Instead, we assert that all branches inside the branch structure may be taken, which is trivially $true$. The solver automatically reasons about which branch should be taken, as indicated in the solution. Note that only one of the two branches can be taken because the conditions for them contradict.
+{\bf Intra-thread Control Flow Constraint \ } Different from the strategy in Section~\ref{sec:relax1}, we do not assert the branch the predicted run will take. Instead, we assert that either branch is possible.
+%, which is always $true$. 
+The solver automatically reasons about which branch should be taken and encodes it in the solution. 
+%Note that only one of the two branches can be taken because the conditions for the branches contradict.
 
-{\bf Intra-thread Value Constraint \ } Intra-thread value constraint is the core constraint that realizes the exploration different branches. It asserts the value constraints imposed by the {\sf assign/heapr/heapw} events take effect only when the guarding condition is satisfied. More formally, we have
+{\bf Intra-thread Value Constraint \ } Intra-thread value constraint is the 
+core constraint that realizes the exploration of different branches. It 
+asserts the value constraints imposed by the {\sf assign/heapr/heapw} events 
+take effect only when the guarding condition is satisfied. 
+Suppose $IF(e_b)$ denotes the event sequence that corresponds to the 
+true branch, $ELSE(e_b)$ denotes the event sequence that corresponds to 
+the false branch, the branch event $e_b$ is  $if(x_b<y_b)$, the event $e_m$ 
+in $IF(e_b)$ is in the form of $x_m=y_m+z_m$ and the 
+event $e_n$ in $ELSE(e_b)$ is in the form of $x_n=y_n+z_n$.
 
-
-\[ cons(n) = \left\{ 
-  \begin{array}{l l}
-  (\bigwedge_{n_1\in n_{if}}{  (expr(header_n) \rightarrow  cons(n_1))}) \\
-  \bigwedge (\bigwedge_{n_2\in n_{else}}  { (\neg expr(header_n) \rightarrow  cons(n_2))}) \\
-   \quad  \quad  \quad \quad  \quad  \quad  \quad  \quad  \quad  \text{if n is a branch} \\
-  equation(n)      \\                                  
-   \quad  \quad  \quad \quad  \quad  \quad \quad  \quad  \quad  \text{otherwise} \\ 
-  \end{array} \right.\]
-Here, $expr(header)$ is the helper function that returns the condition associated with the header. $equation(n)$ returns the equation inside each event, which imposes the value constraint.  In the first case when the instruction $n$ is a branch, we assert the value constraint imposed by each instruction in the if-branch can take effect only when the if-branch is taken, i.e., when $expr(header_n)$ is evaluated as true,  and the value constraint imposed by instruction in the else-branch can take effect only when the else-branch is taken. In the second case, when the instruction $n$ is a normal instruction that contains the equation, we assert the equation as the value constraint. Note that the constraint is defined recursively because a branch  may contain another branch structure.
-
-
-Consider the example in Figure~\ref{fig:pathssa},  the constraint is,
+More formally, we have, 
 $$
 \begin{array}{l}
-&(\theta'(x^5)<10 \rightarrow \theta'(W^7_{S})=0) \wedge (\theta'(x^5)\geq 10 \rightarrow \theta'(z^9)=\theta'(R^{9}_{o1.f}) 
-&\wedge  (\theta'(x^5)\geq 10 \rightarrow  
-& \ \ \ \ \  \ \ (\theta'(x^5)<\theta'(z^9) \rightarrow \theta'(W^{11}_{S})=0 
-& \ \ \ \ \  \ \ \wedge \theta'(x^5)\geq \theta'(z^9) \rightarrow \theta'(W^{13}_{S})=\theta'(l^{id}_{o2.f}))
-&)\\ 
+\bigwedge\limits_{e_m \in IF(e_b)} (\theta'(x_b) < \theta'(y_b) \rightarrow  \theta'(x_m)=\theta'(y_m)+\theta'(z_m)) \\ 
+\quad \quad \quad \bigwedge  \\
+\bigwedge\limits_{e_n \in ELSE(e_b)} (\neg(\theta'(x_b)  < \theta'(y_b)) \rightarrow  \theta'(x_n)=\theta'(y_n)+\theta'(z_n)) \\ 
 \end{array}
 $$
-<<<<<<< HEAD
-=======
-\end{center}
-caption{\label{fig:pathencode}}
-\end{figure}
->>>>>>> 570094b2b54308062c4b89f7f60235e22be4e5eb
-
-{\bf Intra-thread Order Constraints\ } The intra-thread order constraint captures the program order imposed by the branch structure and the instruction sequence. More formally, for each branch $n$, we have,
-
-\[ cons(n) = \left\{ 
-  \begin{array}{l l}
-  (\bigwedge_{n_1\in n_{if}}{O'(header_n)<O'(n_1)<O'(end_n)}) \\
-   (\bigwedge_{n_1 and n_3 are adjacent in n_{if}}{O'(n_1)<O'(n_3)}) \\
-   (\bigwedge_{n_2\in n_{else}}{O'(header_n)<O'(n_2)<O'(end_n)}) \\
-    (\bigwedge_{n_2 and n_4 are adjacent in n_{else}}{O'(n_2)<O'(n_4)}) \\
-  \end{array} \right.\]
-Here, $end_n$ is a node that denotes the first event after the branch.  The order constraints are imposed by the program, and therefore, are unconditionally valid. That is why we do not specify the order constraints under specific branch conditions. 
-
-{\bf Inter-thread value constraints\ } The inter-thread value constraints are identical to those in Section~\ref{sec:relax1}. Interesting, we do not need to specify the value constraints under the specific branch condition. The underlying reason is that, the intra-thread value constraint already encodes the branch condition information, if the branch condition is not satisfied at runtime, the value constraint does not take effect and the read of a shared variable cannot propagate its value downstream, even if it is assigned to a value. 
 
 
+Consider our example, the corresponding value constraint is, 
+$$
+\begin{array}{l}
+\theta'(R^4_y)>2 \rightarrow \theta'(z^5)=1+\theta'(R^5_x) \\ 
+\wedge  \\
+\theta'(R^4_y)\leq 2 \rightarrow  \theta'(w^7)=2+\theta'(R^{7}_{x})\\
+\end{array}
+$$
+
+This is also how we encode Phi operations.
+%{\bf Assignment with {\sf Phi}\ }  For the assignment with the Phi, e.g., $y=Phi(y_1, x>0, y_2, x\leq 0)$, the encoding is similar.
+%$$
+%\begin{array}{l}
+%\theta'(x)>0 \rightarrow \theta'(y)=\theta'(y_1) \wedge \theta'(x)\leq 0 \rightarrow \theta'(y)=\theta'(y_2)
+%\end{array}
+%$$
+
+%In case that the unexplored branch contains another branch structure, the above encoding process is applied recursively and the resultant constraints are nested.
+
+{\bf Inter-thread value constraints\ } The inter-thread value constraints 
+are similarly extended. Details are elided.
+
+
+{\bf Intra-thread Order Constraints\ } The intra-thread order constraint captures the program order imposed by the branch structure and the instruction sequence. Suppose $IF(e_b)$=$e_{i_1}e_{i_2}\dots e_{i_m}$, $ELSE(e_b)=e_{j_1}e_{j_2}\dots e_{j_n}$, the first event after the branch structure is $e_{end}$. Then we have, 
+
+$$
+\begin{array}{l}
+O'(e_b)<O'(e_{i_1})<O'(e_{i_2})<\dots <O'(e_{i_m})<O'(e_{end})\\
+\wedge\\
+O'(e_b)<O'(e_{j_1})<O'(e_{j_2})<\dots <O'(e_{j_m})<O'(e_{end})
+\end{array}
+$$
+
+The order constraints capture the program order, which are unconditionally valid. That is also why we do not specify the order constraints under specific branch conditions. 
+
+%identical to those in Section~\ref{sec:relax1}. Interesting, we do not need to specify the value constraints under the specific branch condition. The underlying reason is that, the shared read  $R$ in the instruction $x=R$ is isolated (meaning the value cannot be propagated downstream) if the instruction is disabled in the intra-thread value constraints due to the infeasible branch condition. 
 
 
 
-\begin{figure}
-\centering
-\begin{tabular}{ll|l}
-\multicolumn{3}{c}{{\tt {\bf P} = new();//$o1$}} \\
-\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$}  &  \multicolumn{1}{c}{$Trace$}\\
-{\tt 1: {\bf P}.f=100; } &  & {\tt $W^{1}_{o1.f}$=100;}\\
-{\tt 2: {\bf Q}=101; } &  & {\tt $W^{2}_{Q}$=101;}\\
-{\tt 3: {\bf Q}=1; } & & {\tt $W^{3}_{Q}$=1;} \\
-{\tt 4: {\bf S}=1; } & & {\tt $W^{4}_{S}$=1;} \\
-& {\tt 5: x={\bf Q};} & {\tt $x^5$=$R^5_{Q}$;}\\
-& {\tt 6: if(x<10)} & {\tt if($x^5$<10)}\\
-& {\tt 7: \ {\bf S}=0;}  & {\tt $W^7_{S}$=0;}\\
-& {\color{Gray}{\tt 8:  else}} &  \\ %{\color{Gray}{\tt if($x^5\geq$10)}}\\
-& {\color{Gray}{\tt 9: \ \ z={\bf P}.f;}} & \\ %{\color{Gray}{\tt $z^{9}$=$R^{9}_{o1.f}$;}}\\
-& {\color{Gray}{\tt 10: \ if(x<z)}} & \\%{\color{Gray}{\tt if($x^5<z^{9}$)}}\\
-& {\color{Gray}{\tt 11: \ \ {\bf S}=0;}}& \\%{\color{Gray}{\tt $W^{11}_{S}$=0;}}\\ 
-& {\color{Gray}{\tt 12: \ else }}  & \\%{\color{Gray}{\tt if($x^5\geq z^{10}$)}}\\
-& {\color{Gray}{\tt 13: \ \ {\bf S}=w.f; }}  & \\%{\color{Gray}{\tt $W^{13}_{S}$=$l^{id}_{o2.f}$;}}\\
-\end{tabular}
-\caption{Running Example (shared variables are in bold font). }
-\label{fig:path}
-\end{figure}
+
+%\begin{figure}
+%\centering
+%\begin{tabular}{ll|l}
+%\multicolumn{3}{c}{{\tt {\bf P} = new();//$o1$}} \\
+%\multicolumn{1}{c}{$T_1$} & \multicolumn{1}{c}{$T_2$}  &  \multicolumn{1}{c}{$Trace$}\\
+%{\tt 1: {\bf P}.f=100; } &  & {\tt $W^{1}_{o1.f}$=100;}\\
+%{\tt 2: {\bf Q}=101; } &  & {\tt $W^{2}_{Q}$=101;}\\
+%{\tt 3: {\bf Q}=1; } & & {\tt $W^{3}_{Q}$=1;} \\
+%{\tt 4: {\bf S}=1; } & & {\tt $W^{4}_{S}$=1;} \\
+%& {\tt 5: x={\bf Q};} & {\tt $x^5$=$R^5_{Q}$;}\\
+%& {\tt 6: if(x<10)} & {\tt if($x^5$<10)}\\
+%& {\tt 7: \ {\bf S}=0;}  & {\tt $W^7_{S}$=0;}\\
+%& {\color{Gray}{\tt 8:  else}} &  \\ %{\color{Gray}{\tt if($x^5\geq$10)}}\\
+%& {\color{Gray}{\tt 9: \ \ z={\bf P}.f;}} & \\ %{\color{Gray}{\tt $z^{9}$=$R^{9}_{o1.f}$;}}\\
+%& {\color{Gray}{\tt 10: \ if(x<z)}} & \\%{\color{Gray}{\tt if($x^5<z^{9}$)}}\\
+%& {\color{Gray}{\tt 11: \ \ {\bf S}=0;}}& \\%{\color{Gray}{\tt $W^{11}_{S}$=0;}}\\ 
+%& {\color{Gray}{\tt 12: \ else }}  & \\%{\color{Gray}{\tt if($x^5\geq z^{10}$)}}\\
+%& {\color{Gray}{\tt 13: \ \ {\bf S}=w.f; }}  & \\%{\color{Gray}{\tt $W^{13}_{S}$=$l^{id}_{o2.f}$;}}\\
+%\end{tabular}
+%\caption{Running Example (shared variables are in bold font). }
+%\label{fig:path}
+%\end{figure}
 %
 %Consider the example in Figure~\ref{fig:path}, only the if-branch of $T_2$ is executed in the original trace $\tau$.
 %Following the rules in Section~\ref{sec:relax1},   we derive a set of constraints to find the new trace $\tau'$ to witness the race pair ($e_5$, $e_8$). We list those specific to if-branch below.
