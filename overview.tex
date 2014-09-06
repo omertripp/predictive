@@ -8,21 +8,9 @@ As input, we assume (i) a program $P$ as well as (ii) a trace of $P$ recorded du
 
 
 \subsection{Preliminaries}
-To facilitate our presentation, we first introduce some terminologies used throughout this paper. Intuitively, a trace is a sequence of events recorded during the observation run.
+We first introduce some notation used throughout this paper. Intuitively, a trace is a sequence of events recorded during the observed run. An event, $e=<t, id, inst>$, is a concrete representation of the runtime execution of a static instruction $inst$, such that (i) $t$ refers to the thread that issues the event $e$ (denoted $t^e$); (ii) $id$ is a unique identifier of the event (unless spcified otherwise, we use the index of an event in the trace as its id); and (iii) $inst$ is a static three-address instruction (involving at most three operands, which modern compilers commonly support).
 
-
-
-
-{\bf Event\ } An event, $e=<t, id, inst>$, is a concrete representation of the runtime execution of a static instruction $inst$.
-
-
-\begin{itemize}
-\item $t$ refers to the thread that issues the event $e$, denoted as $t^e$.
-\item  $id$ refers to the id associated with each event. The key property of  $id$ is {\em uniqueness}, i.e., any two events in the trace own different ids.  Unless otherwise specified, we use  the index of an event in the trace as its id, which satisfies the above property. Throughout this paper,  we denote an event as $e_{id}$ with the id as the subscript. %We may use the terms $e_{id}$ and $id$ interchangeably given their one-to-one correspondence, e.g., $t^{e_3}$ and $t^3$. 
-\item $inst$ is the static instruction. The instructions are three-address instructions involving at most three operands, which modern compilers commonly support.  Specifically, we are interested in the types of instructions listed in Table~\ref{Ta:syntax}. When the variable does not appear on the left hand of an equation, such as $y$ in $x.f=y$, it may refer to a variable, a constant or event object creation expression $new (...)$.  The $bop$ stands for the binary operator, which may refer to $+, -, *, /, \%, \wedge, \vee$ in the assignment, or refer to $<, >, =, \wedge, \vee$ in the branch. The target of the branch event is not important in our scope, therefore, we may abbreviate the branch instruction as the boolean expression afterwards. The listed instructions suffice to represent all trace events of interest. This is because a concrete finite execution trace can be reduced to a straight-line loop-free call-free path program  (argument passing of the method call is modeled as assignments and the virtual call resolution is modeled as branches). This standard form of simplification preserves all the data-race-related information contained in the original trace. 
-\end{itemize}
-
-
+For this paper, we utilize the instructions listed in Table~\ref{Ta:syntax}. When the variable does not appear on the left hand of an equation, such as $y$ in $x.f=y$, it may refer to a variable, a constant or event object creation expression $new (...)$.  The $bop$ stands for the binary operator, which may refer to $+, -, *, /, \%, \wedge, \vee$ in the assignment, or refer to $<, >, =, \wedge, \vee$ in the branch. The target of the branch event is not important in our scope, therefore, we may abbreviate the branch instruction as the boolean expression afterwards. The listed instructions suffice to represent all trace events of interest. This is because a concrete finite execution trace can be reduced to a straight-line loop-free call-free path program  (argument passing of the method call is modeled as assignments and the virtual call resolution is modeled as branches). This standard form of simplification preserves all the data-race-related information contained in the original trace. 
 
 \begin{table}
 	\begin{center}
@@ -40,13 +28,16 @@ To facilitate our presentation, we first introduce some terminologies used throu
 \end{table}
 
 
-{\bf Trace \ } A trace $\tau$ is a sequence of events. It can also be represented more comprehensively as,  $\tau=<\Gamma , \{\tau_{t_1}, \tau_{t_2}, \dots \tau_{t_n} \}, O, \theta>$.
+{\bf Trace Representation \ } In the following, we assume that trace $\tau$ is represented as $\tau=<\Gamma , \{\tau_{t_1}, \tau_{t_2}, \dots \tau_{t_n} \}, O, \theta>$, where
 \begin{itemize}
-\item  $\Gamma$ refers to the set of threads involved in the trace, which include $t_1$, $t_2$, \dots, $t_n$.
-\item   $\{\tau_{t_1}, \tau_{t_2}, \dots \tau_{t_n} \}$ denotes the event sequences produced by each thread.  
-\item  $O$ is a function that assigns  to every event an integer value that denotes its scheduling order. For example, $e_i$ is scheduled earlier than $e_j$ if $O(e_i)<O(e_j)$.
-\item  $\theta$ is a function that maps every variable to a value. For example, given an event $e$ executing the instruction $x=y+z$, the mapping recorded in the trace may be $\theta(x)=3$,  $\theta(y)=2$,  $\theta(z)=1$.  If the variable $x$ is defined in two events, the mapping for $x$ becomes ambiguous. To avoid the ambiguity, we conduct a pre-processing  (Section~\ref{sec:relax1}) that produces the SSA form of the trace, in which each variable is defined exactly once. 
+\item  $\Gamma$ refers to the set of threads involved in the trace, which include $t_1$, $t_2$, \dots, $t_n$;
+\item   $\{\tau_{t_1}, \tau_{t_2}, \dots \tau_{t_n} \}$ denotes the event sequences produced by each thread;
+\item  $O$ is a function that assigns  to every event an integer value that denotes its scheduling order: $e_i$ is scheduled earlier than $e_j$ iff $O(e_i)<O(e_j)$; and
+\item  $\theta$ is a function that maps every live variable to a value. 
+%For example, given an event $e$ executing the instruction $x=y+z$, the mapping recorded in the trace may be $\theta(x)=3$,  $\theta(y)=2$,  $\theta(z)=1$.  
 \end{itemize}
+To ensure the integrity of $\theta$ as well simplify downstream encoding steps performed by the analysis already at the syntactic level, we rewrite the raw input trace into SSA form, such that each variable is defined exactly once.
+
 
 %\item $map$ is a mapping from live expressions at the current event to their value (and thus a partial mapping from expressions to values). Live expressions include program variables, object fields, boolean expressions, etc. We use the notation $\lsyn exp \rsyn^e$ to retrieve the value associated with expression $exp$ at $e$.
 %Specially,  we also store the heap location value  $\lsyn \overline{x.f} \rsyn^e$ for a field $x.f$. Note the difference between $\lsyn \overline{x.f} \rsyn^e$ and $\lsyn x.f \rsyn^e$, which represent the location and the value stored in it respectively. The location value $\lsyn \overline{x.f} \rsyn^e$ is computed as a pair $(\lsyn x \rsyn^e, f)$.
@@ -131,28 +122,20 @@ Given the trace, $\tau=<\Gamma , \{\tau_{t_1}, \tau_{t_2}, \dots \tau_{t_n} \}, 
 
 We first preprocess the trace as follows. We introduce symbols to replace the shared accesses in the instructions, e.g., We use $W^{id}_{x}$/$R^{id}_{x}$ to replace the write/read of the shared variable $x$ by the event $e_{id}$. %The rationale is explained in Section~\ref{sec:relax1}.
 
-{\bf Race Condition\ } The potential race pair involves two accesses of the same shared location from different threads, where at least one access is a write. Given any potential race pair, e.g., ($e_2$, $e_5$), it is a real race if and only if the two accesses can occur at the same time (race condition), which is captured by the race condition constraint
-$$
-	O'(e_2) = O'(e_5)
-$$.
+{\bf Race Condition\ } The potential race pair involves two accesses of the same shared location from different threads, where at least one access is a write. Given any potential race pair, e.g., ($e_2$, $e_5$), it is a real race if and only if the two accesses can occur at the same time (race condition), which is captured by the race condition constraint: 
+$O'(e_2) = O'(e_5)$.
 The race condition constraint--- together with the other constraints --- guarantees the feasibility of the predicted race if a solution is found for the overall constraint system.
 
 {\bf Intra-thread Constraints\ } The predictive analysis needs to preserve the same event sequence for each thread, which further requires 
 
 \begin{itemize}
 \item {\bf Control Flow Constraints\ } Each thread takes the same control flows (or branch decisions) to reproduce the events.
- For the running example (ignoring the statements in red), this yields:
-$$
-	\theta'(R_{\tt y}^4) > 2 \equiv {\bf true}
-$$
+ For the running example (ignoring the statements in red), this yields: $\theta'(R_{\tt y}^4) > 2 \equiv {\bf true}$.
 That is, in the predicted trace $\tau'$, the value of variable {\tt y} read at $e_4$ should be greater than $2$. 
 
 
 \item {\bf Intra-thread Order Constraints\ } The events should follow the same thread-local order as in the original trace. This constraint is imposed by the fact that the two runs share the same instruction sequence and take the same control flows. 
-We yield the following formula:
-$$
-	O'(e_1) < O'(e_2) < O'(e_3) \wedge O'(e_4) < O'(e_5)
-$$
+We obtain the  formula: $O'(e_1) < O'(e_2) < O'(e_3) \wedge O'(e_4) < O'(e_5)$.
 That is, in the predicted trace $\tau'$, the three events from $T_1$ are ordered in the same way as in $\tau$, and similarly, the branch event $e_4$ in $T_2$ still executes before the event $e_5$ inside the branch body.
 
 \item {\bf Intra-thread Value Constraints\ } The events should respect the value constraints imposed by each instruction.
@@ -198,9 +181,8 @@ For the racy events, $e_2$ and $e_7$, we first specify the race condition constr
 
 
 
-
-{\bf Highlights \ } In this example, our analysis finds two more pairs of races than existing analyses~\cite{yannis, jeff}, which include $(e_2, e_5)$ and $(e_2, e_7)$.
-The key insight for finding the first race is, we do not require $e_4$ to read from $e_3$ to retain the original value, as what existing approaches do, rather, we allow $e_4$ to read from $e_1$ while still preserving the feasibility of the branch. This relaxation allows the events after $e_4$ to run concurrently with the events before $e_3$, leading to the detection of the first race.  The key insight for finding the second race is, we explore the unexplored branches and ask the solver to compute a feasible schedule that exercises them. The neighboring branches are likely to contain racy events if the executed branches contain racy events.
+{\bf Highlights \ } In this example, our analysis finds two more pairs of races beyond existing analyses~\cite{yannis, jeff}: $(e_2, e_5)$ and $(e_2, e_7)$.
+For the first race, we do not require $e_4$ to read from $e_3$ to retain the original value, as in approaches. Rather, we allow $e_4$ to read from $e_1$ while still preserving the feasibility of the branch. This relaxation allows the events after $e_4$ to run concurrently with the events before $e_3$, leading to the detection of the first race.  For the second race, we cover unexecuted branches and ask the solver to compute a feasible schedule that exercises them. The neighboring branches are likely to contain racy events if the executed branches contain racy events.
 
  
 %In particular, the solution discloses a feasible trace that gives rise to the race at hand. The trace is identified uniquely via the order enforced in the solution over the variables $O_i$, which represent scheduling order. 
