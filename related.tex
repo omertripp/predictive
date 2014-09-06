@@ -36,7 +36,7 @@ the data races. PTA is founded on the notion of sound causality, as it
 considers feasible reorderings of the input trace that prove a candidate 
 data race as such. 
 
-Wang et al.~\cite{chao} pioneere the symbolic predictive analysis, 
+Wang et al.~\cite{chao} pioneer the symbolic predictive analysis, 
 which our approach also belongs to. However, the approach lacks support 
 of heap encoding, therefore, cannot be applied to real-world applications. 
 The first PTA that applies to real-world applications is proposed by 
@@ -54,8 +54,8 @@ establish the presence of data races. Soundness is guaranteed by their
 ability to precisely encode the semantics of sequential consistency. 
 Inspired by Said et al., Huang et al. present an improvement, whereby 
 control-flow information is encoded into the constraint system so as 
-to relax flow dependencies as long as control dependencies are 
-preserved. ExceptionNULL \cite{Farzan:2012} is another example of 
+to relax value flow dependencies as long as the values do not flow into the control-flow event.
+ ExceptionNULL \cite{Farzan:2012} is another example of 
 sound PTA. Its goal is to detect null dereferences rather than data races. 
 
 \tool\ is similar to Said et al. and Huang et al. in that it also makes 
@@ -79,7 +79,7 @@ branch events are modeled, the technique does not guarantee maximality.
 Assuming the branch events are modeled but local assignments are not recorded, 
 \cite{pldi14} guarantees maximality. 
 Compared to \cite{maximal}, it allows some events to read different 
-values if they do not affect the following branch decisions. However, 
+values if the values do not flow into the following branch conditions, as they do not affect the following branch decisions. However, 
 it requires the events that affect the branch decisions to read exactly 
 the same values. In practice, these assumptions are too restrictive  
 because local assignments can be easily collected in practice.
@@ -88,7 +88,7 @@ because local assignments can be easily collected in practice.
 
 Assuming local assignments are available in the trace, both techniques 
 cannot guarantee maximality. As illustrated in our example and discussed 
-in Section~\ref{sec:guarantee}, our analysis allows higher detection capability
+in Section~\ref{sec:guarantee}, our analysis allows higher detection capability.
 %, i.e., we allow the events to read different values even they flow into the branch events; we allow the exploration of un-executed paths, both of which are not allowed by the above techniques.
  
 

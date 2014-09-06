@@ -6,7 +6,7 @@ enlarge analysis coverage. The first relaxation allows variables to
 take different values as long as doing so does not affect trace feasiblity;
 the second relaxation allows exploring neighboring unexecuted paths as long
 as doing so does not affect the soundness guarantee. Our results show that
-\sysname is able to detect 2.5X as many races as compared to the state-of-the-art,
+\sysname is able to detect 2.5X as many races compared to the state-of-the-art,
 without any false positives.
 
 %In this paper, we investigated the problem of sound data-race detection (i.e., without false alarms) via predictive analysis

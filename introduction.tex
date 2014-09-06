@@ -87,7 +87,7 @@ we forbid \sysname\ to explore an unexecuted branch if the effect of the branch 
 (e.g. an array element is read while it was not defined in the original trace). The essence of our technique 
 is to {\em explore the neighborhood of the original execution as much as possible}. Due to the substantially
 enlarged search space, our results show that a race detector based on our relaxed predictive analysis 
-can detect XXX times more races than existing predictive analysis, while guaranteeing soundness. 
+can detect $2.5X$ as many races as the existing predictive analysis, while guaranteeing soundness. 
 
 Our contributions are summarized as follows.
 \begin{itemize}
@@ -95,7 +95,7 @@ Our contributions are summarized as follows.
 be relaxed).
 \item We develop a constraint encoding scheme that encodes the necessary information (i.e. the
 part that must be preserved) and the relaxed information (i.e., the part that may be mutated) uniformly as part of a single logical representation.
-\item We develop a propotype \sysname. Our results show XXX.
+\item We develop a propotype \sysname. Our results on 16 benchmarks show \sysname is significantly more effective than existing predictive analyses. We also conducted case studies to confirm the effectiveness.
 \end{itemize}
 
 

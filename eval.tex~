@@ -134,7 +134,7 @@ branches, i.e., one before each shared field access, which ensures
 the use of the same base objects.
 We get rid of such artificial branches and instead, rely on the small 
 amount of base read events to ensure the use of the same base 
-objects (Section~\ref{sec:relax}). Our strategy reduces the number of branches 
+objects (Section~\ref{sec:relax1} and Section~\ref{sec:relax2}). Our strategy reduces the number of branches 
 greatly and amplifies the effectiveness of the optimization. We also 
 carried out case studies (Section~\ref{sec:cases}) to better illustrate the scenarios.
 
@@ -283,7 +283,7 @@ read from the method to be equal to their concrete values in the constraints.
 The constraint solver can proceed safely without being affected by 
 such methods.
 
-\tool lacks support for certain operators. In our current 
+\tool\  lacks support for certain operators. In our current 
 implementation, we do not support bit operations such as $\&$ and $<<$, which accounts for most of our misses.
 
 

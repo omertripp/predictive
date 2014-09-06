@@ -74,7 +74,7 @@
 
 \author{\IEEEauthorblockN{Peng Liu} \\
 \IEEEauthorblockA{Purdue University\\
-\{peng74 \}@cs.purdue.edu }
+peng74@cs.purdue.edu }
 \and
 \IEEEauthorblockN{Xiangyu Zhang\ \ \ } \\
 \IEEEauthorblockA{Purdue University \\
@@ -274,7 +274,7 @@
 
 
 % use section* for acknowledgement
-\section*{Acknowledgment}
+%\section*{Acknowledgment}
 
 
 The authors would like to thank...
