@@ -1,4 +1,4 @@
-\section{Value Relaxation}~\label{sec:relax1}
+\section{Relaxation of Flow Dependencies}~\label{sec:relax1}
 Our first relaxation is to allow variables to have different values 
 as long as thread local paths are preserved.
 Given a trace, $\tau=<\Gamma , \{\tau_{t_1}, \tau_{t_2}, \dots \tau_{t_n} \}, 
